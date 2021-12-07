@@ -1,0 +1,43 @@
+body {
+  background: #fff;
+  color: #000;
+  font-size: 12px;
+}
+
+a {
+  border-bottom: 1px solid #000;
+}
+
+.list {
+  padding-right: 0;
+}
+
+.text {
+  text-align: justify;
+}
+
+.text.large {
+  font-size: 0.9rem;
+}
+
+section {
+  padding: 8px 16px;
+  min-height: 0;
+  justify-content: start;
+}
+
+section.bio p {
+  padding-top: 0;
+}
+
+section.bio .logo {
+  display: none;
+}
+
+.col-section {
+  max-width: 100%;
+}
+
+footer {
+  display: none;
+}
