@@ -105,6 +105,10 @@ section.bio .logo {
   margin: 0;
 }
 
+section.bio p .contact {
+  display: none;
+}
+
 @media (max-width: 1024px) {
   section {
     padding: 48px 0 48px 48px;
