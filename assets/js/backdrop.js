@@ -143,13 +143,13 @@ export function createBackdrop({ scene, sky, mobile, ink, star }) {
     return { sprite, strength, scale, galaxy, reveal: 0 };
   });
 
-  const state = { night: true, quiet: false, dim: 1, formed: Infinity };
+  const state = { night: true, quiet: false, dim: 1, formed: Infinity, sky: 1 };
 
   const sync = () => {
-    deepUniforms.uGain.value = layers.deep * (state.night ? 1.25 : 0.4);
+    deepUniforms.uGain.value = layers.deep * state.sky * (state.night ? 1.25 : 0.4);
     deep.visible = layers.deep > 0.001;
-    uniforms.uFar.value = layers.far;
-    uniforms.uHaze.value = state.quiet ? 0 : layers.haze;
+    uniforms.uFar.value = layers.far * state.sky;
+    uniforms.uHaze.value = state.quiet ? 0 : layers.haze * state.sky;
     dome.visible = uniforms.uFar.value + uniforms.uHaze.value > 0.001;
     glows.forEach(({ sprite, strength, scale, galaxy }) => {
       const reveal = smoothstep(galaxy.start, galaxy.end, state.formed);
@@ -181,9 +181,10 @@ export function createBackdrop({ scene, sky, mobile, ink, star }) {
       state.dim = value;
       sync();
     },
-    update: (time, camera, formed) => {
-      if (formed !== state.formed) {
+    update: (time, camera, formed, sky = 1) => {
+      if (formed !== state.formed || sky !== state.sky) {
         state.formed = formed;
+        state.sky = sky;
         sync();
       }
       dome.position.copy(camera.position);

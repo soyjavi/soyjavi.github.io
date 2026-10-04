@@ -1,6 +1,10 @@
 import { SPIN } from "./life.js";
 
-export const DISCOVER = { delay: 0.1, seconds: 5, order: 0.6, jitter: 0.08, flight: 0.3, arrive: 0.54, swirl: 2.6, burst: 0.17, glow: 0.07 };
+export const DISCOVER = { order: 0.6, jitter: 0.08, flight: 0.3, arrive: 0.54, swirl: 2.6, burst: 0.17, glow: 0.07 };
+
+export const ENTRANCE = { sky: 1.4, seed: 0.9, wait: 6, delay: 0.3, seconds: 4, dolly: 6, from: 1.6, card: 0.85, first: 0.9 };
+
+export const DIRECT = { sky: 0.5, delay: 0, seconds: 1.4, card: 0 };
 
 export const CLOUD = { spin: 0.07, breath: 0.05, pace: 0.5, still: 0.92 };
 export const POINTER = { radius: 0.2, push: 0.04, rate: 6 };
@@ -22,6 +26,7 @@ export const DUST_VERTEX = `
   #define CLOUD_BREATH ${CLOUD.breath.toFixed(3)}
   #define CLOUD_PACE ${CLOUD.pace.toFixed(2)}
   #define CLOUD_STILL ${CLOUD.still.toFixed(2)}
+  #define ENTRANCE_FIRST ${ENTRANCE.first.toFixed(2)}
   #define POINTER_RADIUS ${POINTER.radius.toFixed(2)}
   #define POINTER_PUSH ${POINTER.push.toFixed(3)}
   attribute vec3 aFrom;
@@ -41,6 +46,9 @@ export const DUST_VERTEX = `
   uniform vec3 uPivot[SPIN_SLOTS];
   uniform float uKeep;
   uniform vec3 uPointer;
+  uniform float uSeed;
+  uniform float uSeedOn;
+  uniform float uKick;
   uniform float uMix;
   uniform float uTime;
   uniform float uScale;
@@ -66,9 +74,12 @@ export const DUST_VERTEX = `
     float delay = DISCOVER_ORDER * aOrder + DISCOVER_JITTER * aSeed;
     float m = smoothstep(delay, delay + DISCOVER_FLIGHT, uMix);
     float since = uMix - (DISCOVER_ORDER * aOrder + DISCOVER_ARRIVE * DISCOVER_FLIGHT);
+    float isSeed = (aKind > 0.5 && abs(aMemory - uSeed) < 0.5) ? 1.0 : 0.0;
+    since = max(since, isSeed * uSeedOn * 0.6);
     float lit = aKind > 0.5 ? step(0.0, since) : 1.0;
     float pulse = max(since, 0.0) / DISCOVER_GLOW;
-    float flash = aKind > 0.5 ? lit * pulse * exp(1.0 - pulse) : 0.0;
+    float flash = aKind > 0.5 ? lit * pulse * exp(1.0 - pulse) * (1.0 + ENTRANCE_FIRST * (1.0 - smoothstep(0.0, 0.06, aOrder))) : 0.0;
+    flash = max(flash, isSeed * uKick);
     if (aKind > 0.5) m = lit;
     vec3 centre = aCenter;
     int galaxy = int(aGalaxy + 0.5);
@@ -110,7 +121,7 @@ export const DUST_VERTEX = `
     gl_PointSize = clamp(aSize * uScale / -mv.z * (0.8 + 0.5 * level) * (1.0 + uFar * 1.3 * aKind), 1.3, 12.0);
     vAlpha = mix(uGain * (0.2 + 0.6 * aSeed * aSeed) * near, vAlpha, m) * (1.0 - smoothstep(uReveal - 0.2, uReveal + 0.4, aU));
     gl_PointSize = mix(1.1 + 1.6 * aSeed * aSeed, gl_PointSize, m);
-    vAlpha = min(1.0, vAlpha * lit * smoothstep(0.0, 0.5, pulse) * (1.0 + 1.2 * flash));
+    vAlpha = min(1.0, vAlpha * lit * smoothstep(0.0, 0.5, pulse) * (1.0 + 1.2 * flash)) * mix(1.0, uSeedOn, isSeed);
     gl_PointSize *= 1.0 + 0.8 * flash;
     if (aKind < 0.5 && uPointer.z > 0.001) {
       float ratio = projectionMatrix[1][1] / projectionMatrix[0][0];
@@ -138,6 +149,8 @@ export const MARK_VERTEX = `
   attribute float aState;
   attribute float aOrder;
   attribute float aFade;
+  attribute float aFirst;
+  uniform float uSeedOn;
   uniform float uScale;
   uniform float uTime;
   uniform float uReveal;
@@ -147,7 +160,8 @@ export const MARK_VERTEX = `
     vec4 mv = modelViewMatrix * vec4(position, 1.0);
     gl_Position = projectionMatrix * mv;
     float pulse = fract(uTime * 0.35);
-    float reveal = smoothstep(aOrder - 0.14, aOrder, uReveal);
+    float low = max(aOrder - 0.14, 0.0001);
+    float reveal = mix(smoothstep(low, max(aOrder, low + 0.02), uReveal), uSeedOn, aFirst);
     float size = aSize * (0.45 + 0.55 * reveal);
     if (aState > 2.5 && aState < 3.5) size *= 1.0 + 2.0 * pulse;
     vState = aState;

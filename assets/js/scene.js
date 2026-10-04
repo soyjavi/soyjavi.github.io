@@ -3,7 +3,7 @@ import { AHEAD, FLOOR, SPIN, START, onPath, spinAngle, starfield, unitsOf, yearO
 import { createBackdrop } from "./backdrop.js";
 import { QUALITY } from "./explore.js";
 import { approach, clamp, ease, eye, slide, turn, zoom } from "./orbit.js";
-import { DISCOVER, DUST_FRAGMENT, DUST_VERTEX, formedAt, MARK_FRAGMENT, MARK_VERTEX, POINTER, STAR_FRAGMENT, STAR_VERTEX } from "./shaders.js";
+import { DIRECT, ENTRANCE, DUST_FRAGMENT, DUST_VERTEX, formedAt, MARK_FRAGMENT, MARK_VERTEX, POINTER, STAR_FRAGMENT, STAR_VERTEX } from "./shaders.js";
 import { lerp, reducedMotion, seeded, smoothstep } from "./util.js";
 
 export const HOME_PITCH = -0.27;
@@ -14,6 +14,7 @@ const MAX_LINKS = 40;
 const DRAG_PIXELS = 6;
 const RING_SPREAD = 0.5;
 const RATE = 4.2;
+const DRIFT = { rate: 0.11, yaw: 0.14, pitch: 0.02, rest: 2.5 };
 
 export function createScene({ canvas, cloud, marks, future, today, mobile, sky }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: "high-performance" });
@@ -47,6 +48,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky }
   starGeometry.setAttribute("aBright", new THREE.BufferAttribute(field.bright, 1));
   starGeometry.setAttribute("aHalo", new THREE.BufferAttribute(field.halo, 1));
   starGeometry.setAttribute("aSize", new THREE.BufferAttribute(field.size, 1));
+  let starBase = 1.25;
   const starUniforms = { uTime: { value: 0 }, uPixel: { value: 1 }, uGain: { value: 0.6 }, uHalo: { value: 1 }, uInk: ink };
   const starMaterial = new THREE.ShaderMaterial({ uniforms: starUniforms, vertexShader: STAR_VERTEX, fragmentShader: STAR_FRAGMENT, transparent: true, depthTest: false, depthWrite: false });
   const stars = new THREE.Points(starGeometry, starMaterial);
@@ -54,6 +56,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky }
   stars.renderOrder = -1;
   scene.add(stars);
   const backdrop = createBackdrop({ scene, sky, mobile, ink, star: starUniforms });
+  const seedIndex = marks.reduce((best, mark, i) => (mark.year < marks[best].year ? i : best), 0);
   const gain = Math.min(1, Math.sqrt(60000 / cloud.count));
   const dustUniforms = {
     uMix: { value: 0 },
@@ -73,6 +76,9 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky }
     uSpin: { value: new Float32Array(SPIN.slots) },
     uPivot: { value: Array.from({ length: SPIN.slots }, (_, k) => new THREE.Vector3(...(sky.list[k]?.centre ?? [0, 0, 0]))) },
     uKeep: { value: 1 },
+    uSeed: { value: seedIndex },
+    uSeedOn: { value: 0 },
+    uKick: { value: 0 },
     uPointer: { value: new THREE.Vector3(0, 0, 0) },
     uInk: ink,
   };
@@ -112,9 +118,10 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky }
   markGeometry.setAttribute("position", markPosition);
   markGeometry.setAttribute("aSize", markSize);
   markGeometry.setAttribute("aFade", markFade);
+  markGeometry.setAttribute("aFirst", new THREE.BufferAttribute(Float32Array.from(marksData.map((_, i) => (i === seedIndex ? 1 : 0))), 1));
   markGeometry.setAttribute("aState", new THREE.BufferAttribute(Float32Array.from(marksData.map((mark) => mark.state)), 1));
   markGeometry.setAttribute("aOrder", new THREE.BufferAttribute(Float32Array.from(marksData.map((mark) => mark.order)), 1));
-  const markUniforms = { uScale: { value: 1 }, uTime: { value: 0 }, uReveal: { value: 0 }, uInk: ink };
+  const markUniforms = { uScale: { value: 1 }, uTime: { value: 0 }, uReveal: { value: 0 }, uSeedOn: { value: 0 }, uInk: ink };
   const markMaterial = new THREE.ShaderMaterial({ uniforms: markUniforms, vertexShader: MARK_VERTEX, fragmentShader: MARK_FRAGMENT, transparent: true, depthTest: false, depthWrite: false });
   const points = new THREE.Points(markGeometry, markMaterial);
   points.frustumCulled = false;
@@ -229,7 +236,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky }
   const view = { target: [...CENTRE], distance: 700, yaw: 0, pitch: HOME_PITCH };
   const goal = { target: [...CENTRE], distance: 340, yaw: 0, pitch: HOME_PITCH };
   const inset = { x: 0, y: 0, goalX: 0, goalY: 0 };
-  const state = { reveal: null, follow: -1, idle: true, hover: -1, selection: -1, preview: -1, previewFade: 0, ringFade: 0, portrait: innerWidth / innerHeight < 1, drift: 0 };
+  const state = { reveal: null, follow: -1, idle: true, hover: -1, selection: -1, preview: -1, previewFade: 0, ringFade: 0, portrait: innerWidth / innerHeight < 1, drift: 0, touched: -1e9 };
 
   const extent = Math.max(...[...marks.map((mark) => mark.position), future.book, future.clone].map((point) => Math.hypot(point[0], point[1]))) + 12;
   const homeDistance = () => Math.max(160, extent * 4.3) * (state.portrait ? 1.3 : 1);
@@ -267,7 +274,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky }
     const night = background.getHSL({}).l < 0.5;
     renderer.setClearColor(background, 1);
     dustMaterial.blending = starMaterial.blending = night ? THREE.AdditiveBlending : THREE.NormalBlending;
-    starUniforms.uGain.value = night ? 1.25 : 0.4;
+    starBase = night ? 1.25 : 0.4;
     starUniforms.uHalo.value = night ? 1 : 0;
     starMaterial.needsUpdate = true;
     backdrop.applyTheme(night);
@@ -302,6 +309,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky }
   };
   const release = () => {
     state.idle = false;
+    state.touched = performance.now() / 1000;
     callbacks.touch();
   };
   const pan = (dx, dy) => {
@@ -374,7 +382,12 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky }
   const timer = new THREE.Timer();
   const target = new THREE.Vector3();
   const here = new THREE.Vector3();
-  let started = 0;
+  let entrance = ENTRANCE;
+  let origin = null;
+  let loaded = null;
+  let armed = false;
+  let still = false;
+  let dolly = null;
   let levelsMoving = true;
 
   const frame = (now) => {
@@ -386,8 +399,15 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky }
       return;
     }
     const time = timer.getElapsed();
-    started ||= time;
-    const intro = Math.min(1, Math.max(0, (time - DISCOVER.delay) / DISCOVER.seconds));
+    loaded ??= time;
+    const from = clamp(homeDistance() * entrance.from, 6, 640);
+    if (armed && origin === null) {
+      origin = time;
+      dolly = still ? null : { from };
+    }
+    const elapsed = origin === null ? 0 : time - origin;
+    const intro = Math.min(1, Math.max(0, (elapsed - entrance.delay) / entrance.seconds));
+    const skyIn = smoothstep(0, entrance.sky, time - loaded);
 
     if (state.follow >= 0) {
       centerOf(state.follow, here);
@@ -395,10 +415,16 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky }
     }
     const next = approach(view, goal, dt, RATE);
     Object.assign(view, next);
+    if (origin === null) view.distance = from;
+    else if (dolly) {
+      const progress = Math.min(1, elapsed / entrance.dolly);
+      if (progress >= 1 || !state.idle) dolly = null;
+      else view.distance = Math.exp(lerp(Math.log(dolly.from), Math.log(goal.distance), 1 - (1 - progress) ** 3));
+    }
     inset.x += (inset.goalX - inset.x) * (1 - Math.exp(-RATE * dt));
     inset.y += (inset.goalY - inset.y) * (1 - Math.exp(-RATE * dt));
-    state.drift += ((state.idle && state.follow < 0 ? 1 : 0) - state.drift) * (1 - Math.exp(-dt));
-    const [ex, ey, ez] = eye({ ...view, yaw: view.yaw + Math.sin(time * 0.07) * 0.1 * state.drift });
+    state.drift += ((pointers.size === 0 && performance.now() / 1000 - state.touched > DRIFT.rest ? 1 : 0) - state.drift) * (1 - Math.exp(-dt * 0.6));
+    const [ex, ey, ez] = eye({ ...view, yaw: view.yaw + Math.sin(time * DRIFT.rate) * DRIFT.yaw * state.drift, pitch: view.pitch + Math.sin(time * DRIFT.rate * 0.75 + 1) * DRIFT.pitch * state.drift });
     camera.position.set(ex, ey, ez);
     camera.fov = fovOf(36);
     camera.updateProjectionMatrix();
@@ -408,7 +434,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky }
     const cssScale = innerHeight / (2 * Math.tan((camera.fov * Math.PI) / 360));
     const far = smoothstep(0.35, 0.75, view.distance / homeDistance());
 
-    const turned = Math.max(0, time - DISCOVER.delay - DISCOVER.seconds - 0.5);
+    const turned = Math.max(0, elapsed - entrance.delay - entrance.seconds - 0.5);
     sky.list.forEach((galaxy, k) => {
       if (k >= SPIN.slots) return;
       spinning[k] = spinAngle(galaxy, turned);
@@ -421,6 +447,10 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky }
     dustUniforms.uPointer.value.set(brush.x, brush.y, brush.strength);
     const pushTag = brush.strength.toFixed(2);
     if (canvas.dataset.pointer !== pushTag) canvas.dataset.pointer = pushTag;
+    const seedOn = origin === null ? smoothstep(entrance.seed, entrance.seed + 1.6, time - loaded) : 1;
+    const kick = elapsed > 0 ? Math.min(1, (elapsed / 0.45) * Math.exp(1 - elapsed / 0.45)) : 0;
+    dustUniforms.uSeedOn.value = markUniforms.uSeedOn.value = seedOn;
+    dustUniforms.uKick.value = kick;
     dustUniforms.uMix.value = intro;
     const formed = yearOf(sky, formedAt(intro));
     dustUniforms.uTime.value = markUniforms.uTime.value = starUniforms.uTime.value = time;
@@ -532,7 +562,8 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky }
     jumpLines.visible = jumpLines.material.opacity > 0.01;
     canvas.dataset.jumps = jumpLines.visible ? String(hops) : "";
 
-    backdrop.update(time, camera, formed);
+    starUniforms.uGain.value = starBase * skyIn;
+    backdrop.update(time, camera, formed, skyIn);
     renderer.render(scene, camera);
 
     projected.forEach((spot, i) => {
@@ -545,7 +576,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky }
       spot.on = ndc.z > -1 && ndc.z < 1 && spot.x > 0 && spot.x < innerWidth && spot.y > 0 && spot.y < innerHeight;
     });
     try {
-      callbacks.frame({ time, dt, intro, formed, far, cssScale, projected, camera });
+      callbacks.frame({ time, dt, intro, formed, far, cssScale, projected, camera, entered: intro >= entrance.card, seen: origin === null && time - loaded > entrance.seed + 1.2, seedIndex });
     } catch (error) {
       running = false;
       callbacks.error(error);
@@ -571,6 +602,11 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky }
       renderer.setSize(innerWidth, innerHeight, false);
     },
     start: () => requestAnimationFrame(frame),
+    begin: (mode = "full") => {
+      armed = true;
+      still = mode !== "full";
+      if (mode === "direct") entrance = { ...ENTRANCE, ...DIRECT };
+    },
     home,
     homeDistance,
     fly,

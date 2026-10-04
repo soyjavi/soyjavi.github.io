@@ -144,7 +144,7 @@ site in memory and compares it, and the bundle, with the disk.
 Three `THREE.Points` with a `ShaderMaterial`, no depth test (`shaders.js`). The stars twinkle slowly and are drawn
 first. The dust has `aFrom` (its star on the shell), one centre (`aCenter`), `position` as the offset from the centre, `aU` (years
 since 1980), `aSeed`, `aSize`, `aAhead`, `aKind` (a cloud dot or a trail dot), `aMemory`, `aGalaxy` (the period it belongs to, -1 for what is ahead) and one attribute per facet; uniforms `uSpin` and `uPivot` (an angle and a centre per galaxy) and `uKeep` (the share of dust that is drawn).
-On load the page is a sky (`DISCOVER`, five seconds). Each trail dot shines as a faint star and then spirals in to its
+On load the page is a sky (`DISCOVER` and `ENTRANCE`, about six seconds). Each trail dot shines as a faint star and then spirals in to its
 place, its start delayed by its year (60% of the time spread over the years, 8% of jitter, a flight of 30% that covers
 most of the way early), so the dust of each galaxy gathers in order. Each memory is a spark: when its year comes
 (`igniteAt`) its dots fade in at its centre with a soft glow that rises and falls and open out to its cloud in under a
@@ -195,6 +195,12 @@ at level 3, hides the form's note, makes its label visually hidden and tightens 
 ### The backdrop
 
 Behind everything (`backdrop.js`): a deep field of real points spread in depth around the sky, fixed in the world so the camera sees parallax (the same star shader as the stars, so every star stays one crisp pixel at any resolution; nearer ones are brighter and larger), a dome at infinity that follows the camera and carries the far galaxies (a small seeded texture, smudges that are meant to be soft), a shader haze, and a soft glow sprite per galaxy sized by its radius and lit by its memory count (`glowOf`), which blooms only as that galaxy's dots form during the opening. Each layer has a strength; haze is off on the lowest quality tier and under reduced motion.
+
+### The entrance
+
+The page opens on a quiet sky (stars, deep field, haze and far galaxies fade in over 1.4 s) with the first memory (the earliest) already there, a real cloud that condenses at 0.9 s with its name beside it and sparks, brighter than the rest, when the opening begins; a transparent real button (`.seed`) lies over it. The first click, tap or key anywhere (the point is the invitation) begins the opening and, being a gesture, lets the sound start; without one it begins by itself after 6 s, and a link with a hash (a memory, the book, the clone) skips the ceremony: no wait, no hidden interface, no camera approach and a 1.4 s gathering, so a visitor who came for something sees it at once; an automated browser skips the wait and the hiding. The galaxies then form in the order of the years over 4 s while the camera, which starts 1.6 times further out, eases in over 6 s (a gesture stops its approach). The first memory sparks brighter than the rest, each galaxy's first memory plays its note as it is born, and the card, the controls and the rail stay hidden until 85% of the gathering and then fade in over 1.4 s (a safety timer returns them after 20 s).
+
+Two and a half seconds after the last touch, wherever it is (the hero, a memory, the whole view), the camera sways around its target (`DRIFT`: about 8° of yaw and 1° of pitch over roughly a minute, eased in over a couple of seconds and out at the first touch), so the deep field's depth is felt as parallax and the card never moves.
 
 ### The invitation, the book's date and the clone's questions
 

@@ -4,6 +4,7 @@ import { askLevels, askPairs, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyA
 import { clamp } from "./orbit.js";
 import { createSound } from "./sound.js";
 import { OVERVIEW_PITCH, createScene } from "./scene.js";
+import { ENTRANCE } from "./shaders.js";
 import { reducedMotion, seeded, webglAvailable } from "./util.js";
 
 const SCENE_FITS = "(min-height: 520px) and (min-width: 320px)";
@@ -133,8 +134,60 @@ async function start() {
   const future = futures(sky);
   const heads = new Set(headlines(marks));
   const scene = createScene({ canvas, cloud, marks, future, today, mobile, sky });
+  const root = document.documentElement;
+  let entering = false;
+  const born = new Set();
+  let enterTimer = 0;
+  const beginEntering = () => {
+    clearTimeout(enterTimer);
+    entering = true;
+    root.dataset.entering = "1";
+    enterTimer = setTimeout(() => finishEntering(), 20000);
+  };
+  const finishEntering = () => {
+    if (!entering) return;
+    entering = false;
+    clearTimeout(enterTimer);
+    root.dataset.entering = "out";
+    enterTimer = setTimeout(() => delete root.dataset.entering, 1600);
+  };
+  undo.push(() => {
+    clearTimeout(enterTimer);
+    delete root.dataset.entering;
+  });
+  const automated = navigator.webdriver;
+  const direct = location.hash.length > 1;
+  if (!automated && !direct) beginEntering();
   scene.home();
   scene.start();
+  const firstMemory = marks.reduce((best, mark, i) => (mark.year < marks[best].year ? i : best), 0);
+  const seed = element("button", "seed");
+  seed.type = "button";
+  seed.setAttribute("aria-label", info[firstMemory].title);
+  let begun = false;
+  let autoTimer = 0;
+  const beginGestures = ["pointerup", "touchend", "click", "keydown"];
+  const dropBeginGestures = () => beginGestures.forEach((type) => document.removeEventListener(type, begin, true));
+  function begin() {
+    if (begun) return;
+    begun = true;
+    clearTimeout(autoTimer);
+    dropBeginGestures();
+    scene.begin(automated ? "still" : direct ? "direct" : "full");
+    seed.dataset.gone = "1";
+    setTimeout(() => seed.remove(), 1600);
+  }
+  if (automated || direct) begin();
+  else {
+    document.body.append(seed);
+    autoTimer = setTimeout(begin, ENTRANCE.wait * 1000);
+    beginGestures.forEach((type) => document.addEventListener(type, begin, true));
+  }
+  undo.push(() => {
+    clearTimeout(autoTimer);
+    dropBeginGestures();
+    seed.remove();
+  });
   const qualityParam = new URLSearchParams(location.search).get("quality");
   let tier = qualityParam === "low" ? QUALITY.tiers.length - 1 : 0;
   const adapting = qualityParam !== "full" && qualityParam !== "low";
@@ -1088,7 +1141,22 @@ async function start() {
   };
   const overlaps = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
 
-  scene.on("frame", ({ formed, projected, camera, cssScale, time, dt, intro }) => {
+  scene.on("frame", ({ formed, projected, camera, cssScale, time, dt, intro, entered, seen }) => {
+    if (seed.isConnected) {
+      const spot = projected[firstMemory];
+      seed.style.left = `${spot.x}px`;
+      seed.style.top = `${spot.y}px`;
+      seed.style.visibility = spot.on ? "visible" : "hidden";
+    }
+    if (entering) {
+      if (Number.isFinite(formed)) sky.list.forEach((galaxy, k) => {
+        if (born.has(k) || formed < galaxy.start) return;
+        born.add(k);
+        const first = marks.findIndex((mark) => mark.year >= galaxy.start - 0.01);
+        if (first >= 0) sound.memory(marks[first]);
+      });
+      if (entered) finishEntering();
+    }
     if (adapting && measure.windows < QUALITY.windows && intro >= 1) {
       measure.from ||= time + 1;
       if (time >= measure.from) {
@@ -1279,6 +1347,7 @@ async function start() {
       else if (ratio < 0.22) priority = 10;
       if (selected >= 0 && priority < 500) priority = 0;
       if (mark.year + 3 > formed && i !== selected) priority = 0;
+      if (!begun && seen && i === firstMemory) priority = 900;
       if (play.year !== null) priority = mark.year <= play.year && mark.year > play.year - 2.5 ? 800 + mark.weight : 0;
       if (priority > 0 && spot.on) candidates.push({ tag, spot, priority, i });
       else if (tag.on) {

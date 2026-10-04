@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { AHEAD, BUDGET, LANES, PLAY, RAIL, SKY, SPACE, SPREAD, START, activityAt, activityTable, aheadPoint, assign, crowdScale, densityAt, densityByYear, dotsPerWeight, fractionIn, futures, galaxies, galaxyOf, lanes, layout, memories, onPath, orderOf, yearOf, playElapsed, playYear, precisionOf, railPercent, shellPoint, skyOf, SPIN, spinAngle, spinRate, spinTime, spun, starfield, todayYear, unitsOf, yearRings, years } from "../assets/js/life.js";
 import { lerp, seeded, smoothstep } from "../assets/js/util.js";
 import { monthsUntil, untilText } from "../assets/js/life.js";
-import { CLOUD, DISCOVER, DUST_VERTEX, POINTER, formedAt, igniteAt } from "../assets/js/shaders.js";
+import { CLOUD, DISCOVER, DUST_VERTEX, ENTRANCE, POINTER, formedAt, igniteAt } from "../assets/js/shaders.js";
 import { archive } from "./fixtures/archive.mjs";
 import { loadContent } from "../src/content.mjs";
 
@@ -372,8 +372,10 @@ test("playing the life runs from birth to today at a steady pace and can resume 
   for (const year of [START, 1994.3, 2011, 2026]) assert.ok(near(playYear(playElapsed(year, 2026), 2026), year), `resumes at ${year}`);
 });
 
-test("on load the life is discovered in order: the first memory sparks within a second, every one before the gathering ends", () => {
-  assert.ok(DISCOVER.delay + igniteAt(0) * DISCOVER.seconds < 1, "the first galaxy starts at once");
+test("on load the life is discovered in order: a quiet sky first, the first memory sparks right after the first touch, every one before the gathering ends", () => {
+  assert.ok(ENTRANCE.sky >= 1 && ENTRANCE.wait <= 8, "a breath of sky, and the opening starts by itself if nobody touches the first memory");
+  assert.ok(ENTRANCE.delay + igniteAt(0) * ENTRANCE.seconds < 1.5, "the first memory sparks at once after the touch");
+  assert.ok(ENTRANCE.delay + ENTRANCE.seconds < 5 && ENTRANCE.dolly >= ENTRANCE.seconds, "the gathering is under five seconds and the camera settles with the galaxies");
   assert.ok(igniteAt(1) + DISCOVER.burst < 1, "the last memory has burst before the end");
   for (const fraction of [0, 0.25, 0.5, 0.9]) {
     assert.ok(igniteAt(fraction + 0.1) > igniteAt(fraction), "later years spark later");
@@ -502,4 +504,12 @@ test("the dots of a memory drift gently: slow, slightly different turns and a so
   assert.ok(CLOUD.still >= 0.9, "seen from far away the dots barely react");
   assert.match(DUST_VERTEX, /calm = 1\.0 - CLOUD_STILL \* uFar/);
   for (const name of ["SPIN", "BREATH", "PACE", "STILL"]) assert.match(DUST_VERTEX, new RegExp(`#define CLOUD_${name} `));
+});
+
+test("the camera sways gently when nothing is touched: slow, small and a little deeper than before", async () => {
+  const source = (await import("node:fs")).readFileSync(new URL("../assets/js/scene.js", import.meta.url), "utf8");
+  const [, rate, yaw, pitch, rest] = source.match(/const DRIFT = \{ rate: ([\d.]+), yaw: ([\d.]+), pitch: ([\d.]+), rest: ([\d.]+) \}/).map(Number);
+  assert.ok(rate <= 0.15 && yaw <= 0.2 && yaw > 0.1 && pitch <= 0.03, "a swing of a few degrees over about a minute");
+  assert.ok(Number(rest) >= 1 && Number(rest) <= 4, "it starts a couple of seconds after the last touch");
+  assert.match(source, /pointers\.size === 0 && performance\.now\(\) \/ 1000 - state\.touched > DRIFT\.rest/, "it depends on touch, not on the station, so it also sways at an item and in the whole view");
 });
