@@ -35,50 +35,7 @@ unless the task names it.
 
 ## Queue
 
-- **QUIET-SCENE** — Name only what you are looking at
-  `feature · agent · high`
-  board: QUIET-SCENE
-  With a memory open, name only that memory and up to three of its strongest relations; every other cloud names itself on hover or keyboard focus.
-- **LINK-STRONGEST** — Three lines, not a fan
-  `feature · agent · high`
-  board: LINK-STRONGEST
-  Draw only the three strongest relations at rest; the rest appear with their card row; no line longer than the window's shorter side.
-- **EDGE-TOP-TWO** — At most two markers, one voice
-  `feature · agent · high`
-  board: EDGE-TOP-TWO
-  At most two edge markers, only for strong off-screen relations, in the tags' typeface and never an arrow without a label.
-- **RELATED-DISCLOSURE** — Three rows, the rest on demand
-  `feature · agent · high`
-  board: RELATED-DISCLOSURE
-  The card lists the three strongest related memories and one row of chips; an All related button expands the rest in place.
-- **DIM-UNRELATED** — Let what is unrelated recede
-  `feature · agent · high`
-  board: DIM-UNRELATED
-  With a memory open, clouds outside its relations fall to about a third of the brightness.
-- **ONE-LABEL-VOICE** — Three type tiers, no more
-  `feature · agent · high`
-  board: ONE-LABEL-VOICE
-  Open memory large and bright, relations smaller, anchors in quiet small caps: one scale for every label in the scene.
-- **NO-GHOST-LABELS** — No stray or clipped galaxy names
-  `feature · agent · high`
-  board: NO-GHOST-LABELS
-  While a memory is open show only its galaxy's label, beside its ring and never under the card.
-- **TOOLBAR-CORE** — Find, Surprise me, More, and the two calls to action
-  `feature · agent · high`
-  board: TOOLBAR-CORE
-  Fold Filter, Sound, the guide, theme and language into More on desktop; nothing inverted at rest; mark The book and Talk to me.
-- **MAP-RAIL-MERGE** — One place instrument at a time
-  `feature · agent · high`
-  board: MAP-RAIL-MERGE
-  Hide the minimap behind a glyph and draw rail ticks at a third until the rail is pointed at.
-- **FIRST-VISIT-FOCUS** — Open the first memory in focus
-  `feature · agent · high`
-  board: FIRST-VISIT-FOCUS
-  The first memory opened in a visit starts in a gentle focus (no rings, no minimap, three lines, two markers) until the visitor moves.
-- **WAITLIST-NUDGE** — An invitation on the way
-  `feature · agent · high`
-  board: WAITLIST-NUDGE
-  One quiet, closable line at the card's foot after the third memory.
+_None._
 
 ## In progress
 
@@ -110,8 +67,9 @@ _None._
 - **BRAND-NAME** — The name of the brand
   `decision · creator · high`
   board: BRAND-NAME
-  accept: the creator picks from the board (or names another) and confirms what `soyjavi` is for (the address, the
-  handle); then an agent task outlines the wordmark and monogram, the favicon, share card, title tags and JSON-LD.
+  accept: the creator picks from the board (recommended: `javi` as the brand, `soyjavi` as the address) and says whether
+  the book's byline is a first name or a full name; then an agent task outlines the wordmark and monogram, the favicon,
+  share card, title tags, JSON-LD (name, alternateName, a WebSite node) and author meta (BRAND-WORDMARK, BRAND-SMALL).
 - **LIFE-VISIBILITY** — Review which milestones are public
   `content · creator · high`
   accept: the creator has gone through the published milestones and, in his own milestones file, through the entries
@@ -177,6 +135,43 @@ _None._
 ## Proposed
 
 Visual ideas have a board in `design/proposals.html`; the others are described here.
+
+From the brand and copy review (the creator asked for the name, the type and every sentence to be worked properly, and
+does not want the word AI on the site). Nothing here is approved.
+
+- **BRAND-WORDMARK** — Eight ways to draw the name, and the two worth keeping
+  board: BRAND-WORDMARK
+  The header draws the name as live text although the rule is the outlined SVG; ship the outlined wordmark from a tool and a test, in the chosen treatment.
+- **BRAND-SMALL** — The mark at 16 px, the home-screen icon and the share card
+  board: BRAND-SMALL
+  A bolder j at 16, 32 and 180 px, an apple-touch icon and PNG fallbacks, and a share image regenerated from the current home (today it shows the old spiral and a Writing link that no longer exists).
+- **BRAND-TYPE-SCALE** — A named scale, and nothing structural below 12 px
+  board: BRAND-TYPE-SCALE
+  Name the sizes and tracking as tokens with a test, raise the anchors to 12 px and the tags to 17 px; replaces the sizes shipped with ONE-LABEL-VOICE.
+- **BRAND-LOCKUP** — One author, two works: by javi, with javi
+  board: BRAND-LOCKUP
+  A mono preposition and the wordmark at the foot of the book's and the clone's cards, and the naming rule for the clone without tool words.
+- **COPY-NO-AI** — Say my clone, never AI
+  board: COPY-NO-AI
+  Remove the banned words from content, the documents and the share image, with a test; the creator decides the one memory about AI as an era.
+- **COPY-HERO** — A hero that says who, what and what comes next, in 45 words
+  board: COPY-HERO
+  Replace the 74-word lede and the clone link; both offers named, no AI.
+- **COPY-BOOK** — For my children, and for whoever wants it
+  board: COPY-BOOK
+  The book's card says who it is for and what it holds (what went well and what went wrong) and promises no date.
+- **COPY-CLONE** — A place to keep talking, when I am no longer here
+  board: COPY-CLONE
+  The clone's card says its purpose in his words, that it is not ready, and nothing it can do; the nav and kicker say My clone. The public name stays CLONE-NAME.
+- **COPY-WAITLIST** — Softer words for the lists and the nudge
+  board: COPY-WAITLIST
+  No time promises, no tool words on the lists; the creator decides whether the nudge may appear on memories about loss.
+- **COPY-META** — What a search result and a shared link say
+  board: COPY-META
+  A description of at most 155 characters in both languages, and a 404 in the sky's vocabulary.
+- **COPY-VOICE** — One voice, twelve rules, nine Spanish fixes
+  board: COPY-VOICE
+  The twelve rules in the brand page's voice section with a test for the mechanical ones, and the Spanish pass; the creator picks the tense of the memories.
 
 
 

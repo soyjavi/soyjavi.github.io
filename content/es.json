@@ -57,6 +57,11 @@
       "more": "{n} más",
       "sound": "Sonido",
       "lit": "Se iluminan {n} recuerdos: {names}",
+      "all": "Todos los relacionados ({n})",
+      "fewer": "Menos",
+      "nudgebook": "Apúntate a la lista del libro →",
+      "nudgeclone": "Apúntate a la lista de la IA →",
+      "nudgeclose": "Cerrar",
       "menu": "Más"
     },
     "count": {

@@ -88,8 +88,8 @@ export function home({ site, life, dict }, lang) {
   const first = life.periods[0];
   const nav = [
     { label: d.ui.nav.life, href: `#period-${first}`, go: `period-${first}` },
-    { label: d.ui.nav.book, href: "#book", go: "book" },
-    { label: d.ui.nav.clone, href: "#clone", go: "clone" },
+    { label: d.ui.nav.book, href: "#book", go: "book", cta: true },
+    { label: d.ui.nav.clone, href: "#clone", go: "clone", cta: true },
     { label: d.ui.nav.contact, href: "#contact", go: "contact" },
   ];
   return `<!doctype html>

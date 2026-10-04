@@ -153,7 +153,7 @@ seconds are out; a galaxy's outline, constellation and label, the decade labels 
 spark (`formedAt`). Cloud dots then turn slowly around
 their memory and breathe. A cloud dot's brightness is read
 from a one-row float texture with one level per memory (`levels` in `explore.js`: 1 normal; with a memory in view 1 for
-it, 0.85 for what is related and 0.35 for the rest; with a filter 0.1 for what is outside it) and eased on the CPU. A
+it, 0.85 for its strongest relations (all of them once the card's list is expanded), 0.5 for its weaker ones and 0.3 for the rest; with a filter 0.1 for what is outside it) and eased on the CPU. A
 trail dot's brightness follows the filter and, with a memory in view, a window of years around it. `uReveal` hides
 every dot after a year while the life plays. Alpha falls with
 distance and fades when closer than a few units to the camera; trail dots are fainter, ahead dots 30%. Zoomed out, cloud dots are drawn dimmer and larger so the clouds stay soft and do not burn out. The marks are today, its pulse, the two rings and a thin ring
@@ -180,7 +180,8 @@ The card is the one real, interactive panel (`aside.card`, focusable, not hidden
 filled by cloning the `[data-panel]` of the node in view, so copy stays in the document, and adds: the threads (and people
 and places) as filter chips, the related memories as buttons (explicit links in both directions first, then the
 neighbours in time inside each of its threads, people and places; at most eight are listed, while the scene lights and joins all of them), and Earlier and Later; a related list that scrolls fades at its foot and counts what is hidden ("5 more"), and hovering
-or focusing a row rings that memory in the scene, joins it to the open one with a brighter line and names it. The hero's card and those of the book and the AI each
+or focusing a row rings that memory in the scene, joins it to the open one with a brighter line and names it. A memory's card shows its three strongest relations and one row of chips, with the rest behind the expander of
+"Relations" (the period's introduction stays in the document and the flat page, not in the card). The hero's card and those of the book and the AI each
 hold their own waitlist, moved there once and shown only at that station. Titles reveal word by word. At the hero it is the
 introduction with the counts, the book's waitlist form (its call to action: the field and the button) and two text links, "Travel through it" and the way to the AI's card, with the invitation to drag; it has no Later, because the link into the life is the way in. Every other card has a close button back to the whole life (the same target as the
 button at the left of the rail, which also carries a tooltip), and Earlier and Later stay pinned to its foot while a long
@@ -191,7 +192,12 @@ their text does not fit, the engine drops the introduction, then the counts and 
 at level 3, hides the form's note, makes its label visually hidden and tightens the spacing
 (`data-fit` 1, 2 and 3), and measures again on resize and when the fonts load.
 
-### The book's date and the AI's questions
+### The invitation, the book's date and the AI's questions
+
+- After the visitor has opened three distinct memories (the idle tour does not count), a quiet line (`.nudge`: a link and a
+  close button) sits at the card's foot, beside it on a laptop and above it on a stacked layout, on a memory's card only. It
+  links to the book's waitlist, or to the AI's once the visitor has seen the AI's station; closing it hides it for the rest
+  of the visit and nothing is stored. It is not drawn in the flat page, which already holds both lists.
 
 - With `book.date` set, the book's panel carries `<p class="countdown" data-until>`: "Expected" and the month as text,
   which a script (`countdown.js`, on every page) completes with the months left on the visitor's calendar
@@ -221,23 +227,32 @@ at level 3, hides the form's note, makes its label visually hidden and tightens 
   `history.replaceState`. A `data-go` link to the book or the AI also puts the cursor in its waitlist field.
 - **Pointing.** The nearest cloud within its reach is named and the cursor changes. A drag never opens anything. The
   book and the AI rings answer the pointer and open their cards like a cloud.
-- **Controls.** Find, Surprise me, Filter, Sound (a speaker icon, pressed when on) and the guide button (?) share the top
-  line with the brand and the sections (left), and the theme and the language sit with them, after the guide (right); when they do not fit, all of them move to a
-  second line on the right. The theme and language buttons live inside the controls' sheet (`.sheet`, `display:
-  contents` beside the bar), so the flat page, which hides everything else of the controls, still shows them. On a
-  stacked layout (up to 900 px wide, or portrait) the header is one row of 56 px: the brand, Find, Surprise me and a
-  More button (`aria-expanded`), and the sheet drops down from it with Filter, Sound, the guide, the theme and the language;
-  Escape, a press elsewhere, choosing something or tabbing out of it closes it, and the focus goes back to the More
-  button (to the first thread after Filter); a filter in force is shown by a dot on More and in its accessible name.
-  Between 901 and 1199 px the header also stays on one row, with the same More button and sheet beside the sections. The thread legend, the guide and the finder open as panels
-  under that row.
+- **Controls.** Find, Surprise me and a More button (`aria-expanded`) share the top line with the brand and the sections (left); the
+  sheet that More drops down holds Filter, Sound, the guide, the theme and the language at every width (from the top
+  right on a laptop, under a header of one row of 56 px on a stacked layout: up to 900 px wide, or portrait). The theme
+  and language buttons live inside the sheet (`.sheet`, `display: contents` beside the bar when the page is flat), so the
+  flat page, which hides everything else of the controls, still shows them. Escape, a press elsewhere, choosing something or
+  tabbing out of the sheet closes it, and the focus goes back to the More button (to the first thread after Filter); a
+  filter in force is shown by a dot on More and in its accessible name. The thread legend, the guide and the finder open as
+  panels under that row. In the sections, The book and Talk to me carry `.cta`: full ink, underlined and a 44 px
+  target, because they are what the site offers; no control is drawn inverted unless the visitor pressed it, and Sound
+  shows its state by the waves or the slash of its icon, never by a fill.
+- **Relations.** The relations of a memory are its explicit links in both directions and its neighbours in time inside each of
+  its threads, people and places (`related`). `strongest` ranks them (an explicit link first, then how many threads,
+  people and places they share, then nearness in time, then position) and the first three are the strong ones
+  (`STRONG`). At rest the scene draws, names and lights only those three; a button in the card, "All related (n)"
+  (`.expander`, `aria-expanded`), shows all of them in the card's list, draws all the lines, names up to eight and lights
+  them all, and "Fewer" puts it back. Any memory a card row or the finder points at is previewed on top of that.
 - **Guide.** The ? button or the `?` key opens a panel of six marks drawn with the real glyphs (a cloud, a dashed
   circle, a line, a hollow ring, today, the dust) and the keys; Escape, a press on the sky, the finder or the thread
   legend closes it. It never covers the card (on a phone it is capped above it and scrolls).
+- **Gentle first look.** The first memory a visit opens (the idle tour counts) starts a gentle state (`data-gentle` on the
+  stage): the year rings and the minimap wait, and only the three strongest lines and at most two edge markers are drawn
+  anyway. A pointer move of more than 12 px, a press, the wheel, a touch or any key ends it for good.
 - **Focus.** `H` hides the masthead, the card, the rail, the minimap, the labels and the readout (`html[data-focus]`,
   announced by a polite status) so only the sky is left; a pointer move of more than 12 px, a press, the wheel, a touch
   or any other key brings them back. `H` typed in a field is a letter, a held `H` toggles once and Escape only brings the interface back.
-- **Sound.** On by default, and the button (pressed) only exists where Web Audio does. A browser allows sound only after a
+- **Sound.** On by default, and the button (pressed, never inverted) only exists where Web Audio does. A browser allows sound only after a
   gesture, so nothing is created until the first click, tap or key; pressing the Sound button as that first gesture
   turns it off instead. The choice is not stored and nothing is fetched. Everything is synthesised (`tones.js` holds the maths, `sound.js`
   the Web Audio, `createGraph(context)` builds it on any context so it can be rendered offline) and it is meant to calm.
@@ -290,9 +305,11 @@ at level 3, hides the form's note, makes its label visually hidden and tightens 
 
 ### Labels
 
-Each memory has a tag (date and title) beside its cloud, with a priority: the memory in view, the one pointed at, its
-relations, the memory a card row or a finder result is pointing at, the members of a filter, then by weight, with more
-of them the closer the camera (only the heaviest, and only once the camera is in a galaxy). They are placed greedily
+Each memory has a tag (date and title) beside its cloud. With a memory open only that memory, its three strongest
+relations (all of them, up to eight, once the card's list is expanded), the one pointed at and the one a card row or a
+finder result is pointing at are named, so every other cloud names itself only when the pointer reaches it. With
+nothing open the priority is the members of a filter, then by weight, with more of them the closer the camera (only the
+heaviest, and only once the camera is in a galaxy). They are placed greedily
 (`tagSpots`, `pickSpot`): first on the right, left, below or above the cloud, then at its four corners, then in up to
 three rings further out, taking the first place that touches no other cloud's disc, no other label, no date or galaxy
 label, no edge marker, not the card, the controls, the minimap, the rail or the edge, and otherwise the first that only
@@ -301,10 +318,15 @@ stops at the cloud's edge (`leaderOf`). At most 24 are shown (14 while the whole
 memory in view and the one pointed at are always named. In the whole-life view, with nothing open and no filter, one
 memory per galaxy is named in italics, without its date: the heaviest of its period and, among equals, the earliest
 (`headlines`); they give way to the usual tags as the camera comes into a galaxy and to nothing once a memory opens. A tag fades in over most of a second, rising a few pixels out of a blur, and the one in
-view or pointed at floats gently. Tags publish the screen position of their cloud as `--cx` and `--cy`. Each galaxy is
-named by its period's kicker outside the ring (only the number and name on a phone), kept inside the window and hidden
-where it would sit under the minimap or an edge marker. Today
-and the book and the AI are named beside their marks (the nav's own words; the future in a smaller italic), at the first
+view or pointed at floats gently. Tags publish the screen position of their cloud as `--cx` and `--cy`.
+
+Every label speaks in one of three tiers. The open or pointed memory is serif at 22 px in full ink; the other tags and
+the edge markers are serif at 15 px in the soft ink (19 and 14 px on a phone); the anchors (a galaxy's name, the year
+rings, today and the countdown) are small mono capitals at 10 px in the muted ink, never brighter than the relations.
+Each galaxy is named by its period's kicker outside the ring (only the number and name on a phone), kept inside the
+window and hidden where it would touch the card, the controls, the rail, the minimap, an edge marker or another label;
+with a memory open only that memory's galaxy is named. Today
+and the book and the AI are named beside their marks (the nav's own words; the book and the AI in italic serif at 15 px, today as an anchor), at the first
 of sixteen places around the mark that touches nothing, starting a clearance of 8 px beyond the mark's drawn radius
 (`ringClearance`, capped where the shader caps a mark at 140 px across), so the ring never covers the first letters at
 any distance, and are left unnamed when none does; they publish their mark's position and radius as `--cx`, `--cy` and
@@ -313,21 +335,23 @@ any distance, and are left unnamed when none does; they publish their mark's pos
 **Year rings.** With a memory open, its galaxy shows one dashed ring for each year at the distance a memory of that
 year sits from the core (`yearRings`: the integer years inside the period, every second, fifth or tenth year when it
 spans more than eight), each labelled in mono along one ray, hidden where they would touch the card or the controls and
-absent from the whole-life view; `data-rings` on `#scene` carries how many show.
+absent from the whole-life view and during the gentle first look; `data-rings` on `#scene` carries how many show.
 
-**Edge markers.** The free area is the window minus the card, the controls and the rail. A line from the memory in view
-to a related memory that leaves it ends where it does, when its marker fits (a line whose marker does not fit stays whole) (`edgeExit`, sampled along the same arc the scene draws) in a
-small arrow and a label with the memory's title and date, on the nearest side and stacked clear of the others (at most
-four, the last one adding "+n" for the rest; `edgeSide`, `edgeLabel`, `stackEdgeLabels`). Pressing a marker opens that
-memory, and the card marks the same memories in its related list with an arrow. `data-edges` on the stage carries how
-many show.
+**Edge markers.** The free area is the window minus the card, the controls and the rail, and no line reaches further than
+half the window's shorter side from the memory in view. A line from the memory in view to one of its strong relations
+that leaves that area ends where it does, when its marker fits (a line whose marker does not fit stays whole)
+(`edgeExit`, sampled along the same arc the scene draws), in a small arrow and a label with the memory's title and date
+in the tags' serif, on the nearest side and stacked clear of the others (at most two, and never an arrow without its
+label; `edgeSide`, `edgeLabel`, `stackEdgeLabels`). Pressing a marker opens that memory, and the card marks the same
+memories in its related list with an arrow. `data-edges` on the stage carries how many show.
 
-**Minimap.** From the first memory on, a 104 by 100 px map of the whole sky sits at the lower right above the rail (below
-the controls on a stacked layout): the galaxies, a dot per memory, the book and the AI, a frame around what the
-window shows (the window's corners cast onto the plane the open memory lies on) and a ring on the memory in view.
-Pressing it flies to the galaxy under the press (`miniMap`, `galaxyAt`). It is hidden in the whole-life view, at the
-book, the AI and the contact, on screens narrower than 520 px and, on a stacked layout, whenever the card would reach it;
-it is not a keyboard stop.
+**Minimap.** Whenever the camera is closer than 0.75 of the whole-life distance (`MINI_ZOOM`), a 104 by 100 px map of the whole
+sky sits at the lower right above the rail (below the controls on a stacked layout): the galaxies, a dot per memory, the
+book and the AI, a frame around what the window shows (the window's corners cast onto the plane the open memory lies on)
+and a ring on the memory in view. Pressing it flies to the galaxy under the press (`miniMap`, `galaxyAt`). It is hidden in
+the whole-life view and the contact, during the gentle first look, on screens narrower than 520 px and, on a stacked
+layout, whenever the card would reach it; it has no button and is not a keyboard stop. `data-map` on the stage says
+`on` or `off`.
 
 ### The timeline rail
 
@@ -338,7 +362,7 @@ density (the sum of the weights of its milestones), a tick per memory (larger wh
 and the AI, today, and a cursor that follows the memory in view; and the five decades as links, which with the two
 buttons are the only focusable parts. It
 is generated at build time from `content/life.json` (`src/rail.mjs`), so both languages share it. Pressing or dragging
-on the track opens the nearest memory, book or AI; pointing at it shows that memory's date and title. The rail is hidden
+on the track opens the nearest memory, book or AI; pointing at it shows that memory's date and title. Its bars and ticks rest at 40% and come to full while the pointer is over the rail or the focus is inside it. The rail is hidden
 in the flat page.
 
 ### Flat page

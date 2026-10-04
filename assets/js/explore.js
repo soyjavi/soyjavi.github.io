@@ -217,7 +217,9 @@ export function galaxyAt(galaxies, [x, y], slack = 1.35) {
   return best;
 }
 
-export const miniVisible = (kind, width, minimum = 520, room = true) => kind === "milestone" && width >= minimum && room;
+export const MINI_ZOOM = 0.75;
+
+export const miniVisible = (ratio, width, minimum = 520, room = true) => ratio < MINI_ZOOM && width >= minimum && room;
 
 export const QUALITY = { tiers: [{ keep: 1, ratio: Infinity }, { keep: 0.65, ratio: 1.5 }, { keep: 0.4, ratio: 1 }], slow: 1000 / 30, window: 90, windows: 3 };
 

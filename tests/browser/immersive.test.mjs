@@ -4,7 +4,8 @@ import { chromium } from "playwright-core";
 import { loadContent } from "../../src/content.mjs";
 import { renderSite } from "../../src/site.mjs";
 import { serveStatic } from "../../tools/static.mjs";
-import { years } from "../../assets/js/life.js";
+import { layout, years } from "../../assets/js/life.js";
+import { related, strongest, STRONG } from "../../assets/js/explore.js";
 import { archive } from "../fixtures/archive.mjs";
 
 const content = loadContent();
@@ -108,6 +109,35 @@ const openFilters = async (page) => {
   if (!(await page.locator(".explore [data-legend-toggle]").isVisible())) await page.locator(".explore [data-more-toggle]").click();
   await page.locator(".explore [data-legend-toggle]").click();
 };
+const reveal = async (page, selector) => {
+  const target = page.locator(selector).first();
+  if (!(await target.isVisible())) await page.locator("[data-more-toggle]").first().click();
+  return target;
+};
+const galaxyNames = async (page) => {
+  const every = await page.evaluate(() =>
+    [...document.querySelectorAll(".labels .galaxy")].map((node) => {
+      const rect = node.getBoundingClientRect();
+      return { text: node.firstChild.textContent, left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, go: node.dataset.go, shown: node.style.visibility === "visible" && +node.style.opacity > 0.2 };
+    }),
+  );
+  const covers = await page.evaluate(() =>
+    [".card", ".explore .bar", ".hud", ".rail", ".masthead", ".nudge"]
+      .flatMap((selector) => [...document.querySelectorAll(selector)].filter((node) => !node.hidden && getComputedStyle(node).display !== "none").map((node) => node.getBoundingClientRect().toJSON()))
+      .concat([{ left: 0, right: innerWidth, top: 0, bottom: 74 }, { left: 0, right: innerWidth, top: innerHeight - 60, bottom: innerHeight }]),
+  );
+  const shown = every.filter((galaxy) => galaxy.shown);
+  const unexplained = every
+    .filter((galaxy) => !galaxy.shown)
+    .filter((galaxy) => ![...covers, ...shown].some((other) => overlap(galaxy, { left: other.left - 16, right: other.right + 16, top: other.top - 16, bottom: other.bottom + 16 })))
+    .map((galaxy) => galaxy.text);
+  return { every, shown, unexplained };
+};
+const wake = async (page) => {
+  await page.keyboard.press("Shift");
+  await page.waitForFunction(() => document.querySelector(".stage").dataset.gentle === "", null, { timeout: 5000 });
+  await page.waitForTimeout(400);
+};
 const touch = async (page, steps) => {
   const client = await page.context().newCDPSession(page);
   for (const [type, points] of steps) await client.send("Input.dispatchTouchEvent", { type, touchPoints: points.map(([x, y], id) => ({ x, y, id })) });
@@ -152,10 +182,19 @@ test("the card shows the memory in view, its threads as filters and its related 
   const chips = [...tapquo.threads.map((id) => content.dict.en.threads[id]), ...tapquo.people.map((id) => content.dict.en.people[id])];
   assert.deepEqual(await page.locator(".card .chip").allTextContents(), chips);
   assert.deepEqual(await page.locator(".card .chip").evaluateAll((nodes) => nodes.map((node) => node.tagName + node.getAttribute("aria-pressed"))), chips.map(() => "BUTTONfalse"));
+  const marks = layout(content.life.milestones, { threads: content.life.threads });
+  const at = marks.findIndex((entry) => entry.id === "tapquo");
+  const everyone = related(marks, at);
+  const total = everyone.links.length + everyone.near.length;
+  const strong = await page.locator(".card .peer").allTextContents();
+  assert.equal(strong.length, Math.min(STRONG, total), "the card lists only the strongest relations");
+  assert.equal(strong.length, strongest(marks, at).length);
+  assert.equal(await page.locator("#scene").getAttribute("data-links"), String(strong.length), "a line is drawn to each listed memory");
+  await page.locator(".card .expander").click();
   const peers = await page.locator(".card .peer").allTextContents();
   for (const title of ["GitHub", "The classroom", "I let TapQuo go", "A front end for the Bizkaibus"]) assert.ok(peers.some((text) => text.includes(title)), `${title} is not related`);
   assert.ok(peers.length <= 8);
-  assert.equal(await page.locator("#scene").getAttribute("data-links"), String(peers.length), "a line is drawn to each related memory");
+  assert.ok(peers.length > strong.length);
   await close();
 });
 
@@ -271,13 +310,15 @@ test("the browser language picks the page: Spanish goes to /es/, anything else s
 
 test("choosing a language with the switch is remembered over the browser's", async () => {
   const { page, close } = await open("/es/", { locale: "es-ES" });
-  await page.locator("a.lang").click();
+  await immersive(page);
+  await (await reveal(page, "a.lang")).click();
   await page.waitForURL((url) => url.pathname === "/");
   assert.equal(await page.evaluate(() => localStorage.getItem("lang")), "en");
   await page.goto(`${base}/`, { waitUntil: "load" });
   await page.waitForTimeout(500);
   assert.equal(new URL(page.url()).pathname, "/", "Spanish browser, English choice");
-  await page.locator("a.lang").click();
+  await immersive(page);
+  await (await reveal(page, "a.lang")).click();
   await page.waitForURL(/\/es\/$/);
   assert.equal(await page.evaluate(() => localStorage.getItem("lang")), "es");
   await close();
@@ -298,7 +339,7 @@ test("night is the first look whatever the system says, and the switch to paper 
     assert.ok((await lightness()) < 40, `a ${system} system still opens on night`);
     assert.equal(await page.locator("html").getAttribute("data-theme"), "dark");
     assert.equal(await page.locator('meta[name="theme-color"]').getAttribute("content"), "#0c0c0b");
-    const toggle = page.locator(".masthead [data-theme-toggle]");
+    const toggle = await reveal(page, ".masthead [data-theme-toggle]");
     assert.equal(await toggle.isVisible(), true);
     assert.equal(await toggle.getAttribute("aria-label"), "Switch to the light theme");
     assert.equal(await page.evaluate(() => localStorage.getItem("theme")), null, "nothing is stored until a choice is made");
@@ -334,7 +375,7 @@ test("switching theme repaints the scene without reloading it", async () => {
   };
   assert.ok((await sample()) < 40, "dark canvas");
   const alive = await page.evaluate(() => (window.__alive = 1));
-  await page.locator(".masthead [data-theme-toggle]").click();
+  await (await reveal(page, ".masthead [data-theme-toggle]")).click();
   await page.waitForTimeout(800);
   assert.ok((await sample()) > 200, "light canvas");
   assert.equal(await page.evaluate(() => window.__alive), alive, "the page did not reload");
@@ -523,6 +564,7 @@ test("choosing a thread dims the rest, in the controls and in the card, and Esca
 test("related memories are buttons that open the other memory, and Earlier and Later follow the filter", async () => {
   const { page, close } = await open("/#m-tapquo");
   await hud(page, TAPQUO);
+  await page.locator(".card .expander").click();
   await page.locator(".card .peer", { hasText: "GitHub" }).click();
   await hud(page, "02 / The craft · GitHub");
   assert.equal(await page.evaluate(() => document.activeElement.classList.contains("card")), true, "the keyboard stays in the card");
@@ -704,17 +746,13 @@ test("the whole life names a galaxy for each period and the names stay in the wi
   await immersive(page);
   await hud(page, "javi");
   await page.waitForTimeout(5500);
-  const galaxies = await page.evaluate(() =>
-    [...document.querySelectorAll(".labels .galaxy")]
-      .filter((node) => node.style.visibility === "visible" && +node.style.opacity > 0.2)
-      .map((node) => {
-        const rect = node.getBoundingClientRect();
-        return { text: node.firstChild.textContent, left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, go: node.dataset.go };
-      }),
-  );
+  const { every: everyGalaxy, shown: galaxies, unexplained } = await galaxyNames(page);
   const wanted = content.life.periods.map((id) => content.dict.en.periods[id].kicker.split(" · ")[0]);
-  assert.deepEqual(galaxies.map((galaxy) => galaxy.text).sort(), [...wanted].sort(), "every period is named");
-  assert.deepEqual(galaxies.map((galaxy) => galaxy.go).sort(), content.life.periods.map((id) => `period-${id}`).sort());
+  assert.equal(everyGalaxy.length, wanted.length, "every period has a galaxy label");
+  assert.ok(galaxies.length >= wanted.length - 2, "all the names that fit are shown");
+  assert.deepEqual(unexplained, [], "a name is hidden only where the card, the controls, the rail or another name is over it");
+  assert.deepEqual(galaxies.map((galaxy) => galaxy.text).sort(), wanted.filter((text) => galaxies.some((galaxy) => galaxy.text === text)).sort());
+  assert.deepEqual(galaxies.map((galaxy) => galaxy.go).sort(), content.life.periods.filter((id) => galaxies.some((galaxy) => galaxy.go === `period-${id}`)).map((id) => `period-${id}`).sort());
   const size = await page.evaluate(() => ({ width: innerWidth }));
   galaxies.forEach((galaxy, i) => {
     assert.ok(galaxy.left >= 0 && galaxy.right <= size.width, `"${galaxy.text}" is cut by the edge`);
@@ -1207,8 +1245,8 @@ test("storage holds only the chosen language and theme", async () => {
   await page.keyboard.press("ArrowDown");
   await page.locator("[data-surprise]").click();
   assert.deepEqual(await page.evaluate(() => ({ local: Object.keys(localStorage), session: Object.keys(sessionStorage), cookie: document.cookie })), { local: [], session: [], cookie: "" });
-  await page.locator("[data-theme-toggle]").first().click();
-  await page.locator("a.lang").click();
+  await (await reveal(page, "[data-theme-toggle]")).click();
+  await (await reveal(page, "a.lang")).click();
   await page.waitForURL((url) => url.pathname === "/");
   const stored = await page.evaluate(() => ({ local: Object.keys(localStorage).sort(), session: Object.keys(sessionStorage), cookie: document.cookie }));
   assert.deepEqual(stored, { local: ["lang", "theme"], session: [], cookie: "" });
@@ -1218,12 +1256,15 @@ test("storage holds only the chosen language and theme", async () => {
 test("the controls and the card speak Spanish on the Spanish page", async () => {
   const { page, close } = await open("/es/");
   await immersive(page);
-  assert.deepEqual(await page.locator(".explore .bar .tool:visible").allInnerTexts(), ["BUSCAR", "SORPRÉNDEME", "FILTRAR", "", "?"]);
+  assert.deepEqual(await page.locator(".explore .bar .tool:visible").allInnerTexts(), ["BUSCAR", "SORPRÉNDEME", "⋯"]);
   await openFilters(page);
   assert.deepEqual(await page.locator(".legend button").allInnerTexts(), content.life.threads.map((id) => content.dict.es.threads[id].toUpperCase()));
   await goTo(page, "m-tapquo");
   await hud(page, "03 / TapQuo · TapQuo");
   const tapquo = content.life.milestones.find((entry) => entry.id === "tapquo");
+  assert.deepEqual(await page.locator(".card .chip:visible").allInnerTexts(), tapquo.threads.map((id) => content.dict.es.threads[id].toUpperCase()), "the card shows the first row of chips");
+  assert.match(await page.locator(".card .expander").innerText(), /^TODOS LOS RELACIONADOS \(\d+\)/i);
+  await page.locator(".card .expander").click();
   assert.deepEqual(await page.locator(".card .chip").allInnerTexts(), [...tapquo.threads.map((id) => content.dict.es.threads[id]), ...tapquo.people.map((id) => content.dict.es.people[id])].map((name) => name.toUpperCase()));
   assert.match(await page.locator(".card .related .kicker").innerText(), /RELACIONADOS/i);
   assert.match(await page.locator(".step[data-step=next]").innerText(), /Después/i);
@@ -1262,7 +1303,10 @@ test("a life of 250 memories with people and places explores without a hitch", a
   assert.equal(await page.locator(".legend[data-facet=threads]").count(), 1);
   const shown = await keepClear(page, "250 at the whole life");
   assert.ok(shown.length <= 24, `${shown.length} labels`);
-  assert.equal(await page.locator(".labels .galaxy").evaluateAll((nodes) => nodes.filter((node) => node.style.visibility === "visible" && +node.style.opacity > 0.2).length), 6, "the six galaxies are named");
+  const named = await galaxyNames(page);
+  assert.equal(named.every.length, 6, "the six galaxies have a name");
+  assert.ok(named.shown.length >= 3, "the names that fit are shown");
+  assert.deepEqual(named.unexplained, [], "a name is hidden only where the card, the controls, the rail or another name is over it");
   const fits = async (where) => {
     const [card, controls] = [await box(page, ".card"), await box(page, ".explore")];
     assert.ok(card.right <= controls.left + 1, `${where}: the controls run into the card (${controls.left.toFixed(0)} against ${card.right.toFixed(0)})`);
@@ -1276,7 +1320,7 @@ test("a life of 250 memories with people and places explores without a hitch", a
   assert.ok(Number(await page.locator("#scene").getAttribute("data-jumps")) > 0, "a filter draws its jumps from galaxy to galaxy");
   assert.ok((await page.locator(".galaxy-count").allTextContents()).some((text) => /· \d+/.test(text)), "each galaxy counts what it holds of the filter");
   await keepClear(page, "250 with a thread");
-  await page.locator(".explore [data-unfilter]").click();
+  await (await reveal(page, ".explore [data-unfilter]")).click();
   assert.equal(await page.locator(".stage").getAttribute("data-filter"), "");
   assert.equal(await page.locator(".explore [data-unfilter]").isVisible(), false);
   const withPeople = entries.findIndex((entry) => entry.people.length >= 2);
@@ -1294,7 +1338,7 @@ test("a life of 250 memories with people and places explores without a hitch", a
   assert.ok((await page.locator(".finder .peer.show").count()) >= 1, "and offered as filters");
   await page.locator(".finder .peer.show").first().click();
   assert.match((await page.locator(".stage").getAttribute("data-filter")) ?? "", /^people:/);
-  assert.equal(await page.locator(".explore [data-unfilter]").isVisible(), true, "a person has no legend but the filter can be let go of");
+  assert.equal(await (await reveal(page, ".explore [data-unfilter]")).isVisible(), true, "a person has no legend but the filter can be let go of");
   await page.locator(".explore [data-unfilter]").click();
   assert.equal(await page.locator(".stage").getAttribute("data-filter"), "");
   assert.deepEqual(errors, []);
@@ -1417,6 +1461,9 @@ test("with a memory open the galaxy shows a dashed ring for each year, labelled,
   await hud(page, "05 / Home · Satoshi Ltd.");
   await settled(page);
   await page.waitForTimeout(900);
+  assert.equal(await page.locator(".stage").getAttribute("data-gentle"), "1", "the first memory of a visit starts quietly");
+  assert.equal(await page.locator("#scene").getAttribute("data-rings"), "", "no year rings while it is gentle");
+  await wake(page);
   assert.equal(await page.locator("#scene").getAttribute("data-rings"), "5");
   const years = async () => page.locator(".ring-year").evaluateAll((nodes) => nodes.filter((node) => node.style.visibility === "visible" && +node.style.opacity > 0.5).map((node) => node.textContent));
   assert.deepEqual(await years(), ["2021", "2022", "2023", "2024", "2025"]);
@@ -1444,7 +1491,9 @@ test("a line to a memory off the screen ends at the edge of the free area in a l
   await settled(page);
   await page.waitForTimeout(900);
   const marks = await page.locator(".edge-mark:not([hidden])").evaluateAll((nodes) => nodes.map((node) => ({ text: node.textContent, memory: +node.dataset.memory, ...Object.fromEntries(["left", "right", "top", "bottom"].map((key) => [key, node.getBoundingClientRect()[key]])) })));
-  assert.ok(marks.length >= 2 && marks.length <= 4, `${marks.length} markers`);
+  assert.ok(marks.length >= 1 && marks.length <= 2, `${marks.length} markers`);
+  assert.ok(marks.every((mark) => !/\+\d/.test(mark.text)), "a marker names one memory and never counts more");
+  assert.equal(await page.evaluate(() => getComputedStyle(document.querySelector(".edge-mark")).fontFamily === getComputedStyle(document.querySelector(".tag")).fontFamily), true, "markers use the serif of the tags");
   assert.ok(marks.some((mark) => mark.text.includes("The first version of Clonara")), "Clonara is off the screen");
   assert.equal(await page.locator(".stage").getAttribute("data-edges"), String(marks.length));
   const around = { card: await box(page, ".card"), explore: await box(page, ".explore"), rail: await box(page, ".rail") };
@@ -1456,7 +1505,8 @@ test("a line to a memory off the screen ends at the edge of the free area in a l
   const flagged = await page.locator(".card .related .peer[data-out='1']").evaluateAll((nodes) => nodes.map((node) => node.dataset.memory));
   for (const mark of marks) assert.ok(flagged.includes(String(mark.memory)), `${mark.text} is flagged in the card`);
   assert.ok((await page.locator(".card .related .peer:not([data-out='1'])").count()) >= 1, "memories on the screen carry no arrow");
-  assert.equal(await page.locator("#scene").getAttribute("data-links"), "5");
+  const placed = layout(content.life.milestones, { threads: content.life.threads });
+  assert.equal(await page.locator("#scene").getAttribute("data-links"), String(strongest(placed, placed.findIndex((entry) => entry.id === "satoshi")).length), "only the strongest relations are drawn");
   const target = marks.find((mark) => mark.text.includes("The first version of Clonara"));
   await page.locator(`.edge-mark[data-memory='${target.memory}']`).click();
   await hud(page, "06 / Now · The first version of Clonara");
@@ -1470,15 +1520,18 @@ test("a related list that scrolls fades with a count of what is hidden, and a ho
   await hud(page, TAPQUO);
   await settled(page);
   const block = page.locator(".card .related");
+  assert.equal(await block.getAttribute("data-more"), "", "three rows never scroll");
+  await page.locator(".card .expander").click();
+  await page.waitForTimeout(200);
   const hidden = await block.getAttribute("data-more");
   assert.match(hidden, /^\d+ more$/);
   assert.ok(+hidden.split(" ")[0] >= 1);
   assert.equal(await block.evaluate((node) => getComputedStyle(node, "::after").content), `"${hidden}"`);
   await block.locator("ul").evaluate((node) => (node.scrollTop = node.scrollHeight));
-  await page.waitForTimeout(200);
+  await page.waitForFunction(() => document.querySelector(".card .related").dataset.more === "", null, { timeout: 5000 }).catch(() => {});
   assert.equal(await block.getAttribute("data-more"), "", "nothing is hidden once the list is at its end");
   await block.locator("ul").evaluate((node) => (node.scrollTop = 0));
-  await page.waitForTimeout(200);
+  await page.waitForFunction((wanted) => document.querySelector(".card .related").dataset.more === wanted, hidden, { timeout: 5000 }).catch(() => {});
   assert.equal(await block.getAttribute("data-more"), hidden);
   assert.equal(await page.locator("#scene").getAttribute("data-preview"), "");
   const classroom = peerRows(page).filter({ hasText: "The classroom" }).first();
@@ -1540,7 +1593,7 @@ test("the finder is a wide palette with one-line rows and a preview of the highl
   }
 });
 
-test("the minimap appears with the first memory, frames what is on screen, flies to another galaxy and stays out of the way", async () => {
+test("the minimap appears once the camera is zoomed in and the first memory is no longer gentle, frames what is on screen, flies to another galaxy and stays out of the way", async () => {
   const { page, errors, close } = await open("/");
   await immersive(page);
   await page.waitForTimeout(3000);
@@ -1549,6 +1602,9 @@ test("the minimap appears with the first memory, frames what is on screen, flies
   await hud(page, "05 / Home · Satoshi Ltd.");
   await settled(page);
   await page.waitForTimeout(700);
+  assert.equal(await page.locator(".minimap").isHidden(), true, "none while the first memory of the visit is gentle");
+  await wake(page);
+  await page.waitForFunction(() => !document.querySelector(".minimap").hidden);
   const map = await box(page, ".minimap");
   assert.ok(Math.abs(map.width - 104) <= 2 && Math.abs(map.height - 100) <= 2, `${map.width}x${map.height}`);
   for (const selector of [".card", ".rail", ".explore"]) assert.ok(!overlap(map, await box(page, selector)), `the minimap touches ${selector}`);
@@ -1602,6 +1658,7 @@ test("the minimap never reaches the card on a stacked layout, so the close butto
     const { page, close } = await open("/#m-tapquo", { viewport: size });
     await hud(page, TAPQUO);
     await settled(page);
+    await wake(page);
     await page.waitForTimeout(600);
     if (await page.locator(".minimap").isVisible()) assert.ok(!overlap(await box(page, ".minimap"), await box(page, ".card")), `${size.width}x${size.height}: the minimap sits on the card`);
     const close_ = await box(page, ".card-close");
@@ -1615,6 +1672,7 @@ test("the frame on the minimap follows the camera", async () => {
   const { page, close } = await open("/#m-satoshi");
   await hud(page, "05 / Home · Satoshi Ltd.");
   await settled(page);
+  await wake(page);
   await page.waitForTimeout(600);
   const before = await page.locator(".mini-frame").getAttribute("points");
   await page.mouse.move(700, 400);
@@ -1696,8 +1754,11 @@ test("on a phone the header is one row of 56 px with Find, Surprise me and More,
   await close();
   const short = await open("/", { viewport: { width: 1280, height: 640 } });
   await immersive(short.page);
-  assert.ok((await box(short.page, ".masthead")).height <= 90, "on a laptop the header is as before");
-  assert.equal(await short.page.locator("[data-more-toggle]").isVisible(), false, "no More button where everything fits");
+  assert.ok((await box(short.page, ".masthead")).height <= 90, "on a laptop the header is one row too");
+  assert.deepEqual(await short.page.locator(".explore .bar .tool:visible").allInnerTexts(), [content.dict.en.ui.explore.find, content.dict.en.ui.explore.surprise, "⋯"].map((text) => (text === "⋯" ? text : text.toUpperCase())), "the same three on a laptop");
+  for (const selector of ["[data-legend-toggle]", "[data-guide-toggle]", "[data-theme-toggle]", ".lang"]) assert.equal(await short.page.locator(selector).first().isVisible(), false, `${selector} waits in the sheet on a laptop`);
+  await short.page.locator("[data-more-toggle]").click();
+  for (const selector of ["[data-legend-toggle]", "[data-guide-toggle]", "[data-theme-toggle]", ".lang"]) assert.equal(await short.page.locator(selector).first().isVisible(), true, `${selector} shows in the sheet on a laptop`);
   await short.close();
 });
 
@@ -1707,7 +1768,8 @@ test("the guide explains the marks, opens with a button or the question mark, ne
   await page.waitForTimeout(2000);
   const button = page.locator("[data-guide-toggle]");
   assert.equal(await page.locator(".guide").isHidden(), true);
-  await button.click();
+  assert.equal(await button.isVisible(), false, "the button waits in the sheet");
+  await (await reveal(page, "[data-guide-toggle]")).click();
   assert.equal(await button.getAttribute("aria-expanded"), "true");
   assert.equal(await page.locator(".guide li").count(), 6);
   assert.match(await page.locator(".guide").innerText(), /A cloud is a memory/);
@@ -1716,7 +1778,7 @@ test("the guide explains the marks, opens with a button or the question mark, ne
   assert.ok(guide.right <= 1280 && guide.bottom <= 800);
   await page.keyboard.press("Escape");
   assert.equal(await page.locator(".guide").isHidden(), true);
-  assert.equal(await page.evaluate(() => document.activeElement.hasAttribute("data-guide-toggle")), true);
+  assert.equal(await page.evaluate(() => document.activeElement.hasAttribute("data-more-toggle")), true, "the sheet handed the focus to More");
   await page.mouse.click(700, 500);
   await page.keyboard.press("?");
   assert.equal(await page.locator(".guide").isVisible(), true, "the question mark opens it");
@@ -1825,8 +1887,10 @@ test("sound is on by default but waits for the first gesture, plays a pluck for 
   await immersive(page);
   await page.waitForTimeout(1500);
   const button = page.locator("[data-sound]");
-  assert.equal(await button.isVisible(), true);
+  assert.equal(await button.isVisible(), false, "the button waits in the sheet");
+  assert.equal(await button.evaluate((node) => node.hidden), false, "and is offered where the browser has Web Audio");
   assert.equal(await button.getAttribute("aria-pressed"), "true", "on by default");
+  assert.equal(await button.evaluate((node) => getComputedStyle(node).backgroundColor), "rgba(0, 0, 0, 0)", "pressed is never drawn inverted");
   await goTo(page, "m-tapquo");
   await hud(page, TAPQUO);
   await page.mouse.move(700, 450);
@@ -1870,7 +1934,7 @@ test("sound is on by default but waits for the first gesture, plays a pluck for 
   await hud(page, BOOK);
   const swell = await page.evaluate(() => window.__audio.oscillators.slice(-2));
   assert.ok(swell.every((frequency) => frequency < 300), "the rings get a low swell");
-  await button.click();
+  await (await reveal(page, "[data-sound]")).click();
   assert.equal(await button.getAttribute("aria-pressed"), "false");
   assert.ok((await page.evaluate(() => window.__audio.gains.at(-1)))[1] === 0, "the volume fades to nothing");
   const before = await page.evaluate(() => window.__audio.oscillators.length);
@@ -1882,6 +1946,7 @@ test("sound is on by default but waits for the first gesture, plays a pluck for 
   await close();
   const quiet = await open("/", { before: (context) => context.addInitScript(() => { delete window.AudioContext; delete window.webkitAudioContext; }) });
   await immersive(quiet.page);
+  await quiet.page.locator("[data-more-toggle]").click();
   assert.equal(await quiet.page.locator("[data-sound]").isVisible(), false, "no button where there is no Web Audio");
   await quiet.close();
 });
@@ -1892,14 +1957,28 @@ test("pressing the sound button as the very first gesture turns it off and nothi
   await page.waitForTimeout(1200);
   const button = page.locator("[data-sound]");
   assert.equal(await button.getAttribute("aria-pressed"), "true");
-  await button.click();
+  await page.evaluate(() => document.querySelector("[data-sound]").click());
   assert.equal(await button.getAttribute("aria-pressed"), "false");
   await page.mouse.click(700, 450);
   await page.keyboard.press("ArrowRight");
   assert.equal(await page.evaluate(() => window.__audio.contexts), 0, "it never starts once it was switched off");
-  await button.click();
+  await (await reveal(page, "[data-sound]")).click();
   assert.equal(await button.getAttribute("aria-pressed"), "true");
   assert.equal(await page.evaluate(() => window.__audio.contexts), 1, "and the button can turn it on again");
+  assert.deepEqual(errors, []);
+  await close();
+});
+
+test("opening the sheet is itself a gesture that starts the sound, and the button inside then turns it off", async () => {
+  const { page, errors, close } = await open("/", { before: audioStub });
+  await immersive(page);
+  await page.waitForTimeout(1200);
+  assert.equal(await page.evaluate(() => window.__audio.contexts), 0);
+  const button = await reveal(page, "[data-sound]");
+  assert.equal(await page.evaluate(() => window.__audio.contexts), 1, "the click on More started it");
+  assert.equal(await button.getAttribute("aria-pressed"), "true");
+  await button.click();
+  assert.equal(await button.getAttribute("aria-pressed"), "false");
   assert.deepEqual(errors, []);
   await close();
 });
@@ -2130,6 +2209,8 @@ test("a first animation frame that arrives before the clock started cannot freez
   await settled(page);
   const view = await page.locator("#scene").getAttribute("data-view");
   assert.doesNotMatch(view, /NaN|Infinity|e\+/, view);
+  await wake(page);
+  await page.waitForFunction(() => document.querySelector(".mini-frame")?.getAttribute("points"), null, { timeout: 5000 });
   assert.ok((await page.locator(".mini-frame").getAttribute("points")).split(/[ ,]/).every((value) => Number.isFinite(+value)));
   assert.deepEqual(errors, []);
   await close();
@@ -2300,5 +2381,304 @@ test("a soft tone answers the pointer reaching a cloud but never twice in a mome
   });
   assert.equal(await page.evaluate(() => window.__audio.resumed), resumed + 1, "and it comes back with the tab");
   assert.deepEqual(errors, []);
+  await close();
+});
+
+const quiet = async (page) => {
+  await page.mouse.move(640, 420);
+  await page.mouse.move(700, 470);
+  await page.waitForFunction(() => document.querySelector(".stage").dataset.gentle === "", null, { timeout: 5000 });
+  await page.waitForTimeout(600);
+};
+const visibleLabels = (page) =>
+  page.evaluate(() =>
+    [...document.querySelectorAll(".tag[data-on='1'], .edge-mark:not([hidden]), .galaxy, .ahead, .ring-year, .countdown-mark")]
+      .map((node) => ({ node, style: getComputedStyle(node), rect: node.getBoundingClientRect() }))
+      .filter(({ style }) => style.visibility === "visible" && Number(style.opacity) > 0.2)
+      .map(({ node, style, rect }) => ({ cls: node.className, size: style.fontSize, color: style.color, family: style.fontFamily, left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom })),
+  );
+
+test("with a memory open the scene names and draws only its three strongest relations, and the rest recede until the card's list is expanded", async () => {
+  const { page, errors, close } = await open("/#m-hua-hin", { viewport: { width: 1280, height: 800 } });
+  await hud(page, "06 / Now · We arrive in Hua Hin");
+  await settled(page);
+  await quiet(page);
+  const tagCount = () => page.locator(".tag[data-on='1']").count();
+  assert.ok((await tagCount()) >= 1 && (await tagCount()) <= 4, "the open memory and at most three relations are named");
+  assert.ok(Number(await page.locator("#scene").getAttribute("data-links")) <= 3, "at most three lines at rest");
+  const levels = (await page.locator(".stage").getAttribute("data-levels")).split(",").map(Number);
+  assert.ok(levels.includes(1) && Math.min(...levels) / levels.filter((level) => level < 1).at(-1) <= 0.4, `unrelated clouds recede (${levels})`);
+  assert.ok(Math.min(...levels) <= 0.3 && levels.some((level) => level > 0.8 && level < 1), "related ones stay brighter");
+  assert.equal(await page.locator(".card .related .peer").count(), 3, "the card lists the three strongest");
+  const expander = page.locator(".card .expander");
+  assert.equal(await expander.getAttribute("aria-expanded"), "false");
+  const stronger = await tagCount();
+  await expander.click();
+  assert.equal(await page.locator(".card .expander").getAttribute("aria-expanded"), "true");
+  await page.waitForFunction(() => Number(document.querySelector("#scene").dataset.links) > 3, null, { timeout: 8000 });
+  await page.waitForFunction((was) => document.querySelectorAll(".tag[data-on='1']").length > was, stronger, { timeout: 8000 });
+  assert.ok((await tagCount()) <= 9, "never more than the open memory and eight relations");
+  assert.equal(await page.evaluate(() => document.activeElement.className), "expander", "the focus stays on the button");
+  assert.ok((await page.locator(".card .related .peer").count()) > 3, "the list shows more");
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(() => Number(document.querySelector("#scene").dataset.links) <= 3, null, { timeout: 8000 });
+  assert.equal(await page.locator(".card .related .peer").count(), 3, "and back to three");
+  assert.deepEqual(errors, []);
+  await close();
+});
+
+test("at most two edge markers, each labelled in the tags' typeface, and no line reaches further than half the shorter side of the window", async () => {
+  for (const [width, height] of [[1280, 640], [1280, 800], [1000, 1100]]) {
+    const { page, close } = await open("/#m-hua-hin", { viewport: { width, height } });
+    await hud(page, "06 / Now · We arrive in Hua Hin");
+    await settled(page);
+    await quiet(page);
+    const marks = await page.locator(".edge-mark:not([hidden])").evaluateAll((nodes) => nodes.map((node) => ({ text: node.querySelector("span").textContent.trim(), family: getComputedStyle(node).fontFamily, left: node.getBoundingClientRect().left, top: node.getBoundingClientRect().top, ax: node.getBoundingClientRect().left + parseFloat(node.querySelector("i").style.left), ay: node.getBoundingClientRect().top + parseFloat(node.querySelector("i").style.top) })));
+    assert.ok(marks.length <= 2, `${width}x${height}: ${marks.length} markers`);
+    assert.equal(await page.locator(".stage").getAttribute("data-edges") ?? "", marks.length ? String(marks.length) : "");
+    const tag = await page.locator(".tag[data-hot='1']").evaluate((node) => ({ family: getComputedStyle(node).fontFamily, cx: +node.style.getPropertyValue("--cx"), cy: +node.style.getPropertyValue("--cy") }));
+    for (const mark of marks) {
+      assert.ok(mark.text.length > 3, "an arrow always has its label");
+      assert.equal(mark.family, tag.family, "the same typeface as the tags");
+      const reach = Math.min(width, height) / 2 + 2;
+      assert.ok(Math.abs(mark.ax - tag.cx) <= reach && Math.abs(mark.ay - tag.cy) <= reach, `${width}x${height}: a line reaches ${Math.round(Math.hypot(mark.ax - tag.cx, mark.ay - tag.cy))}px`);
+    }
+    await close();
+  }
+});
+
+test("every label speaks in one of three tiers: the open memory large and bright, the relations smaller, the anchors small and quiet", async () => {
+  const { page, close } = await open("/#m-hua-hin", { viewport: { width: 1280, height: 800 } });
+  await hud(page, "06 / Now · We arrive in Hua Hin");
+  await settled(page);
+  await quiet(page);
+  const labels = await visibleLabels(page);
+  const combos = new Set(labels.map((label) => `${label.size} ${label.color}`));
+  assert.ok(combos.size <= 3, `${combos.size} styles: ${[...combos].join(" | ")}`);
+  const lead = labels.find((label) => label.cls.includes("tag") && label.size === "22px");
+  assert.ok(lead, "the open memory is 22px");
+  const sizes = (cls) => labels.filter((label) => label.cls.includes(cls)).map((label) => parseFloat(label.size));
+  assert.ok(sizes("tag").every((size) => size === 22 || size === 15));
+  assert.ok(sizes("galaxy").concat(sizes("ring-year"), sizes("ahead")).every((size) => size <= 15));
+  const anchor = labels.find((label) => /galaxy|ring-year|ahead now/.test(label.cls));
+  assert.ok(anchor && parseFloat(anchor.size) === 10, "the anchors are 10px");
+  assert.notEqual(anchor.color, lead.color, "anchors are never as bright as the open memory");
+  await close();
+});
+
+test("a galaxy name never sits under the card or the controls, and only the open memory's galaxy is named while a memory is open", async () => {
+  for (const [width, height] of [[1280, 640], [1280, 800], [390, 844]]) {
+    const mobile = width < 600;
+    const { page, close } = await open("/#m-hua-hin", { viewport: { width, height }, hasTouch: mobile, isMobile: mobile });
+    await hud(page, "06 / Now · We arrive in Hua Hin");
+    await settled(page);
+    await quiet(page).catch(() => {});
+    const shown = await page.locator(".galaxy").evaluateAll((nodes) => nodes.filter((node) => getComputedStyle(node).visibility === "visible" && Number(getComputedStyle(node).opacity) > 0.05).map((node) => node.getBoundingClientRect().toJSON()));
+    assert.ok(shown.length <= 1, `${width}x${height}: ${shown.length} galaxy names with a memory open`);
+    const blockers = await page.evaluate(() => [".card", ".masthead", ".rail", ".minimap:not([hidden])"].flatMap((selector) => [...document.querySelectorAll(selector)].map((node) => node.getBoundingClientRect().toJSON())));
+    for (const name of shown) for (const other of blockers) assert.ok(!(name.left + 4 < other.right && name.right - 4 > other.left && name.top + 4 < other.bottom && name.bottom - 4 > other.top), `${width}x${height}: a galaxy name touches the card, controls or rail`);
+    await close();
+  }
+  const { page, close } = await open("/", { viewport: { width: 1280, height: 800 } });
+  await immersive(page);
+  await page.waitForTimeout(6500);
+  const named = await page.locator(".galaxy").evaluateAll((nodes) => nodes.filter((node) => getComputedStyle(node).visibility === "visible" && Number(getComputedStyle(node).opacity) > 0.05).map((node) => node.getBoundingClientRect().toJSON()));
+  const card = await box(page, ".card");
+  for (const name of named) assert.ok(!(name.left + 4 < card.right && name.right - 4 > card.left && name.top + 4 < card.bottom && name.bottom - 4 > card.top), "in the whole life no name sits under the card");
+  assert.ok(named.length >= 2, "and the whole life still names its galaxies");
+  await close();
+});
+
+test("a memory's card is calm: three relations, one row of chips, no period introduction, and an expander the keyboard can use", async () => {
+  for (const [width, height] of [[1280, 640], [1366, 657], [1280, 800]]) {
+    const { page, close } = await open("/#m-hua-hin", { viewport: { width, height } });
+    await hud(page, "06 / Now · We arrive in Hua Hin");
+    await settled(page);
+    assert.equal(await page.locator(".card .period-head").count(), 0, "the period's introduction stays in the document");
+    assert.equal(await page.locator(".card .related .peer").count(), 3);
+    const rows = await page.locator(".card .facets").evaluateAll((nodes) => nodes.filter((node) => getComputedStyle(node).display !== "none").length);
+    assert.equal(rows, 1, "one row of chips");
+    const card = await box(page, ".card");
+    const steps = await box(page, ".card-steps");
+    assert.ok(steps.bottom <= card.bottom + 1 && steps.top >= card.top && card.bottom <= height, `${width}x${height}: Earlier and Later are in view`);
+    assert.equal(await page.locator(".card .expander").getAttribute("aria-expanded"), "false");
+    await page.locator(".card .expander").focus();
+    await page.keyboard.press("Enter");
+    assert.equal(await page.locator(".card .expander").getAttribute("aria-expanded"), "true");
+    const chips = await page.locator(".card .facets").evaluateAll((nodes) => nodes.filter((node) => getComputedStyle(node).display !== "none").length);
+    assert.ok(chips > 1, "all the chips are back once expanded");
+    await close();
+  }
+});
+
+test("the top bar holds Find, Surprise me and More; the rest waits in the sheet; the two offers are marked; nothing is inverted at rest", async () => {
+  const { page, close } = await open("/", { viewport: { width: 1280, height: 800 } });
+  await immersive(page);
+  await page.waitForTimeout(800);
+  const bar = await page.locator(".explore .bar > :not(.sheet)").evaluateAll((nodes) => nodes.filter((node) => node.getClientRects().length).map((node) => node.textContent.trim()));
+  assert.equal(bar.length, 3, `visible beside the sections: ${bar}`);
+  for (const selector of ["[data-legend-toggle]", "[data-sound]", "[data-guide-toggle]", "[data-theme-toggle]", ".lang"]) assert.equal(await page.locator(selector).first().isVisible(), false, `${selector} waits in the sheet`);
+  assert.equal(await page.locator(".masthead nav a.cta").count(), 2);
+  const cta = await page.locator(".masthead nav a.cta").evaluateAll((nodes) => nodes.map((node) => ({ line: getComputedStyle(node).textDecorationLine, height: node.getBoundingClientRect().height, go: node.dataset.go })));
+  assert.deepEqual(cta.map((item) => item.go), ["book", "clone"]);
+  assert.ok(cta.every((item) => item.line.includes("underline") && item.height >= 43.5), JSON.stringify(cta));
+  assert.equal(await page.locator(".masthead nav a:not(.cta)").evaluateAll((nodes) => nodes.every((node) => !getComputedStyle(node).textDecorationLine.includes("underline"))), true);
+  await page.locator("[data-more-toggle]").click();
+  for (const selector of ["[data-legend-toggle]", "[data-sound]", "[data-guide-toggle]", "[data-theme-toggle]", ".lang"]) assert.equal(await page.locator(selector).first().isVisible(), true, `${selector} is in the sheet`);
+  assert.equal(await page.locator("[data-sound]").getAttribute("aria-pressed"), "true");
+  assert.equal(await page.locator("[data-sound]").evaluate((node) => getComputedStyle(node).backgroundColor), "rgba(0, 0, 0, 0)", "sound is never drawn inverted");
+  const filled = await page.evaluate(() => {
+    const probe = document.createElement("i");
+    probe.style.color = "var(--fg)";
+    document.body.append(probe);
+    const ink = getComputedStyle(probe).color;
+    probe.remove();
+    return [...document.querySelectorAll(".explore .tool, .masthead .theme, .masthead .lang")].filter((node) => node.getClientRects().length && node.getAttribute("aria-pressed") !== "true" && getComputedStyle(node).backgroundColor === ink).map((node) => node.className);
+  });
+  assert.deepEqual(filled, [], "nothing is drawn with an ink fill at rest");
+  await close();
+});
+
+test("the minimap has no button: it shows whenever the camera is zoomed in and not in the whole life, and the rail rests quiet until pointed at", async () => {
+  const { page, close } = await open("/#m-hua-hin", { viewport: { width: 1280, height: 800 } });
+  await hud(page, "06 / Now · We arrive in Hua Hin");
+  await settled(page);
+  assert.equal(await page.locator(".rail [data-map], .rail-map").count(), 0, "no map button");
+  assert.equal(await page.locator(".stage").getAttribute("data-map"), "off", "waiting out the gentle first look");
+  await quiet(page);
+  await page.waitForFunction(() => document.querySelector(".stage").dataset.map === "on", null, { timeout: 8000 });
+  assert.equal(await page.locator(".minimap").isVisible(), true);
+  const ticks = () => page.locator(".rail-ticks").evaluate((node) => Number(getComputedStyle(node).opacity));
+  assert.ok((await ticks()) <= 0.4, "rail ticks rest at 40%");
+  const rail = await box(page, ".rail-track");
+  await page.mouse.move(rail.left + rail.width / 2, rail.top + 10);
+  await page.waitForFunction(() => Number(getComputedStyle(document.querySelector(".rail-ticks")).opacity) >= 0.99, null, { timeout: 3000 });
+  await page.mouse.move(700, 300);
+  await page.waitForFunction(() => Number(getComputedStyle(document.querySelector(".rail-ticks")).opacity) <= 0.41, null, { timeout: 3000 });
+  await page.locator(".rail-years a").first().focus();
+  await page.waitForFunction(() => Number(getComputedStyle(document.querySelector(".rail-ticks")).opacity) >= 0.99, null, { timeout: 3000 });
+  await page.locator(".rail-home").click();
+  await hud(page, "javi");
+  await page.waitForFunction(() => document.querySelector(".stage").dataset.map === "off", null, { timeout: 8000 });
+  assert.equal(await page.locator(".minimap").isVisible(), false, "none in the whole life");
+  await close();
+});
+
+test("the first memory of a visit opens gently, with no year rings and no minimap, until the visitor really moves, presses or types", async () => {
+  const { page, errors, close } = await open("/", { viewport: { width: 1280, height: 800 } });
+  await immersive(page);
+  await page.mouse.move(640, 420);
+  await page.waitForTimeout(500);
+  await goTo(page, "m-hua-hin");
+  await hud(page, "06 / Now · We arrive in Hua Hin");
+  await settled(page);
+  assert.equal(await page.locator(".stage").getAttribute("data-gentle"), "1");
+  assert.equal(await page.locator("#scene").getAttribute("data-rings"), "", "no year rings");
+  assert.equal(await page.locator(".minimap").isVisible(), false, "no minimap");
+  assert.ok(Number(await page.locator("#scene").getAttribute("data-links")) <= 3);
+  assert.ok((await page.locator(".edge-mark:not([hidden])").count()) <= 2);
+  await page.mouse.move(644, 424);
+  await page.waitForTimeout(300);
+  assert.equal(await page.locator(".stage").getAttribute("data-gentle"), "1", "a small tremor of the hand is not a move");
+  await page.mouse.move(700, 470);
+  await page.waitForFunction(() => document.querySelector(".stage").dataset.gentle === "", null, { timeout: 4000 });
+  await page.waitForFunction(() => Number(document.querySelector("#scene").dataset.rings) > 0, null, { timeout: 8000 });
+  await goTo(page, "m-github");
+  await hud(page, "02 / The craft · GitHub");
+  assert.equal(await page.locator(".stage").getAttribute("data-gentle"), "", "only the first memory of the visit is gentle");
+  await close();
+
+  const keyed = await open("/", { viewport: { width: 1280, height: 800 } });
+  await immersive(keyed.page);
+  await goTo(keyed.page, "m-hua-hin");
+  await hud(keyed.page, "06 / Now · We arrive in Hua Hin");
+  assert.equal(await keyed.page.locator(".stage").getAttribute("data-gentle"), "1");
+  await keyed.page.keyboard.press("Shift");
+  await keyed.page.waitForFunction(() => document.querySelector(".stage").dataset.gentle === "", null, { timeout: 4000 });
+  assert.deepEqual(errors, []);
+  await keyed.close();
+});
+
+test("after three memories a quiet line invites to the book's list, then to the AI's, can be closed for the visit, and never moves the card", async () => {
+  for (const [width, height] of [[1280, 640], [1366, 657], [390, 844], [360, 640]]) {
+    const mobile = width < 600;
+    const { page, errors, close } = await open("/", { viewport: { width, height }, hasTouch: mobile, isMobile: mobile });
+    await immersive(page);
+    await page.waitForTimeout(800);
+    const nudge = page.locator(".nudge");
+    await goTo(page, "m-born");
+    await hud(page, "01 / Origins · Born in Bilbao");
+    await goTo(page, "m-github");
+    await hud(page, "02 / The craft · GitHub");
+    await settled(page);
+    assert.equal(await nudge.isVisible(), false, `${width}x${height}: not before the third memory`);
+    const before = await box(page, ".card");
+    await goTo(page, "m-tapquo");
+    await hud(page, TAPQUO);
+    await settled(page);
+    const where = `${width}x${height}`;
+    assert.equal(await nudge.isVisible(), true, `${where}: after the third`);
+    assert.equal(await nudge.locator("a").getAttribute("data-go"), "book");
+    const [card, line] = [await box(page, ".card"), await box(page, ".nudge")];
+    assert.ok(Math.abs(card.top - before.top) < 1 && Math.abs(card.height - before.height) < 1, `${width}x${height}: the card did not move`);
+    assert.ok(line.left >= 0 && line.right <= width && line.top >= 0 && line.bottom <= height, `${where}: on screen`);
+    assert.ok(!(line.left < card.right && line.right > card.left && line.top < card.bottom && line.bottom > card.top), `${where}: never over the card`);
+    const rail = await box(page, ".rail");
+    assert.ok(line.bottom <= rail.top + 1 || line.top >= rail.bottom, `${where}: clear of the rail`);
+    await goTo(page, "clone");
+    await hud(page, CLONE);
+    assert.equal(await nudge.isVisible(), false, `${where}: not on the AI's own card`);
+    await goTo(page, "m-github");
+    await hud(page, "02 / The craft · GitHub");
+    await settled(page);
+    assert.equal(await nudge.locator("a").getAttribute("data-go"), "clone", `${where}: the AI's list once its station was seen`);
+    await nudge.locator("button").click();
+    assert.equal(await nudge.isVisible(), false, `${where}: closed`);
+    await goTo(page, "m-born");
+    await hud(page, "01 / Origins · Born in Bilbao");
+    assert.equal(await nudge.isVisible(), false, `${where}: closed for the rest of the visit`);
+    assert.equal(await page.evaluate(() => Object.keys(localStorage).filter((key) => !["lang", "theme"].includes(key)).length), 0, "nothing stored");
+    assert.deepEqual(errors, []);
+    await close();
+  }
+  const link = await open("/", { viewport: { width: 1280, height: 800 } });
+  await immersive(link.page);
+  for (const [id, label] of [["m-born", "01 / Origins · Born in Bilbao"], ["m-github", "02 / The craft · GitHub"], ["m-tapquo", TAPQUO]]) {
+    await goTo(link.page, id);
+    await hud(link.page, label);
+  }
+  await link.page.locator(".nudge a").click();
+  await hud(link.page, BOOK);
+  assert.equal(await link.page.evaluate(() => document.activeElement.id), "waitlist-book-email");
+  await link.close();
+
+  const flat = await open("/", { reducedMotion: "reduce" });
+  await flat.page.waitForSelector(".waitlist");
+  assert.equal(await flat.page.locator(".nudge").count(), 0, "the flat page already carries both lists");
+  await flat.close();
+});
+
+test("the brand and every section link sit on one line across the header at laptop sizes", async () => {
+  for (const [width, height] of [[1280, 800], [1366, 657], [1024, 700]]) {
+    const { page, close } = await open("/", { viewport: { width, height } });
+    await immersive(page);
+    const centres = await page.locator(".masthead .brand, .masthead nav a").evaluateAll((nodes) => nodes.map((node) => {
+      const rect = node.getBoundingClientRect();
+      return (rect.top + rect.bottom) / 2;
+    }));
+    assert.equal(centres.length, 5);
+    assert.ok(Math.max(...centres) - Math.min(...centres) <= 2, `${width}x${height}: centres ${centres.map(Math.round)}`);
+    await close();
+  }
+});
+
+test("a memory whose relations are all shown has no expander and keeps every chip", async () => {
+  const { page, close } = await open("/#m-bali", { viewport: { width: 1280, height: 800 } });
+  await hud(page, "03 / TapQuo · Bali, where I decided no");
+  await settled(page);
+  assert.equal(await page.locator(".card .expander").count(), 0);
+  assert.ok((await page.locator(".card .related .peer").count()) <= 3);
+  const lists = await page.locator(".card .facets").evaluateAll((nodes) => nodes.filter((node) => getComputedStyle(node).display !== "none").length);
+  assert.equal(lists, await page.locator(".card .facets").count(), "no chip row is hidden");
   await close();
 });

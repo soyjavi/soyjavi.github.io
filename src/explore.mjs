@@ -16,7 +16,7 @@ export function explore({ life, dict, tools = "" }) {
     .filter((facet) => facets[facet].length)
     .map((facet) => `<ul class="legend" data-facet="${facet}" aria-label="${esc(copy[facet])}" hidden>${facets[facet].map((id) => `<li><button type="button" aria-pressed="false" data-item="${id}">${esc(dict[facet][id])}</button></li>`).join("")}</ul>`);
   const data = { facets: Object.fromEntries(present.map((facet) => [facet, facets[facet]])), ahead: life.ahead, periods: life.periods };
-  const attributes = [`data-facets="${esc(JSON.stringify(data.facets))}"`, `data-ahead="${esc(JSON.stringify(data.ahead))}"`, `data-periods="${esc(JSON.stringify(data.periods))}"`, ...["related", "earlier", "later", "filter", "unfilter", "more", "lit"].map((key) => `data-${key}="${esc(copy[key])}"`), `data-overview="${esc(dict.ui.rail.overview)}"`, `data-book="${esc(dict.ui.nav.book)}"`, `data-clone="${esc(dict.ui.nav.clone)}"`].join(" ");
+  const attributes = [`data-facets="${esc(JSON.stringify(data.facets))}"`, `data-ahead="${esc(JSON.stringify(data.ahead))}"`, `data-periods="${esc(JSON.stringify(data.periods))}"`, ...["related", "earlier", "later", "filter", "unfilter", "more", "lit", "all", "fewer", "nudgebook", "nudgeclone", "nudgeclose"].map((key) => `data-${key}="${esc(copy[key])}"`), `data-overview="${esc(dict.ui.rail.overview)}"`, `data-book="${esc(dict.ui.nav.book)}"`, `data-clone="${esc(dict.ui.nav.clone)}"`].join(" ");
   const marks = [["g-cloud", "cloud"], ["g-galaxy", "galaxy"], ["g-line", "line"], ["g-ring", "ring"], ["g-today", "today"], ["g-dust", "dust"]];
   return `<div class="explore" role="group" aria-label="${esc(copy.label)}" ${attributes} data-focus-note="${esc(dict.ui.focus)}">
       <div class="bar">

@@ -267,6 +267,7 @@ canvas {
 
 .masthead nav {
   display: flex;
+  align-items: center;
   gap: 26px;
   font-family: var(--mono);
   font-size: 12px;
@@ -284,6 +285,19 @@ canvas {
 .masthead nav a:hover,
 .lang:hover {
   color: var(--fg);
+}
+
+.masthead nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin: -4px 0;
+}
+
+.masthead nav a.cta {
+  color: var(--fg);
+  text-decoration: underline;
+  text-underline-offset: 6px;
 }
 
 .controls {

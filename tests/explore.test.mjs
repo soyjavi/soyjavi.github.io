@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { LEVEL, RING_CLEARANCE, askLevels, askPairs, TAG_GAP, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, jumps, leaderOf, levels, matching, miniMap, miniVisible, QUALITY, averageMs, nextQuality, normalize, perGalaxy, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, tagSpots, tourPlan, tourTick } from "../assets/js/explore.js";
+import { LEVEL, RING_CLEARANCE, STRONG, askLevels, askPairs, strongest, TAG_GAP, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, jumps, leaderOf, levels, matching, miniMap, MINI_ZOOM, miniVisible, QUALITY, averageMs, nextQuality, normalize, perGalaxy, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, tagSpots, tourPlan, tourTick } from "../assets/js/explore.js";
 import { layout } from "../assets/js/life.js";
 import { ORBIT, approach, ease, eye, nearest, slide, turn, zoom } from "../assets/js/orbit.js";
 import { loadContent } from "../src/content.mjs";
@@ -293,12 +293,13 @@ test("a click on the minimap picks the galaxy under it, with a little slack, and
   assert.equal(galaxyAt([], [0, 0]), -1);
 });
 
-test("the minimap shows from a memory on, and not in the whole-life view, at the book or on a narrow screen", () => {
-  assert.equal(miniVisible("milestone", 1280), true);
-  for (const kind of ["hero", "book", "clone", "contact"]) assert.equal(miniVisible(kind, 1280), false, kind);
-  assert.equal(miniVisible("milestone", 519), false);
-  assert.equal(miniVisible("milestone", 520), true);
-  assert.equal(miniVisible("milestone", 800, 520, false), false, "and none where the card would reach it");
+test("the minimap shows whenever the camera is zoomed in, never in the whole-life view or on a narrow screen", () => {
+  assert.equal(miniVisible(0.3, 1280), true);
+  assert.equal(miniVisible(MINI_ZOOM - 0.01, 1280), true);
+  for (const ratio of [MINI_ZOOM, 1, 1.4]) assert.equal(miniVisible(ratio, 1280), false, `at ${ratio} of the whole-life distance`);
+  assert.equal(miniVisible(0.3, 519), false);
+  assert.equal(miniVisible(0.3, 520), true);
+  assert.equal(miniVisible(0.3, 800, 520, false), false, "and none where the card would reach it");
 });
 
 test("edge markers keep clear of anything already on the map, such as the minimap", () => {
@@ -371,4 +372,37 @@ test("a question lights exactly its memories and draws one line from each to the
   assert.ok(levelsNow.filter((level) => level !== 1).every((level) => level === LEVEL.quiet));
   assert.deepEqual(askPairs(lit, 240), [[3, 240, true], [40, 240, true], [200, 240, true]]);
   assert.deepEqual(askPairs(new Set(), 240), []);
+});
+
+test("the strongest relations are at most three, explicit links first, then what is shared, then nearness in time", () => {
+  const member = (threads) => ({ threads, people: [], places: [] });
+  const marks = [
+    { id: "p", year: 8, links: [], members: member([0]) },
+    { id: "q", year: 9, links: [], members: member([1]) },
+    { id: "a", year: 10, links: ["r"], members: member([0, 1]) },
+    { id: "r", year: 30, links: [], members: member([2]) },
+    { id: "s", year: 10.4, links: [], members: member([0]) },
+    { id: "t", year: 40, links: [], members: member([1]) },
+  ];
+  assert.equal(STRONG, 3);
+  assert.equal(related(marks, 2).links.length + related(marks, 2).near.length, 5, "five candidates");
+  assert.deepEqual(strongest(marks, 2), [3, 4, 1], "the explicit link, then the nearest in time among equals");
+  assert.deepEqual(strongest(marks, 2), strongest(marks, 2), "deterministic");
+  assert.equal(strongest(marks, 2, 1).length, 1);
+  assert.deepEqual(strongest([{ id: "x", year: 1, links: [], members: member([]) }], 0), []);
+});
+
+test("a relation is always at least 2.4 times brighter than a cloud that has nothing to do with the open memory", () => {
+  assert.ok(LEVEL.quiet <= LEVEL.related * 0.4, "unrelated clouds recede to under 0.4 of the related ones");
+  assert.ok(LEVEL.quiet < LEVEL.weak && LEVEL.weak < LEVEL.related, "weaker relations sit between");
+  const selected = at("tapquo");
+  const { links, near } = related(placed, selected);
+  const all = [...links, ...near];
+  const top = new Set(strongest(placed, selected));
+  const weak = new Set(all.filter((i) => !top.has(i)));
+  const chosen = levels(placed, { selected, near: top, weak });
+  assert.equal(chosen[selected], 1);
+  assert.ok([...top].every((i) => chosen[i] === LEVEL.related));
+  assert.ok([...weak].every((i) => chosen[i] === LEVEL.weak));
+  assert.ok(chosen.filter((_, i) => i !== selected && !all.includes(i)).every((level) => level === LEVEL.quiet));
 });

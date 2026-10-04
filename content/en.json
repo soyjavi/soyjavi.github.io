@@ -57,6 +57,11 @@
       "more": "{n} more",
       "sound": "Sound",
       "lit": "{n} memories light up: {names}",
+      "all": "All related ({n})",
+      "fewer": "Fewer",
+      "nudgebook": "Join the book's waitlist →",
+      "nudgeclone": "Join the AI's waitlist →",
+      "nudgeclose": "Close",
       "menu": "More"
     },
     "count": {

@@ -50,7 +50,7 @@ export const tools = ({ dict, lang, switchHref }) => `<div class="tools">
         </div>`;
 
 export function masthead({ dict, lang, nav, switchHref, brandHref, controls = "", inline = false }) {
-  const links = nav.map(({ label, href, go }) => `<a href="${href}"${go ? ` data-go="${go}"` : ""}>${esc(label)}</a>`).join("\n        ");
+  const links = nav.map(({ label, href, go, cta }) => `<a href="${href}"${go ? ` data-go="${go}"` : ""}${cta ? ' class="cta"' : ""}>${esc(label)}</a>`).join("\n        ");
   return `<a class="skip" href="#main">${esc(dict.ui.skip)}</a>
     <header class="masthead">
       <a class="brand" href="${brandHref}"${brandHref.startsWith("#") ? ' data-go="top"' : ""} aria-label="Javi">javi</a>

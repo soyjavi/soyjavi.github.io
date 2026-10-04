@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { BUDGET, FACETS, FLOOR, RAIL, START, futures, layout, memories, playElapsed, monthsUntil, playYear, railPercent, skyOf, todayYear, untilText, yearRings } from "./life.js";
-import { askLevels, askPairs, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, jumps, leaderOf, levels as levelsOf, matching, perGalaxy, miniMap, miniVisible, QUALITY, averageMs, nextQuality, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, tagSpots, tourPlan, tourTick } from "./explore.js";
+import { askLevels, askPairs, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, jumps, leaderOf, levels as levelsOf, matching, perGalaxy, miniMap, miniVisible, QUALITY, averageMs, nextQuality, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, strongest, tagSpots, tourPlan, tourTick } from "./explore.js";
 import { clamp } from "./orbit.js";
 import { createSound } from "./sound.js";
 import { OVERVIEW_PITCH, createScene } from "./scene.js";
@@ -16,7 +16,7 @@ const AHEAD_GAPS = [0, 22];
 const RING_UNITS = { today: 2.4, book: 1.2, clone: 1.2 };
 const YEAR_RING_MAX = 8;
 const EDGE_SAMPLES = 20;
-const EDGE_MARKS = 4;
+const EDGE_MARKS = 2;
 const MAX_LINKS_CUT = 40;
 const MINI = { width: 104, height: 100, top: 118 };
 const SVG_NS = "http://www.w3.org/2000/svg";
@@ -237,6 +237,14 @@ async function start() {
   card.id = "card";
   stage.after(card);
   undo.push(() => card.remove());
+  const nudge = element("div", "nudge");
+  nudge.hidden = true;
+  const nudgeLink = element("a", "");
+  const nudgeClose = element("button", "", "✕");
+  nudgeClose.type = "button";
+  nudge.append(nudgeLink, nudgeClose);
+  card.after(nudge);
+  undo.push(() => nudge.remove());
   const looseLinks = [...story.querySelectorAll("a, button, input, select, textarea")];
   looseLinks.forEach((node) => node.setAttribute("tabindex", "-1"));
   undo.push(() => looseLinks.forEach((node) => node.removeAttribute("tabindex")));
@@ -291,12 +299,22 @@ async function start() {
     unfilter: tools.dataset.unfilter,
     more: tools.dataset.more,
     lit: tools.dataset.lit,
+    all: tools.dataset.all,
+    fewer: tools.dataset.fewer,
+    nudgebook: tools.dataset.nudgebook,
+    nudgeclone: tools.dataset.nudgeclone,
+    nudgeclose: tools.dataset.nudgeclose,
   };
 
   let current = 0;
   let filter = null;
   let hover = -1;
   let neighbours = { links: [], near: [] };
+  let chosen = [];
+  let showAll = false;
+  const pointerAt = { x: 0, y: 0 };
+  const gentle = { on: false, seen: false, from: null };
+  const invite = { opened: new Set(), sawClone: false, closed: false };
   const memoryOf = (index) => markOf.get(index) ?? -1;
   const stationOf = (memory) => lived[memory].t;
 
@@ -315,11 +333,16 @@ async function start() {
   const refreshScene = () => {
     const memory = memoryOf(current);
     neighbours = memory >= 0 ? related(marks, memory) : { links: [], near: [] };
+    const everyone = [...neighbours.links, ...neighbours.near];
+    chosen = memory < 0 ? [] : showAll ? everyone : strongest(marks, memory);
+    const picked = new Set(chosen);
     const lit = asked ? asks.get(asked) : null;
-    scene.setLevels(lit ? askLevels(marks, lit) : levelsOf(marks, { selected: memory, near: new Set([...neighbours.links, ...neighbours.near]), filter }));
-    scene.setLinks(neighbours.links, neighbours.near);
+    const levelNow = lit ? askLevels(marks, lit) : levelsOf(marks, { selected: memory, near: picked, weak: new Set(everyone.filter((i) => !picked.has(i))), filter });
+    scene.setLevels(levelNow);
+    stage.dataset.levels = [...new Set(levelNow)].sort((a, b) => a - b).join(",");
+    scene.setLinks(neighbours.links.filter((i) => picked.has(i)), neighbours.near.filter((i) => picked.has(i)));
     scene.setSelection(memory);
-    const rings = memory >= 0 && marks[memory].period >= 0 ? yearRings(sky.list[marks[memory].period], YEAR_RING_MAX) : [];
+    const rings = !gentle.on && memory >= 0 && marks[memory].period >= 0 ? yearRings(sky.list[marks[memory].period], YEAR_RING_MAX) : [];
     const galaxy = memory >= 0 ? sky.list[marks[memory].period] : null;
     scene.setYearRings(galaxy?.centre ?? null, rings);
     yearLabels.forEach((item, n) => {
@@ -338,7 +361,7 @@ async function start() {
       const counts = perGalaxy(marks, chain, sky.list.length);
       galaxyLabels.forEach((item, k) => {
         if (!item) return;
-        item.dim = filter && !counts[k] ? 0.3 : 1;
+        item.dim = memory >= 0 && marks[memory].period !== k ? 0 : filter && !counts[k] ? 0.3 : 1;
         item.node.querySelector(".galaxy-count").textContent = filter ? ` · ${counts[k]}` : "";
         item.width = 0;
       });
@@ -392,8 +415,10 @@ async function start() {
     });
 
   const relatedIn = (root, memory) => {
-    const shown = [...neighbours.links, ...neighbours.near].slice(0, MAX_RELATED);
-    if (!shown.length) return;
+    const everyone = [...neighbours.links, ...neighbours.near];
+    if (!everyone.length) return;
+    const top = strongest(marks, memory);
+    const shown = showAll ? everyone.slice(0, MAX_RELATED) : top;
     const block = element("div", "related");
     block.append(element("p", "kicker", copy.related));
     const list = element("ul");
@@ -408,7 +433,24 @@ async function start() {
     });
     list.addEventListener("scroll", () => showMore());
     block.append(list);
+    if (everyone.length > top.length) {
+      const expander = element("button", "expander", showAll ? copy.fewer : copy.all.replace("{n}", String(Math.min(everyone.length, MAX_RELATED))));
+      expander.type = "button";
+      expander.setAttribute("aria-expanded", String(showAll));
+      block.append(expander);
+    }
     root.append(block);
+  };
+
+  const renderRelated = () => {
+    const body = cardBody.firstElementChild;
+    const memory = memoryOf(current);
+    if (!body || memory < 0) return;
+    body.querySelector(".related")?.remove();
+    relatedIn(body, memory);
+    card.dataset.collapsed = body.querySelector(".expander") && !showAll ? "1" : "";
+    showMore();
+    cardBody.querySelector(".expander")?.focus({ preventScroll: true });
   };
 
   const showMore = () => {
@@ -451,8 +493,10 @@ async function start() {
     asksIn(clone);
     const memory = memoryOf(current);
     if (memory >= 0) relatedIn(clone, memory);
+    if (station.kind === "milestone") clone.querySelector(".period-head")?.remove();
     setPreview(-1);
     cardBody.replaceChildren(clone);
+    card.dataset.collapsed = clone.querySelector(".expander") && !showAll ? "1" : "";
     card.dataset.kind = station.kind;
     forms.forEach((holder, kind) => (holder.hidden = station.kind !== kind));
     const { previous, next } = stepOf(current);
@@ -484,7 +528,46 @@ async function start() {
     return { book: RAIL.book, clone: RAIL.clone }[station.kind] ?? RAIL.end;
   };
 
+  const placeNudge = () => {
+    if (nudge.hidden) return;
+    const box = card.getBoundingClientRect();
+    const wide = !stackedQuery.matches;
+    const room = Math.max(160, innerWidth - 24 - (wide ? box.right + 12 : box.left));
+    nudge.style.maxWidth = `${Math.min(340, room)}px`;
+    const left = wide ? box.right + 12 : box.left;
+    nudge.style.left = `${Math.max(12, Math.min(left, innerWidth - nudge.offsetWidth - 12)).toFixed(1)}px`;
+    nudge.style.top = `${(wide ? box.bottom - nudge.offsetHeight : box.top - nudge.offsetHeight - 8).toFixed(1)}px`;
+  };
+
+  const updateNudge = () => {
+    const station = stations[current];
+    const want = !invite.closed && invite.opened.size >= 3 && station.kind === "milestone";
+    nudge.hidden = !want;
+    if (!want) return;
+    const target = invite.sawClone ? "clone" : "book";
+    nudgeLink.dataset.go = target;
+    nudgeLink.href = `#${target}`;
+    nudgeLink.textContent = copy[target === "clone" ? "nudgeclone" : "nudgebook"];
+    nudgeClose.setAttribute("aria-label", copy.nudgeclose);
+    nudgeClose.setAttribute("title", copy.nudgeclose);
+    placeNudge();
+  };
+
+  nudgeClose.addEventListener("click", () => {
+    invite.closed = true;
+    updateNudge();
+    card.focus({ preventScroll: true });
+  });
+  nudge.addEventListener("click", (event) => {
+    const link = event.target.closest("[data-go]");
+    if (link) {
+      event.preventDefault();
+      goTo(link.dataset.go);
+    }
+  });
+
   const layoutInset = () => {
+    placeNudge();
     const box = card.getBoundingClientRect();
     const top = Math.max(KEEP_TOP, tools.getBoundingClientRect().bottom + 6);
     if (stackedQuery.matches) scene.setInset(0, (top + Math.max(top + 120, box.top)) / 2 - innerHeight / 2);
@@ -516,13 +599,23 @@ async function start() {
     stopPlay();
     current = clamp(index, 0, END);
     asked = null;
+    showAll = false;
     stage.dataset.asked = "";
+    if (stations[current].kind === "milestone" && !gentle.seen) {
+      gentle.seen = true;
+      gentle.on = true;
+      gentle.from = { ...pointerAt };
+      stage.dataset.gentle = "1";
+    }
     const station = stations[current];
     document.documentElement.dataset.at = current;
     hud.textContent = station.label;
     refreshScene();
     shotOf(current);
+    if (stations[current].kind === "milestone" && !hush) invite.opened.add(current);
+    if (stations[current].kind === "clone") invite.sawClone = true;
     renderCard();
+    updateNudge();
     if (rail) rail.querySelector(".rail-cursor")?.style.setProperty("--x", `${railPercent(cursorYear()).toFixed(2)}%`);
     if (station.kind === "milestone") sound.memory(marks[memoryOf(current)]);
     else if (station.kind === "book" || station.kind === "clone") sound.swell(station.kind);
@@ -749,7 +842,6 @@ async function start() {
   const focusNote = element("p", "visually-hidden");
   focusNote.setAttribute("role", "status");
   stage.append(focusNote);
-  const pointerAt = { x: 0, y: 0 };
   let focusFrom = null;
   const focusing = () => document.documentElement.dataset.focus === "1";
   const setFocusMode = (on) => {
@@ -763,16 +855,24 @@ async function start() {
     }
   };
   const endFocus = () => focusing() && setFocusMode(false);
+  const endGentle = () => {
+    if (!gentle.on) return;
+    gentle.on = false;
+    stage.dataset.gentle = "";
+    refreshScene();
+  };
   let touched = performance.now() / 1000;
   const touch = () => (touched = performance.now() / 1000);
   const onMove = (event) => {
     pointerAt.x = event.clientX;
     pointerAt.y = event.clientY;
     if (focusFrom && Math.hypot(pointerAt.x - focusFrom.x, pointerAt.y - focusFrom.y) > 12) endFocus();
+    if (gentle.on && Math.hypot(pointerAt.x - gentle.from.x, pointerAt.y - gentle.from.y) > 12) endGentle();
     if (Math.abs(event.movementX) + Math.abs(event.movementY) > 6) touch();
   };
   const onPress = () => {
     endFocus();
+    endGentle();
     touch();
   };
   const interactions = [["pointermove", onMove], ["pointerdown", onPress], ["wheel", onPress], ["touchstart", onPress]];
@@ -798,6 +898,12 @@ async function start() {
   card.addEventListener("click", (event) => {
     const chip = event.target.closest(".chip");
     if (chip) return toggleFilter(chip.dataset.facet, chip.dataset.item);
+    const expander = event.target.closest(".expander");
+    if (expander) {
+      showAll = !showAll;
+      refreshScene();
+      return renderRelated();
+    }
     const ask = event.target.closest(".ask-q");
     if (ask) return setAsk(asked === ask.dataset.ask ? null : ask.dataset.ask);
     const peer = event.target.closest(".peer");
@@ -859,6 +965,7 @@ async function start() {
   const onKey = (event) => {
     if (event.metaKey || event.ctrlKey || event.altKey) return;
     touch();
+    endGentle();
     if (focusing() && event.key.toLowerCase() !== "h") {
       setFocusMode(false);
       if (event.key === "Escape") return;
@@ -974,7 +1081,7 @@ async function start() {
   });
 
   const frameRects = () => {
-    const rects = [card, tools, hud, rail].filter(Boolean).map((node) => node.getBoundingClientRect());
+    const rects = [card, tools, hud, rail, nudge.hidden ? null : nudge].filter(Boolean).map((node) => node.getBoundingClientRect());
     const finderBox = finder.hidden ? null : finder.getBoundingClientRect();
     if (finderBox) rects.push(finderBox);
     return rects;
@@ -1016,13 +1123,15 @@ async function start() {
     }
     const selected = memoryOf(current);
     const ratio = scene.view.distance / scene.homeDistance();
-    const peers = new Set([...neighbours.links, ...neighbours.near].slice(0, MAX_RELATED));
+    const peers = new Set(chosen.slice(0, MAX_RELATED));
     const keepOut = frameRects().map((box) => ({ left: box.left - 12, right: box.right + 12, top: box.top - 12, bottom: box.bottom + 12 }));
     keepOut.push({ left: 0, right: innerWidth, top: 0, bottom: Math.max(KEEP_TOP, (masthead?.getBoundingClientRect().bottom ?? 0) + 4) }, { left: 0, right: innerWidth, top: innerHeight - 60, bottom: innerHeight });
 
     const solid = [];
     const stackedNow = stackedQuery.matches;
-    const showMini = miniVisible(stations[current].kind, innerWidth, 520, !stackedNow || card.getBoundingClientRect().top >= MINI.top + MINI.height + 8);
+    const showMini = !gentle.on && miniVisible(ratio, innerWidth, 520, !stackedNow || card.getBoundingClientRect().top >= MINI.top + MINI.height + 8);
+    const mapTag = showMini ? "on" : "off";
+    if (stage.dataset.map !== mapTag) stage.dataset.map = mapTag;
     if (minimap.hidden === showMini) minimap.hidden = !showMini;
     const miniBox = showMini ? minimap.getBoundingClientRect() : null;
     if (showMini && selected >= 0) {
@@ -1058,15 +1167,19 @@ async function start() {
         top: Math.max(KEEP_TOP, tools.getBoundingClientRect().bottom + 6),
         bottom: Math.min((rail?.getBoundingClientRect().top ?? innerHeight - 100) - 8, stacked ? cardBox.top - 8 : Infinity),
       };
-      [...neighbours.links, ...neighbours.near].slice(0, MAX_LINKS_CUT).forEach((j) => {
+      const origin = projected[selected];
+      const half = Math.min(innerWidth, innerHeight) / 2;
+      const reach = origin && origin.x >= free.left && origin.x <= free.right && origin.y >= free.top && origin.y <= free.bottom
+        ? { left: Math.max(free.left, origin.x - half), right: Math.min(free.right, origin.x + half), top: Math.max(free.top, origin.y - half), bottom: Math.min(free.bottom, origin.y + half) }
+        : free;
+      chosen.slice(0, MAX_LINKS_CUT).forEach((j) => {
         const samples = arcSamples.map((sample, k) => scene.arcScreen(selected, j, k / EDGE_SAMPLES, sample));
-        const exit = edgeExit(samples, free);
+        const exit = edgeExit(samples, reach);
         if (exit) exits.push({ j, ...exit });
       });
       const shown = exits.slice(0, EDGE_MARKS).map((exit, k) => {
         const mark = edgeMarks[k];
-        const extra = k === EDGE_MARKS - 1 ? exits.length - EDGE_MARKS : 0;
-        const text = `${info[exit.j].title} · ${info[exit.j].time}${extra > 0 ? ` +${extra}` : ""}`;
+        const text = `${info[exit.j].title} · ${info[exit.j].time}`;
         if (mark.label.textContent !== text) {
           mark.label.textContent = text;
           mark.width = mark.height = 0;
@@ -1074,10 +1187,10 @@ async function start() {
         mark.node.hidden = false;
         mark.width ||= mark.node.offsetWidth;
         mark.height ||= mark.node.offsetHeight;
-        const side = edgeSide(exit, free);
-        return { mark, exit, side, box: edgeLabel(exit, side, mark, free), shown: false };
+        const side = edgeSide(exit, reach);
+        return { mark, exit, side, box: edgeLabel(exit, side, mark, reach), shown: false };
       });
-      stackEdgeLabels(shown, free, 4, miniBox ? [{ left: miniBox.left, right: miniBox.right, top: miniBox.top, bottom: miniBox.bottom }] : []);
+      stackEdgeLabels(shown, reach, 4, miniBox ? [{ left: miniBox.left, right: miniBox.right, top: miniBox.top, bottom: miniBox.bottom }] : []);
       edgeMarks.forEach((mark, k) => {
         const item = shown[k];
         mark.node.hidden = !item?.shown;
@@ -1134,7 +1247,8 @@ async function start() {
           const pad = item.kind === "ring-year" || item.kind === "countdown-mark" ? 1 : 4;
           const spot = { left: point.x - item.width / 2 - pad, right: point.x + item.width / 2 + pad, top: point.y - item.height / 2 - pad, bottom: point.y + item.height / 2 + pad };
           if ((item.kind === "ring-year" || item.kind === "countdown-mark") && keepOut.some((other) => overlaps(spot, other))) opacity = 0;
-          if (item.kind === "galaxy" && solid.some((other) => overlaps({ left: spot.left + 4, right: spot.right - 4, top: spot.top + 4, bottom: spot.bottom - 4 }, other))) opacity = 0;
+          const inner = { left: spot.left + 4, right: spot.right - 4, top: spot.top + 4, bottom: spot.bottom - 4 };
+          if (item.kind === "galaxy" && (solid.some((other) => overlaps(inner, other)) || keepOut.some((other) => overlaps(inner, other)))) opacity = 0;
           if (opacity > 0.2) keepOut.push(spot);
         }
       }
@@ -1176,8 +1290,10 @@ async function start() {
     const accepted = [];
     for (const { tag, spot, priority, i } of candidates) {
       const asName = priority === 40 ? "1" : "";
-      if (tag.node.dataset.name !== asName) {
+      const hot = i === selected || i === hover ? "1" : "";
+      if (tag.node.dataset.name !== asName || tag.node.dataset.hot !== hot) {
         tag.node.dataset.name = asName;
+        tag.node.dataset.hot = hot;
         tag.width = tag.height = 0;
       }
       tag.width ||= tag.node.offsetWidth;
@@ -1201,7 +1317,6 @@ async function start() {
         tag.node.style.transform = `translate3d(${box.left.toFixed(1)}px, ${box.top.toFixed(1)}px, 0)`;
         tag.node.style.setProperty("--cx", spot.x.toFixed(1));
         tag.node.style.setProperty("--cy", spot.y.toFixed(1));
-        tag.node.dataset.hot = i === selected || i === hover ? "1" : "";
         if (!tag.on) {
           tag.on = true;
           tag.node.dataset.on = "1";
