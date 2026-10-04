@@ -133,7 +133,7 @@ async function start() {
   const cloud = memories({ marks, today, random: seeded(1980), facets, sky, cap: mobile ? 55000 : BUDGET.cap, trail: mobile ? 12000 : BUDGET.trail });
   const future = futures(sky);
   const heads = new Set(headlines(marks));
-  const scene = createScene({ canvas, cloud, marks, future, today, mobile, sky });
+  const scene = createScene({ canvas, cloud, marks, future, today, mobile, sky, kinds: lived.map((station) => station.element.dataset.kind) });
   const root = document.documentElement;
   let entering = false;
   const born = new Set();

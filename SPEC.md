@@ -88,7 +88,7 @@ site in memory and compares it, and the bundle, with the disk.
 ## Themes
 
 - Tokens in `assets/brand.css`: paper, ink, night and bone with their raised, line, muted and soft variants, twelve
-  neutrals in all and no hue. `:root` is the light theme; `prefers-color-scheme: dark` switches to dark unless
+  neutrals in all and no hue (the memory clouds take a warm or cool tint by kind in the scene only: `KIND_TINT`, 12% in `shaders.js`, read per memory from a one-row texture, the warm pair for personal and education and the cool pair for professional and product, deeper in the paper theme). `:root` is the light theme; `prefers-color-scheme: dark` switches to dark unless
   `data-theme="light"` is set; `data-theme="dark"` forces dark.
 - Night is the first look: `assets/theme.js` loads synchronously in every `<head>` and sets `data-theme` before the first
   paint to `localStorage.theme` (`light` or `dark`) or, with no choice, to `dark` whatever the system says; the switch

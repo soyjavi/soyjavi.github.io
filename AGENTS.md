@@ -117,7 +117,9 @@ no ROADMAP entry or is malformed.
   Nothing is only reachable in order: clicking, the rail, the finder, Surprise me, related memories and the keyboard
   all get there, and Earlier and Later are one way among them.
 - The brand is `javi` in outlined Instrument Serif Italic; `soyjavi` is an address (domain, X, email), not the
-  brand. The identity has no hue: twelve neutrals in a light and a dark theme, night first and a remembered
+  brand. The identity has no hue: twelve neutrals in a light and a dark theme (the one exception is `KIND_TINT`, a barely
+  perceptible warm or cool tint of the memory clouds by kind, drawn in the scene only, never in the interface and never
+  above 15%), night first and a remembered
   switch to paper.
 - Two languages from day one. At `/` the browser's primary language decides: Spanish goes to `/es/`, anything else
   stays in English. A choice made with the language switch is remembered and wins; a direct link to `/es/` or to any

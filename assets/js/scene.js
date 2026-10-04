@@ -1,9 +1,9 @@
 import * as THREE from "three";
-import { AHEAD, FLOOR, SPIN, START, onPath, spinAngle, starfield, unitsOf, yearOf } from "./life.js";
+import { AHEAD, FLOOR, KINDS, SPIN, START, onPath, spinAngle, starfield, unitsOf, yearOf } from "./life.js";
 import { createBackdrop } from "./backdrop.js";
 import { QUALITY } from "./explore.js";
 import { approach, clamp, ease, eye, slide, turn, zoom } from "./orbit.js";
-import { DIRECT, ENTRANCE, DUST_FRAGMENT, DUST_VERTEX, formedAt, MARK_FRAGMENT, MARK_VERTEX, POINTER, STAR_FRAGMENT, STAR_VERTEX } from "./shaders.js";
+import { DIRECT, ENTRANCE, DUST_FRAGMENT, DUST_VERTEX, formedAt, KIND_TINT, MARK_FRAGMENT, MARK_VERTEX, POINTER, STAR_FRAGMENT, STAR_VERTEX } from "./shaders.js";
 import { lerp, reducedMotion, seeded, smoothstep } from "./util.js";
 
 export const HOME_PITCH = -0.27;
@@ -16,7 +16,7 @@ const RING_SPREAD = 0.5;
 const RATE = 4.2;
 const DRIFT = { rate: 0.11, yaw: 0.14, pitch: 0.02, rest: 2.5 };
 
-export function createScene({ canvas, cloud, marks, future, today, mobile, sky }) {
+export function createScene({ canvas, cloud, marks, future, today, mobile, sky, kinds = [] }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: "high-performance" });
   renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.5 : 2));
   const scene = new THREE.Scene();
@@ -39,6 +39,13 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky }
   const levelTexture = new THREE.DataTexture(levelNow, levelNow.length, 1, THREE.RedFormat, THREE.FloatType);
   levelTexture.minFilter = levelTexture.magFilter = THREE.NearestFilter;
   levelTexture.needsUpdate = true;
+  const kindData = new Float32Array(levelNow.length).fill(-1);
+  kinds.forEach((kind, i) => (kindData[i] = KINDS.indexOf(kind)));
+  const kindTexture = new THREE.DataTexture(kindData, kindData.length, 1, THREE.RedFormat, THREE.FloatType);
+  kindTexture.minFilter = kindTexture.magFilter = THREE.NearestFilter;
+  kindTexture.needsUpdate = true;
+  const tints = KINDS.map(() => new THREE.Color());
+  const paintTints = () => (state.night ? KIND_TINT.night : KIND_TINT.paper).forEach((hex, i) => tints[i].set(hex));
 
   const ink = { value: new THREE.Color() };
   const field = starfield({ count: mobile ? 4000 : undefined, random: seeded(2026) });
@@ -73,6 +80,9 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky }
     uReveal: { value: 1e4 },
     uLevelCount: { value: levelNow.length },
     uLevels: { value: levelTexture },
+    uKinds: { value: kindTexture },
+    uTints: { value: tints },
+    uTint: { value: KIND_TINT.strength },
     uSpin: { value: new Float32Array(SPIN.slots) },
     uPivot: { value: Array.from({ length: SPIN.slots }, (_, k) => new THREE.Vector3(...(sky.list[k]?.centre ?? [0, 0, 0]))) },
     uKeep: { value: 1 },
@@ -278,6 +288,8 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky }
     starUniforms.uHalo.value = night ? 1 : 0;
     starMaterial.needsUpdate = true;
     backdrop.applyTheme(night);
+    state.night = night;
+    paintTints();
     markMaterial.blending = THREE.NormalBlending;
     dustUniforms.uGain.value = (night ? 0.55 : 0.6) * gain;
     dustMaterial.needsUpdate = true;

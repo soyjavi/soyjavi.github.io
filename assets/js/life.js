@@ -256,6 +256,8 @@ export function starfield({ count = SPACE.stars, random }) {
   return out;
 }
 
+export const KINDS = ["personal", "professional", "product", "education"];
+
 export const BACKDROP = {
   deep: { count: 16000, mobile: 6000, alpha: [0.1, 0.8], band: 0.35, radius: 1650, inner: 400 },
   far: { count: 36, alpha: [0.15, 0.4], radius: [5, 14] },

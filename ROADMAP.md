@@ -187,18 +187,8 @@ Ordered by what must be decided or applied first; each group names what it waits
 
 
 
-### 3. Reading the memories — creator decisions on the look
 
-- **KIND-TINT** — Show the kind of each memory
-  `decision · creator · normal`
-  board: KIND-TINT
-  A faint tint per kind (an exception to the no-hue rule) or a small mark per kind (one ink), as a toggle.
-- **PORTRAIT-DOTS** — The avatar as a dot portrait
-  board: PORTRAIT-DOTS
-  The masked figure of `assets/avatar.jpg` drawn with the fine dots as a station, to say "more than a person" without
-  words.
-
-### 4. Depth and the book — need content or approvals from the creator
+### 3. Depth and the book — need content or approvals from the creator
 
 - **MILESTONE-MEDIA** — A photo or a sound at a milestone
   board: MILESTONE-MEDIA

@@ -6,6 +6,8 @@ export const ENTRANCE = { sky: 1.4, seed: 0.9, wait: 6, delay: 0.3, seconds: 4, 
 
 export const DIRECT = { sky: 0.5, delay: 0, seconds: 1.4, card: 0 };
 
+export const KIND_TINT = { strength: 0.12, night: ["#ecd2b0", "#b8cdea", "#b8cdea", "#ecd2b0"], paper: ["#8a5a2b", "#2f5f99", "#2f5f99", "#8a5a2b"] };
+
 export const CLOUD = { spin: 0.07, breath: 0.05, pace: 0.5, still: 0.92 };
 export const POINTER = { radius: 0.2, push: 0.04, rate: 6 };
 
@@ -63,7 +65,9 @@ export const DUST_VERTEX = `
   uniform float uReveal;
   uniform float uLevelCount;
   uniform sampler2D uLevels;
+  uniform sampler2D uKinds;
   varying float vAlpha;
+  varying float vKind;
   void main() {
     if (aSeed > (aKind > 0.5 ? max(uKeep, 0.55) : uKeep)) {
       gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
@@ -105,6 +109,7 @@ export const DUST_VERTEX = `
     p += vec3(sin(aSeed * 91.7 + uTime * 0.35), cos(aSeed * 57.3 + uTime * 0.31), sin(aSeed * 33.1 + uTime * 0.27)) * (0.05 * calm + 0.5 * (1.0 - m));
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
     gl_Position = projectionMatrix * mv;
+    vKind = aKind > 0.5 ? texture2D(uKinds, vec2((aMemory + 0.5) / uLevelCount, 0.5)).r : -1.0;
     float level;
     if (aKind > 0.5) {
       level = texture2D(uLevels, vec2((aMemory + 0.5) / uLevelCount, 0.5)).r;
@@ -136,11 +141,16 @@ export const DUST_VERTEX = `
 
 export const DUST_FRAGMENT = `
   uniform vec3 uInk;
+  uniform vec3 uTints[4];
+  uniform float uTint;
   varying float vAlpha;
+  varying float vKind;
   void main() {
     float d = length(gl_PointCoord - 0.5) * 2.0;
     if (d > 1.0) discard;
-    gl_FragColor = vec4(uInk, smoothstep(1.0, 0.3, d) * vAlpha);
+    vec3 colour = uInk;
+    if (vKind > -0.5) colour = mix(uInk, uTints[int(vKind + 0.5)], uTint);
+    gl_FragColor = vec4(colour, smoothstep(1.0, 0.3, d) * vAlpha);
   }
 `;
 

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { AHEAD, BUDGET, LANES, PLAY, RAIL, SKY, SPACE, SPREAD, START, activityAt, activityTable, aheadPoint, assign, crowdScale, densityAt, densityByYear, dotsPerWeight, fractionIn, futures, galaxies, galaxyOf, lanes, layout, memories, onPath, orderOf, yearOf, playElapsed, playYear, precisionOf, railPercent, shellPoint, skyOf, SPIN, spinAngle, spinRate, spinTime, spun, starfield, todayYear, unitsOf, yearRings, years } from "../assets/js/life.js";
 import { lerp, seeded, smoothstep } from "../assets/js/util.js";
 import { monthsUntil, untilText } from "../assets/js/life.js";
-import { CLOUD, DISCOVER, DUST_VERTEX, ENTRANCE, POINTER, formedAt, igniteAt } from "../assets/js/shaders.js";
+import { CLOUD, DISCOVER, KIND_TINT, DUST_VERTEX, ENTRANCE, POINTER, formedAt, igniteAt } from "../assets/js/shaders.js";
 import { archive } from "./fixtures/archive.mjs";
 import { loadContent } from "../src/content.mjs";
 
@@ -512,4 +512,25 @@ test("the camera sways gently when nothing is touched: slow, small and a little 
   assert.ok(rate <= 0.15 && yaw <= 0.2 && yaw > 0.1 && pitch <= 0.03, "a swing of a few degrees over about a minute");
   assert.ok(Number(rest) >= 1 && Number(rest) <= 4, "it starts a couple of seconds after the last touch");
   assert.match(source, /pointers\.size === 0 && performance\.now\(\) \/ 1000 - state\.touched > DRIFT\.rest/, "it depends on touch, not on the station, so it also sways at an item and in the whole view");
+});
+
+test("the kind tint is barely there: warm and cool, four kinds, both themes, never above 15%", () => {
+  assert.ok(KIND_TINT.strength > 0 && KIND_TINT.strength <= 0.15, "at most 15%");
+  for (const theme of ["night", "paper"]) {
+    const [personal, professional, product, education] = KIND_TINT[theme];
+    assert.equal(KIND_TINT[theme].length, 4);
+    assert.equal(personal, education, "personal and education share the warm tint");
+    assert.equal(professional, product, "professional and product share the cool tint");
+    const red = (hex) => parseInt(hex.slice(1, 3), 16) - parseInt(hex.slice(5, 7), 16);
+    assert.ok(red(personal) > 0 && red(professional) < 0, `${theme}: warm leans red, cool leans blue`);
+  }
+  assert.match(DUST_VERTEX, /vKind = aKind > 0\.5 \? texture2D\(uKinds/, "each cloud reads its memory's kind");
+});
+
+test("every method the engine calls on the scene exists in the scene", async () => {
+  const { readFileSync } = await import("node:fs");
+  const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
+  const scene = readFileSync(new URL("../assets/js/scene.js", import.meta.url), "utf8");
+  const api = scene.slice(scene.lastIndexOf("  return {\n    camera,"));
+  for (const name of new Set([...engine.matchAll(/(?<![/\w])scene\.([a-zA-Z]+)/g)].map((m) => m[1]))) assert.match(api, new RegExp(`^    ${name}\\b`, "m"), `scene.${name} is called by the engine but the scene does not export it`);
 });
