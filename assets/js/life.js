@@ -256,6 +256,44 @@ export function starfield({ count = SPACE.stars, random }) {
   return out;
 }
 
+export const BACKDROP = {
+  deep: { count: 16000, mobile: 6000, alpha: [0.1, 0.8], band: 0.35, radius: 1650, inner: 400 },
+  far: { count: 36, alpha: [0.15, 0.4], radius: [5, 14] },
+  haze: { alpha: 0.08 },
+  glow: { max: 0.15, scale: 2.6 },
+};
+
+const equirect = ([x, y, z]) => [Math.atan2(y, x) / (2 * Math.PI) + 0.5, Math.acos(Math.max(-1, Math.min(1, z))) / Math.PI];
+
+export function deepField({ count = BACKDROP.deep.count, random, centre = [0, 0, 0], inner = BACKDROP.deep.inner, outer = BACKDROP.deep.radius }) {
+  const [low, high] = BACKDROP.deep.alpha;
+  const out = { count, position: new Float32Array(count * 3), seed: new Float32Array(count), bright: new Float32Array(count), size: new Float32Array(count) };
+  for (let i = 0; i < count; i++) {
+    const direction = random() < BACKDROP.deep.band ? bandDirection(random) : shellPoint(random, 1, 1);
+    const length = Math.hypot(...direction);
+    const near = Math.log(outer / (inner * (outer / inner) ** random())) / Math.log(outer / inner);
+    const radius = outer * (inner / outer) ** near;
+    out.position.set(direction.map((value, k) => centre[k] + (value / length) * radius), i * 3);
+    out.seed[i] = random();
+    out.bright[i] = Math.min(high, (low + (high - low) * random() ** 4) * (1 + 0.6 * near ** 3));
+    out.size[i] = 1 + 1.4 * near ** 4;
+  }
+  return out;
+}
+
+export function farGalaxies({ count = BACKDROP.far.count, random }) {
+  const [low, high] = BACKDROP.far.alpha;
+  const [small, large] = BACKDROP.far.radius;
+  return Array.from({ length: count }, () => {
+    const [u, v] = equirect(shellPoint(random, 1, 1));
+    return { u, v, radius: small + (large - small) * random(), squash: 0.35 + 0.5 * random(), angle: random() * Math.PI, alpha: low + (high - low) * random() };
+  });
+}
+
+export function glowOf(galaxy, most) {
+  return { scale: galaxy.radius * BACKDROP.glow.scale, strength: BACKDROP.glow.max * (0.25 + 0.75 * (galaxy.count / Math.max(1, most))) };
+}
+
 const gaussian = (random) => Math.sqrt(-2 * Math.log(1 - random())) * Math.cos(2 * Math.PI * random());
 
 export function dotsPerWeight(marks, { base = BUDGET.base, cap = BUDGET.cap } = {}) {

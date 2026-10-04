@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { AHEAD, BUDGET, LANES, PLAY, RAIL, SKY, SPACE, SPREAD, START, activityAt, activityTable, aheadPoint, assign, crowdScale, densityAt, densityByYear, dotsPerWeight, fractionIn, futures, galaxies, galaxyOf, lanes, layout, memories, onPath, orderOf, yearOf, playElapsed, playYear, precisionOf, railPercent, shellPoint, skyOf, SPIN, spinAngle, spinRate, spinTime, spun, starfield, todayYear, unitsOf, yearRings, years } from "../assets/js/life.js";
 import { lerp, seeded, smoothstep } from "../assets/js/util.js";
 import { monthsUntil, untilText } from "../assets/js/life.js";
-import { DISCOVER, DUST_VERTEX, POINTER, formedAt, igniteAt } from "../assets/js/shaders.js";
+import { CLOUD, DISCOVER, DUST_VERTEX, POINTER, formedAt, igniteAt } from "../assets/js/shaders.js";
 import { archive } from "./fixtures/archive.mjs";
 import { loadContent } from "../src/content.mjs";
 
@@ -473,4 +473,33 @@ test("the months to a date count calendar months on the visitor's own calendar, 
   assert.equal(untilText(8, "es"), "dentro de 8 meses");
   assert.equal(untilText(-1, "en"), "", "a date that has passed says nothing");
   assert.equal(untilText(NaN, "en"), "", "a broken date says nothing instead of throwing");
+});
+
+test("the backdrop is seeded, stays dim, and its glow grows with what a period holds", async () => {
+  const { BACKDROP, deepField, farGalaxies, glowOf } = await import("../assets/js/life.js");
+  const { seeded } = await import("../assets/js/util.js");
+  const a = deepField({ count: 500, random: seeded(1) });
+  const b = deepField({ count: 500, random: seeded(1) });
+  assert.deepEqual([...a.position], [...b.position], "the same sky every time");
+  assert.ok(Math.max(...a.bright) <= BACKDROP.deep.alpha[1] + 1e-6 && Math.min(...a.bright) >= BACKDROP.deep.alpha[0] - 1e-6);
+  const centre = [10, -20, 30];
+  const spread = deepField({ count: 2000, random: seeded(4), centre, inner: 100, outer: 1000 });
+  const distances = Array.from({ length: spread.count }, (_, i) => Math.hypot(...[0, 1, 2].map((k) => spread.position[i * 3 + k] - centre[k])));
+  assert.ok(Math.min(...distances) >= 99 && Math.max(...distances) <= 1001, "the stars fill a volume between the sky and the far shell");
+  assert.ok(distances.filter((d) => d < 300).length > 300 && distances.filter((d) => d > 700).length > 100, "near and far stars both exist, so the camera sees parallax");
+  const far = farGalaxies({ random: seeded(2) });
+  assert.ok(far.length >= 20 && far.length <= 60 && far.every((galaxy) => galaxy.alpha <= 0.4), "twenty to sixty smudges, none above 40%");
+  assert.ok(BACKDROP.haze.alpha <= 0.08, "haze at most 8% of the ink");
+  const small = glowOf({ radius: 10, count: 2 }, 20);
+  const large = glowOf({ radius: 10, count: 20 }, 20);
+  assert.ok(large.strength > small.strength, "a denser period glows more");
+  assert.ok(large.strength <= BACKDROP.glow.max, "capped at 15% of the ink");
+});
+
+test("the dots of a memory drift gently: slow, slightly different turns and a soft breath, not a whirl", () => {
+  assert.ok(CLOUD.spin <= 0.08, "the fastest dot turns under 0.08 rad/s");
+  assert.ok(CLOUD.breath <= 0.06 && CLOUD.pace <= 0.6);
+  assert.ok(CLOUD.still >= 0.9, "seen from far away the dots barely react");
+  assert.match(DUST_VERTEX, /calm = 1\.0 - CLOUD_STILL \* uFar/);
+  for (const name of ["SPIN", "BREATH", "PACE", "STILL"]) assert.match(DUST_VERTEX, new RegExp(`#define CLOUD_${name} `));
 });

@@ -150,8 +150,8 @@ most of the way early), so the dust of each galaxy gathers in order. Each memory
 (`igniteAt`) its dots fade in at its centre with a soft glow that rises and falls and open out to its cloud in under a
 second, so a heavier memory, with more dots, glows brighter. The first sparks come within the first second and the last before the four
 seconds are out; a galaxy's outline, constellation and label, the decade labels and the tags appear as their years
-spark (`formedAt`). Cloud dots then turn slowly around
-their memory and breathe. A cloud dot's brightness is read
+spark (`formedAt`). Cloud dots then drift: each turns around
+its memory at its own very slow pace (`CLOUD`: at most 0.07 rad/s) and breathes by 5%; as the camera pulls out (`uFar`) the drift, the breath and the pointer's push fade to 8% of that, so the whole-life view is almost still. A cloud dot's brightness is read
 from a one-row float texture with one level per memory (`levels` in `explore.js`: 1 normal; with a memory in view 1 for
 it, 0.85 for its strongest relations (all of them once the card's list is expanded), 0.5 for its weaker ones and 0.3 for the rest; with a filter 0.1 for what is outside it) and eased on the CPU. A
 trail dot's brightness follows the filter and, with a memory in view, a window of years around it. `uReveal` hides
@@ -191,6 +191,10 @@ left, between the top bar and the rail; on a phone at the bottom with at most 44
 their text does not fit, the engine drops the introduction, then the counts and the hint and shrinks the title and,
 at level 3, hides the form's note, makes its label visually hidden and tightens the spacing
 (`data-fit` 1, 2 and 3), and measures again on resize and when the fonts load.
+
+### The backdrop
+
+Behind everything (`backdrop.js`): a deep field of real points spread in depth around the sky, fixed in the world so the camera sees parallax (the same star shader as the stars, so every star stays one crisp pixel at any resolution; nearer ones are brighter and larger), a dome at infinity that follows the camera and carries the far galaxies (a small seeded texture, smudges that are meant to be soft), a shader haze, and a soft glow sprite per galaxy sized by its radius and lit by its memory count (`glowOf`), which blooms only as that galaxy's dots form during the opening. Each layer has a strength; haze is off on the lowest quality tier and under reduced motion.
 
 ### The invitation, the book's date and the clone's questions
 

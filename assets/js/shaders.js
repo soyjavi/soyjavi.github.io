@@ -2,6 +2,7 @@ import { SPIN } from "./life.js";
 
 export const DISCOVER = { delay: 0.1, seconds: 5, order: 0.6, jitter: 0.08, flight: 0.3, arrive: 0.54, swirl: 2.6, burst: 0.17, glow: 0.07 };
 
+export const CLOUD = { spin: 0.07, breath: 0.05, pace: 0.5, still: 0.92 };
 export const POINTER = { radius: 0.2, push: 0.04, rate: 6 };
 
 export const igniteAt = (fraction) => DISCOVER.order * fraction + DISCOVER.arrive * DISCOVER.flight;
@@ -17,6 +18,10 @@ export const DUST_VERTEX = `
   #define DISCOVER_BURST ${DISCOVER.burst.toFixed(2)}
   #define DISCOVER_GLOW ${DISCOVER.glow.toFixed(2)}
   #define SPIN_SLOTS ${SPIN.slots}
+  #define CLOUD_SPIN ${CLOUD.spin.toFixed(3)}
+  #define CLOUD_BREATH ${CLOUD.breath.toFixed(3)}
+  #define CLOUD_PACE ${CLOUD.pace.toFixed(2)}
+  #define CLOUD_STILL ${CLOUD.still.toFixed(2)}
   #define POINTER_RADIUS ${POINTER.radius.toFixed(2)}
   #define POINTER_PUSH ${POINTER.push.toFixed(3)}
   attribute vec3 aFrom;
@@ -73,11 +78,12 @@ export const DUST_VERTEX = `
       centre.xy = uPivot[galaxy].xy + vec2(cos(turn) * around.x - sin(turn) * around.y, sin(turn) * around.x + cos(turn) * around.y);
     }
     vec3 off = position;
-    float spin = uTime * (0.1 + 0.2 * aSeed) * aKind;
+    float spin = uTime * CLOUD_SPIN * (0.35 + 0.65 * aSeed) * aKind;
     float c = cos(spin);
     float s = sin(spin);
-    off.xy = vec2(c * off.x - s * off.y, s * off.x + c * off.y);
-    off *= 1.0 + 0.07 * aKind * sin(uTime * 0.8 + aSeed * 20.0);
+    float calm = 1.0 - CLOUD_STILL * uFar;
+    off.xy = mix(off.xy, vec2(c * off.x - s * off.y, s * off.x + c * off.y), calm);
+    off *= 1.0 + calm * CLOUD_BREATH * aKind * sin(uTime * CLOUD_PACE + aSeed * 20.0);
     float e = 1.0 - pow(1.0 - m, 3.0);
     vec3 target = centre + off;
     vec3 rel = aFrom - target;
@@ -85,7 +91,7 @@ export const DUST_VERTEX = `
     rel.xy = vec2(cos(twist) * rel.x - sin(twist) * rel.y, sin(twist) * rel.x + cos(twist) * rel.y);
     vec3 p = target + rel * (1.0 - e);
     if (aKind > 0.5) p = centre + off * smoothstep(0.0, 1.0, clamp(since / DISCOVER_BURST, 0.0, 1.0));
-    p += vec3(sin(aSeed * 91.7 + uTime * 0.35), cos(aSeed * 57.3 + uTime * 0.31), sin(aSeed * 33.1 + uTime * 0.27)) * (0.05 + 0.5 * (1.0 - m));
+    p += vec3(sin(aSeed * 91.7 + uTime * 0.35), cos(aSeed * 57.3 + uTime * 0.31), sin(aSeed * 33.1 + uTime * 0.27)) * (0.05 * calm + 0.5 * (1.0 - m));
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
     gl_Position = projectionMatrix * mv;
     float level;
@@ -112,7 +118,7 @@ export const DUST_VERTEX = `
       float gap = max(length(away), 0.0001);
       float fall = 1.0 - smoothstep(0.0, POINTER_RADIUS, gap);
       vec2 dir = away / gap * vec2(1.0 / ratio, 1.0);
-      gl_Position.xy += dir * fall * fall * POINTER_PUSH * uPointer.z * gl_Position.w;
+      gl_Position.xy += dir * fall * fall * POINTER_PUSH * uPointer.z * calm * gl_Position.w;
     }
   }
 `;
@@ -141,9 +147,9 @@ export const MARK_VERTEX = `
     vec4 mv = modelViewMatrix * vec4(position, 1.0);
     gl_Position = projectionMatrix * mv;
     float pulse = fract(uTime * 0.35);
-    float size = aSize;
+    float reveal = smoothstep(aOrder - 0.14, aOrder, uReveal);
+    float size = aSize * (0.45 + 0.55 * reveal);
     if (aState > 2.5 && aState < 3.5) size *= 1.0 + 2.0 * pulse;
-    float reveal = smoothstep(aOrder - 0.02, aOrder, uReveal);
     vState = aState;
     vFade = ((aState > 2.5 && aState < 3.5) ? 1.0 - pulse : 1.0) * reveal * aFade;
     gl_PointSize = clamp(size * uScale / -mv.z, 2.0, 140.0);

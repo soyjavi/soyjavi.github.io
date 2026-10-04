@@ -56,13 +56,13 @@ _None._
   `content · creator · high`
   accept: the creator hands over the remaining two or three hundred memories in batches, in the archive format of the
   README (`npm run import -- archive.json`), each with a date (a year or a month), a weight, the people and places he
-  wants public and what it relates to; an agent task imports them (the archive can also define the periods, the threads and where the book and the AI
+  wants public and what it relates to; an agent task imports them (the archive can also define the periods, the threads and where the book and the clone
   belong: see `tools/archive.example.json` and `tools/archive.schema.json`). The people and places filters grow by themselves with those lists. Names of
   people enter the repository only as he approves them, his children included under their own names.
 - **THREADS-REVIEW** — Check the threads, the links and the end of the path
   `content · creator · normal`
   accept: the seven threads (home, family, body, craft, ventures, learning, love), each memory's threads and links, and
-  the thread each of the book and the AI belongs to (`ahead`) have been read by the creator and changed where they say
+  the thread each of the book and the clone belongs to (`ahead`) have been read by the creator and changed where they say
   something he would not say. They were drafted from the milestone texts, nothing else.
 - **LIFE-VISIBILITY** — Review which milestones are public
   `content · creator · high`
@@ -73,14 +73,14 @@ _None._
   accept: each published milestone whose date the creator's notes give two ways has one date, a year or a month; the
   decades with no milestone (the 1990s after 1994 and the early 2000s) and the years 2023 and 2014 have a milestone or
   are left out on purpose; the dates of the products named in the Satoshi milestone are given if they are to appear.
-- **CLONE-NAME** — What the AI is called in public
+- **CLONE-NAME** — What the clone is called in public
   `decision · creator · normal`
   accept: its public name, and whether any earlier name of it is used in public at all.
-- **CLONE-SPEC** — Write the AI as its own project
+- **CLONE-SPEC** — Write the clone as its own project
   `feature · agent · normal`
   depends: CLONE-NAME
   accept: a spec in this repository's docs or in a new repository, as the creator chooses: a public corpus separate
-  from private memory, a clear "this is an AI" disclosure, limits on what it answers, backend and provider, privacy of
+  from private memory, a clear "this is a clone, not me" disclosure, limits on what it answers, backend and provider, privacy of
   visitor messages against the site's "no telemetry" rule, abuse and cost limits, and how the site links to it.
 
 ### Before announcing
@@ -89,15 +89,15 @@ _None._
   `deploy · creator · high`
   accept: the Buttondown newsletter `soyjavi` exists and `content/site.json` carries that username; after a push, a real
   address entered in the book's form on www.soyjavi.com appears in Buttondown with the tag `book` and one entered in the
-  AI's form with the tag `clone`, so the two lists are two tags of one newsletter; say whether double opt-in is on. The
+  the clone's form with the tag `clone`, so the two lists are two tags of one newsletter; say whether double opt-in is on. The
   creator checks the free plan's subscriber limit against what he expects; if it is not enough, another service with an
   embeddable form takes its place and the form action, the CSP `form-action` and the tests change with it. The agent
   cannot create or manage the account: it never submits real addresses.
-- **CLONE-QUESTIONS** — Choose the questions the AI's card offers
+- **CLONE-QUESTIONS** — Choose the questions the clone's card offers
   `content · creator · normal`
-  accept: three to five questions in English and Spanish, each with the ids of the public memories the AI would draw on,
+  accept: three to five questions in English and Spanish, each with the ids of the public memories the clone would draw on,
   written in `content/questions.json` (`[{ "id", "memories", "en", "es" }]`) or sent for the agent to write there. Until
-  then the AI's card shows no questions.
+  then the clone's card shows no questions.
 - **BOOK-DETAILS** — What the site says about the book (autobiographical, written so that it serves his children)
   `content · creator · high`
   accept: title, subtitle, a blurb of two or three sentences, expected window or date and whether there is a cover, in
@@ -128,7 +128,7 @@ _None._
   `verify · creator · normal`
   accept: on an iPhone and an Android phone, one finger turns the scene, two zoom it, a tap opens a memory, the address
   bar does not break the framing, the card is not cut, text is readable and the frame rate holds with 60,000 dots (and
-  with 120,000 once the archive is in); on a 13-inch laptop the book and AI cards fit their text and their form.
+  with 120,000 once the archive is in); on a 13-inch laptop the book and clone cards fit their text and their form.
 - **DEPLOY** — Publish the redesign
   `deploy · creator · high`
   accept: the change is pushed to `main`, the Pages build is `built`, www.soyjavi.com and www.soyjavi.com/es/ serve the
@@ -178,29 +178,8 @@ Ordered by what must be decided or applied first; each group names what it waits
   board: BRAND-LOCKUP
   A mono preposition and the wordmark at the foot of the book's and the clone's cards, and the naming rule for the clone without tool words.
 
-### 3. Sky — agent work with no content needed, one depth layer at a time
 
-- **SKY-DOME** — A deep field behind the galaxies
-  board: SKY-DOME
-  On a large screen the night looks almost empty: the stars are a few thousand points and most are too dim to see. Bake a
-  deep field into a texture at load (thousands of stars, a band of density) for no cost per frame.
-- **SPACE-HAZE** — A faint haze of dust
-  board: SPACE-HAZE
-  A very faint neutral haze drifting slower than the galaxies, so the space has volume.
-- **FAR-GALAXIES** — Distant galaxies that are not memories
-  board: FAR-GALAXIES
-  Tiny dim spirals very far behind, never named and never clickable.
-- **GALAXY-GLOW** — A soft glow around every galaxy
-  board: GALAXY-GLOW
-  An additive glow in proportion to what each period holds, so denser periods read from far away.
-- **PAPER-GRAIN** — The paper theme with its own sky
-  board: PAPER-GRAIN
-  A faint grain of fibres and ink specks so the light theme has a sky like the night's.
-- **SHOOTING-STARS** — A slow light that crosses the sky
-  board: SHOOTING-STARS
-  A rare, slow streak on the whole-life view only, off under reduced motion.
-
-### 4. Reading the memories — creator decisions on the look
+### 3. Reading the memories — creator decisions on the look
 
 - **KIND-TINT** — Show the kind of each memory
   `decision · creator · normal`
@@ -211,14 +190,14 @@ Ordered by what must be decided or applied first; each group names what it waits
   The masked figure of `assets/avatar.jpg` drawn with the fine dots as a station, to say "more than a person" without
   words.
 
-### 5. Depth and the book — need content or approvals from the creator
+### 4. Depth and the book — need content or approvals from the creator
 
 - **MILESTONE-MEDIA** — A photo or a sound at a milestone
   board: MILESTONE-MEDIA
   Optional media for a milestone, shown in its card, only where the creator has approved it.
 - **DEPTH-LOCKED** — Show how much more there is than what is public
   board: DEPTH-LOCKED
-  Fine, unnamed dots for the memories the creator keeps for the book and the AI, with a count he chooses to publish, so
+  Fine, unnamed dots for the memories the creator keeps for the book and the clone, with a count he chooses to publish, so
   a visitor feels the depth behind the named ones; pressing one says it is in the book. Nothing about what a locked
   memory holds is ever in the repository.
 - **BOOK-CHAPTERS** — The book as nodes
@@ -231,7 +210,7 @@ Ordered by what must be decided or applied first; each group names what it waits
 - **DREAM-ARCS** — What was wished for, done and let go
   board: DREAM-ARCS
   An arc from the memory where something was wished for to the one where it came true; what is still pending is a hollow
-  ring ahead, like the book and the AI. Needs the dreams the creator is willing to make public.
+  ring ahead, like the book and the clone. Needs the dreams the creator is willing to make public.
 - **RELATIONS-VIEW** — A view of who and what was connected
   board: RELATIONS-VIEW
   A network view that draws the links themselves, once there are hundreds of them.

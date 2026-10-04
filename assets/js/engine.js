@@ -1278,7 +1278,7 @@ async function start() {
       else if (mark.weight === 2 && ratio < 0.5) priority = 20;
       else if (ratio < 0.22) priority = 10;
       if (selected >= 0 && priority < 500) priority = 0;
-      if (mark.year > formed && i !== selected) priority = 0;
+      if (mark.year + 3 > formed && i !== selected) priority = 0;
       if (play.year !== null) priority = mark.year <= play.year && mark.year > play.year - 2.5 ? 800 + mark.weight : 0;
       if (priority > 0 && spot.on) candidates.push({ tag, spot, priority, i });
       else if (tag.on) {

@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { AHEAD, FLOOR, SPIN, START, onPath, spinAngle, starfield, unitsOf, yearOf } from "./life.js";
+import { createBackdrop } from "./backdrop.js";
 import { QUALITY } from "./explore.js";
 import { approach, clamp, ease, eye, slide, turn, zoom } from "./orbit.js";
 import { DISCOVER, DUST_FRAGMENT, DUST_VERTEX, formedAt, MARK_FRAGMENT, MARK_VERTEX, POINTER, STAR_FRAGMENT, STAR_VERTEX } from "./shaders.js";
@@ -52,6 +53,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky }
   stars.frustumCulled = false;
   stars.renderOrder = -1;
   scene.add(stars);
+  const backdrop = createBackdrop({ scene, sky, mobile, ink, star: starUniforms });
   const gain = Math.min(1, Math.sqrt(60000 / cloud.count));
   const dustUniforms = {
     uMix: { value: 0 },
@@ -268,6 +270,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky }
     starUniforms.uGain.value = night ? 1.25 : 0.4;
     starUniforms.uHalo.value = night ? 1 : 0;
     starMaterial.needsUpdate = true;
+    backdrop.applyTheme(night);
     markMaterial.blending = THREE.NormalBlending;
     dustUniforms.uGain.value = (night ? 0.55 : 0.6) * gain;
     dustMaterial.needsUpdate = true;
@@ -529,6 +532,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky }
     jumpLines.visible = jumpLines.material.opacity > 0.01;
     canvas.dataset.jumps = jumpLines.visible ? String(hops) : "";
 
+    backdrop.update(time, camera, formed);
     renderer.render(scene, camera);
 
     projected.forEach((spot, i) => {
@@ -562,6 +566,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky }
     setQuality: (tier) => {
       const step = QUALITY.tiers[Math.min(tier, QUALITY.tiers.length - 1)];
       dustUniforms.uKeep.value = step.keep;
+      backdrop.setTier(tier);
       renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.5 : 2, step.ratio));
       renderer.setSize(innerWidth, innerHeight, false);
     },
@@ -578,6 +583,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky }
     setFilter: (filter) => {
       dustUniforms.uFilterFacet.value = filter ? ["threads", "people", "places"].indexOf(filter.facet) : -1;
       dustUniforms.uFilterItem.value = filter ? filter.item : -1;
+      backdrop.setDim(filter ? 0.45 : 1);
     },
     setFocus: (year) => {
       dustUniforms.uFocusOn.value = year === null ? 0 : 1;
