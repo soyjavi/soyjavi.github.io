@@ -187,10 +187,6 @@
         <li><a href="#copy-hero">COPY-HERO</a></li>
         <li><a href="#copy-waitlist">COPY-WAITLIST</a></li>
         <li><a href="#copy-meta">COPY-META</a></li>
-        <li><a href="#brand-wordmark">BRAND-WORDMARK</a></li>
-        <li><a href="#brand-small">BRAND-SMALL</a></li>
-        <li><a href="#brand-type-scale">BRAND-TYPE-SCALE</a></li>
-        <li><a href="#brand-lockup">BRAND-LOCKUP</a></li>
         <li><a href="#kind-tint">KIND-TINT</a></li>
         <li><a href="#portrait-dots">PORTRAIT-DOTS</a></li>
         <li><a href="#milestone-media">MILESTONE-MEDIA</a></li>
@@ -199,6 +195,10 @@
         <li><a href="#private-edition">PRIVATE-EDITION</a></li>
         <li><a href="#dream-arcs">DREAM-ARCS</a></li>
         <li><a href="#relations-view">RELATIONS-VIEW</a></li>
+        <li><a href="#entrance-choreography">ENTRANCE-CHOREOGRAPHY</a></li>
+        <li><a href="#year-rings">YEAR-RINGS</a></li>
+        <li><a href="#memory-tense">MEMORY-TENSE</a></li>
+        <li><a href="#audio-entrance">AUDIO-ENTRANCE</a></li>
       </ul>
 
 
@@ -269,77 +269,9 @@
         <p class="accept"><strong>Accept</strong> meta.description is at most 155 characters in both languages, has no banned word, no “personal site” and no “milestones”, and is the same text in the description, og:description and twitter:description; the 404 title, heading and link use the sky, not days; og-image.png is regenerated after this change.</p>
       </article>
 
-      <article class="board" data-board="BRAND-WORDMARK" id="brand-wordmark">
-        <header>
-          <p class="meta"><code>BRAND-WORDMARK</code><span>Brand · wordmark</span></p>
-          <h3 class="h3">Eight ways to draw the name, and the two worth keeping</h3>
-          <p><strong>Why.</strong> The wordmark is the one drawn thing on the site, so it earns a careful look. Eight treatments with Instrument Serif, Geist and Geist Mono (the only families the repository may use), judged by eye in both lights; the winner is the one that already ships, and the header does not use it.</p>
-        </header>
-        <div class="pair wide">
-          <figure><div class="wm"><div class="tone-light"><img src="../assets/brand/javi-ink.svg" alt="javi, ink on paper" /><span>outlined SVG, 56 px</span></div><div class="tone-dark"><img src="../assets/brand/javi-bone.svg" alt="javi, bone on night" /><span>the header draws it as live text instead</span></div></div><figcaption>Now</figcaption></figure>
-          <figure><div class="specs"><div class="spec" data-pick="1"><div class="pair2"><p class="w tone-light ">javi</p><p class="w tone-dark ">javi</p></div><p class="kicker"><b>1</b> Italic, tracking −0.01em (today)</p><div class="pc"><p class="pro">Best: two dots for the j and the i, a hand-signed descender</p><p class="pro">Holds from 20 px up in both lights</p><p class="con">Needs the sentence around it to be findable</p></div></div><div class="spec"><div class="pair2"><p class="w tone-light ">Javi</p><p class="w tone-dark ">Javi</p></div><p class="kicker"><b>2</b> Capital italic</p><div class="pc"><p class="pro">Graceful swash J</p><p class="con">Formal; one dot instead of two</p><p class="con">Use in running text only</p></div></div><div class="spec"><div class="pair2"><p class="w tone-light ">soyjavi</p><p class="w tone-dark ">soyjavi</p></div><p class="kicker"><b>3</b> One word, italic</p><div class="pc"><p class="pro">Matches the address</p><p class="con">The y and j descenders collide; it reads as a handle even in a serif</p></div></div><div class="spec"><div class="pair2"><p class="w tone-light ">soy <i>javi</i></p><p class="w tone-dark ">soy <i>javi</i></p></div><p class="kicker"><b>4</b> soy roman + javi italic</p><div class="pc"><p class="pro">The runner-up: the posture shift is the site’s headline device</p><p class="pro">Same size and colour: one drawing, one ink</p><p class="con">A Spanish sentence; the word space and two descenders to clear</p></div></div><div class="spec"><div class="pair2"><p class="w tone-light ">javi<small>A LIFE</small></p><p class="w tone-dark ">javi<small>A LIFE</small></p></div><p class="kicker"><b>5</b> With a mono descriptor</p><div class="pc"><p class="pro">Says what it is at a glance</p><p class="con">Only works above 48 px of wordmark height; never in the header</p></div></div><div class="spec"><div class="pair2"><p class="w tone-light ">javi.</p><p class="w tone-dark ">javi.</p></div><p class="kicker"><b>6</b> With a full stop</p><div class="pc"><p class="pro">Quiet</p><p class="con">Reads as the end; rejected</p></div></div><div class="spec"><div class="pair2"><p class="w tone-light roman">javi</p><p class="w tone-dark roman">javi</p></div><p class="kicker"><b>7</b> Roman, for a book spine only</p><div class="pc"><p class="pro">Sober and bookish</p><p class="con">Loses the signature; never mixed with the italic on the site</p></div></div><div class="spec"><div class="pair2"><p class="w tone-light ">j</p><p class="w tone-dark ">j</p></div><p class="kicker"><b>8</b> Monogram for favicon and avatar</p><div class="pc"><p class="pro">Works alone; the dot of the j is the whole idea</p><p class="con">Hairline at 16 px (see BRAND-SMALL)</p></div></div></div>
-<div class="stack"><p><b>Specs for the two best.</b> Always shipped as the outlined SVG; the values are what the outline is drawn from.</p>
-<pre class="code">1 · javi (italic)
-font: Instrument Serif italic 400 · letter-spacing −0.01em · kerning on · line-height 1
-header SVG height 28 px (24 px up to 640 px) · cover clamp(120px, 18vw, 240px)
-left ink edge on the gutter ±1 px · baseline on the nav labels' baseline, not the box centre
 
-4 · soy javi (runner-up, for the hero kicker only)
-soy: Instrument Serif roman 400 · javi: Instrument Serif italic 400 · same size and ink
-letter-spacing −0.01em · word space 0.18em of the italic · the y and j descenders must clear</pre>
-<p><b>How it is made.</b> A small tool in tools/ shapes the word with the font's own kerning, flips y, takes the ink box plus a fixed margin and writes the quadratic paths to assets/brand/ in the ink and bone variants and one with currentColor; a test recomputes the path from the font and compares it, as the generated pages already are. Any font library is a dev dependency only.</p></div><figcaption>Proposed · eight treatments with their verdicts and the spec of the best two</figcaption></figure>
-        </div>
-        <p class="accept"><strong>Accept</strong> the wordmark in the header is the outlined SVG (inline, currentColor, 28 px high, 24 px under 640 px) and no live text spells the brand; a test compares its bounding box with the gutter and its baseline with the nav labels; the outlined files are generated from the font by a tool and a test fails when they drift; the brand page shows the chosen treatment and the runner-up.</p>
-      </article>
 
-      <article class="board" data-board="BRAND-SMALL" id="brand-small">
-        <header>
-          <p class="meta"><code>BRAND-SMALL</code><span>Brand · small sizes</span></p>
-          <h3 class="h3">The mark at 16 px, the home-screen icon and the share card</h3>
-          <p><strong>Why.</strong> The mark has to be recognised among twenty tabs and on a phone’s home screen, and today it is thinnest exactly there. The share image, the first thing anyone sees when the link is pasted, is from the previous version of the site.</p>
-        </header>
-        <div class="pair wide">
-          <figure><div class="tiles tone-dark"><div class="tile"><span class="sq s16">j</span>16 px</div><div class="tile"><span class="sq s32">j</span>32 px</div><div class="tile"><span class="sq s180">j</span>180 px</div></div>
-<div class="stack"><p>Today’s favicon is a hairline <em>j</em> at about half the tile’s height: it nearly disappears at 16 px. There is no apple-touch icon, so an iPhone home screen gets nothing, and the share image still shows the spiral and a “Writing” link that no longer exist.</p></div><figcaption>Now</figcaption></figure>
-          <figure><div class="tiles tone-dark"><div class="tile"><span class="sq s16 big fat">j</span>16 px</div><div class="tile"><span class="sq s32 big fat">j</span>32 px</div><div class="tile"><span class="sq s180 big fat">j</span>180 px</div></div>
-<div class="tiles tone-light"><div class="tile"><span class="sq s16 big fat">j</span>16 px</div><div class="tile"><span class="sq s32 big fat">j</span>32 px</div><div class="tile"><span class="sq s180 big fat">j</span>180 px</div></div>
-<div class="stack"><ul class="rules"><li>The <em>j</em> grows to about 72% of the tile and takes a stroke of 0.03 em in the same ink, with round joins, because Instrument Serif has no optical sizes or weights.</li><li>PNG fallbacks at 32 and 180 px; the 180 px one is an opaque square because iOS masks it; the SVG keeps following the system theme, as it sits on the browser’s chrome.</li><li>The share image is regenerated from the new sky (npm run og) and carries the current nav, hero and the chosen name.</li></ul></div><figcaption>Proposed · a bolder j in both lights, with PNG fallbacks</figcaption></figure>
-        </div>
-        <p class="accept"><strong>Accept</strong> the favicon reads as a j at 16, 32 and 180 px in both themes (a screenshot test counts ink pixels); an apple-touch icon and a 32 px PNG are linked from the head; og-image.png is regenerated from the current home, and a test fails when its source nav or title no longer matches the page.</p>
-      </article>
 
-      <article class="board" data-board="BRAND-TYPE-SCALE" id="brand-type-scale">
-        <header>
-          <p class="meta"><code>BRAND-TYPE-SCALE</code><span>Brand · type</span></p>
-          <h3 class="h3">A named scale, and nothing structural below 12 px</h3>
-          <p><strong>Why.</strong> The things that carry the idea, a galaxy’s name and a memory’s tag, are the smallest and dimmest type on the screen: 10 px muted mono and a 15 px hairline serif over a glow. The stylesheet has no scale: sizes from 9 to 40 px and five different tracking values for what is one style.</p>
-        </header>
-        <div class="pair wide">
-          <figure><div class="glow tone-dark"><p class="t3" style="font-size:10px; margin:0">06 / NOW · 2025-2026</p><p class="t1" style="font-size:22px; margin:0; font-style: italic">We arrive in Hua Hin</p><p class="t2" style="font-size:15px; margin:0; font-style: italic">Oct 2025 · Knowing yourself</p><p class="t2s" style="font-size:17px; margin:0">At the end of January, after more than ten years in Chiang Mai.</p></div><figcaption>Now</figcaption></figure>
-          <figure><div class="glow tone-dark"><p class="t3" style="font-size:12px; margin:0">06 / NOW · 2025-2026</p><p class="t1" style="font-size:26px; margin:0; font-style: italic">We arrive in Hua Hin</p><p class="t2" style="font-size:17px; margin:0; font-style: italic">Oct 2025 · Knowing yourself</p><p class="t2s" style="font-size:17px; margin:0">At the end of January, after more than ten years in Chiang Mai.</p></div><div class="stack"><table class="matrix"><thead><tr><th>Token</th><th>Size</th><th>Use</th></tr></thead><tbody>
-<tr><td>label</td><td>12 px mono, 0.12em, capitals</td><td>anchors, dates, counts: never below 11 px; muted ink over the scene only at 12 px or more</td></tr>
-<tr><td>small</td><td>14 px sans</td><td>notes, forms, status</td></tr>
-<tr><td>body</td><td>17 px sans (16 px phone)</td><td>reading</td></tr>
-<tr><td>tag</td><td>17 px serif italic</td><td>relations and edge markers; never a serif below 17 px (16 px phone)</td></tr>
-<tr><td>title</td><td>26 px serif italic (22 px phone)</td><td>the open memory</td></tr>
-<tr><td>heading, display</td><td>clamps as today</td><td>card titles, hero</td></tr>
-</tbody></table></div><figcaption>Proposed · anchors 12 px, tags 17 px, one named scale</figcaption></figure>
-        </div>
-        <p class="accept"><strong>Accept</strong> brand.css names the sizes and the tracking as tokens and a test fails on any font-size or letter-spacing literal outside them, as it does for colour; a browser test walks the visible text at 1280×640 and 390×844 and finds nothing under 11 px (12 px for muted mono over the scene); no serif is drawn under 17 px (16 px on a phone); the galaxy names clear 7 to 1 against a background sampled from the rendered scene. This replaces the label sizes shipped with ONE-LABEL-VOICE.</p>
-      </article>
-
-      <article class="board" data-board="BRAND-LOCKUP" id="brand-lockup">
-        <header>
-          <p class="meta"><code>BRAND-LOCKUP</code><span>Brand · the two offers</span></p>
-          <h3 class="h3">One author, two works: <em>by</em> javi, <em>with</em> javi</h3>
-          <p><strong>Why.</strong> A book is by someone and a conversation is with someone, so two small prepositions can tie both offers to the one name without a tool word. The clone is the delicate one: it is for people who miss him, so its name must be honest about what it is and never claim to be him.</p>
-        </header>
-        <div class="pair wide">
-          <figure><div class="stack"><p>Today the book and the clone are sections of a page: “07 / The book”, “08 / Talk to me”. Nothing says whose they are, and the clone is called by a tool name.</p></div><figcaption>Now</figcaption></figure>
-          <figure><div class="pair2" style="grid-template-columns:1fr 1fr"><div class="lock tone-dark"><p class="by">by <img src="../assets/brand/javi-bone.svg" alt="javi" /></p><h4>A book <em>for my children</em></h4><p>My life, what I learnt, what went well and what went wrong. For them, and for whoever wants to read it.</p></div><div class="lock tone-dark"><p class="by">with <img src="../assets/brand/javi-bone.svg" alt="javi" /></p><h4><em>What I’d tell you</em></h4><p>A place to keep talking once I am not here. A program built from what I wrote: it is not me.</p></div></div><div class="stack"><table class="matrix"><thead><tr><th>English</th><th>Español</th><th>Gains</th><th>Costs</th></tr></thead><tbody><tr class="pick"><td>Talk to me</td><td>Habla conmigo</td><td>Already the nav label; direct, first person, no tech word</td><td>An imperative, like a phone line; promises presence</td></tr><tr class="pick"><td>What I’d tell you</td><td>Lo que te diría</td><td>Honest: a conditional, an approximation; intimate; fits a loss</td><td>Can sound speculative as a button</td></tr><tr><td>Ask me</td><td>Pregúntame</td><td>Lower promise; matches the questions</td><td>Reads as an FAQ</td></tr><tr><td>Keep talking</td><td>Seguir hablando</td><td>Names the real purpose, continuity, and is not morbid</td><td>Presupposes a loss; unclear out of context</td></tr><tr><td>Conversations with javi</td><td>Conversaciones con javi</td><td>Dignified, book-like, fits the “with” lockup</td><td>Long; “with javi” overpromises that it is him</td></tr><tr><td>Stay a while</td><td>Quédate un rato</td><td>Hospitable and gentle</td><td>Says nothing of what it is</td></tr><tr><td>The echo</td><td>El eco</td><td>Poetic and honest that it is a reflection</td><td>Abstract; a smart-speaker collision</td></tr><tr><td>Ask the archive</td><td>Pregunta al archivo</td><td>Honest; ties it to the memories that feed it</td><td>Cold</td></tr><tr><td>Still here</td><td>Aquí sigo</td><td>Emotional and natural in Spanish</td><td>Claims presence; false hope for someone grieving: rejected</td></tr><tr><td>Javi’s voice</td><td>La voz de Javi</td><td>Warm</td><td>Implies audio; overpromises: rejected</td></tr></tbody></table><ol class="rules"><li>Describe the action, in the first person. Never “AI”, “clone”, “bot”, “twin”, “avatar”, “legacy” or “digital immortality” on the site.</li><li>The name must not claim to be him: “with” and “I’d say”, yes; “I am here”, no.</li><li>A plain sentence of disclosure sits beside it, in both languages.</li><li>English and Spanish carry the same meaning, not the same words.</li><li>No product name, and no earlier name for the project, until the creator decides it. The dots on the first two rows are the recommendation: the nav and the button keep “Talk to me” and the card’s kicker says “What I’d tell you”. The wording is the copy review’s to settle.</li></ol></div><figcaption>Proposed · the lockup and ten names for the clone, with what each gains and costs</figcaption></figure>
-        </div>
-        <p class="accept"><strong>Accept</strong> the book’s card and the clone’s card show the same lockup at the same place (a mono preposition and the outlined wordmark at 18 to 22 px); the word AI and its Spanish twin IA appear nowhere in content/, src/ or the built pages; the clone’s card carries one sentence of disclosure in both languages; the Buttondown tag and the dictionary key names stay internal; the creator picks the clone’s public name and the repository holds no name for it until then.</p>
-      </article>
 
 
 
@@ -580,6 +512,45 @@ letter-spacing −0.01em · word space 0.18em of the italic · the y and j desce
 <rect class="solid" x="48" y="252" width="88" height="22"/><rect class="ln s" x="144" y="252" width="88" height="22"/></g><rect class="ln f box" x="300" y="48" width="170" height="20"/><text class="tm new" x="385" y="61" text-anchor="middle">RELATIONS · 36 LINKS</text></svg><figcaption>Proposed</figcaption></figure>
         </div>
         <p class="accept"><strong>Accept</strong> a toggle (key <code>R</code> and a button in the sheet) that draws every declared link as a hairline arc and dims the clouds, with the line count in the corner; a memory in view lights its own links as usual; off by default, and capped so that 300 memories and 600 links stay at the frame rate of the quality tier.</p>
+      </article>
+      <article class="board" data-board="ENTRANCE-CHOREOGRAPHY" id="entrance-choreography">
+        <header>
+          <p class="meta"><code>ENTRANCE-CHOREOGRAPHY</code><span>Scene · the opening</span></p>
+          <h3 class="h3">The first ten seconds as one piece</h3>
+          <p><strong>Why.</strong> The opening is the first thing a buyer feels. Today the dust spirals into the galaxies and the memories spark in the order of the years, but nothing orders the rest of the sky: the stars, the haze and the names are simply there or pop in. A gate with a button was tried and rejected, so the piece has to work on its own from the moment the page loads.</p>
+        </header>
+        <div class="pair"><figure><ol class="rules"><li>The deep field, the haze and the far galaxies are on from the first frame.</li><li>Dust spirals in, memories spark in the order of their years, each galaxy's glow blooms with it.</li><li>A memory's name follows its spark by a few years of the life.</li><li>The first spark comes inside the first second.</li></ol><figcaption>Now</figcaption></figure><figure><ol class="rules"><li><b>Beat 1, the sky:</b> only the stars, and the haze and the near stars rising slowly, with no galaxy yet.</li><li><b>Beat 2, the galaxies:</b> they form in life order, each with its glow and a small flash as it is born.</li><li><b>Beat 3, the names:</b> the hero card and the labels arrive last, after the last spark.</li><li>The sound, if allowed, swells with the births and stays calm.</li></ol><figcaption>Proposed</figcaption></figure></div>
+        <p class="accept"><strong>Accept</strong> the creator says what the ten seconds should feel like (quiet and slow, or more spectacular) and which of the three beats stay. The beats and their timings live in <code>DISCOVER</code>; a test pins the order (haze before the first spark, the last name before the end) and that the first spark stays inside the first second unless the creator lifts that rule; reduced motion keeps the flat page.</p>
+      </article>
+
+      <article class="board" data-board="YEAR-RINGS" id="year-rings">
+        <header>
+          <p class="meta"><code>YEAR-RINGS</code><span>Scene · the year rings</span></p>
+          <h3 class="h3">Rings that read as rings when you come close</h3>
+          <p><strong>Why.</strong> The rings that mark the years are drawn with a dashed line. From far away they read as a circle, but close to a galaxy the dashes become short loose strokes scattered over the dust and look like noise, not like a ring.</p>
+        </header>
+        <div class="pair"><figure><ol class="rules"><li>A dashed line, 0.8 long with 0.9 gaps, at a fixed opacity at every distance.</li><li>Close to a galaxy the dashes read as scratches across the clouds.</li></ol><figcaption>Now</figcaption></figure><figure><ol class="rules"><li><b>A.</b> A continuous hairline at a low opacity, the same ink.</li><li><b>B.</b> Dashed from far away and fading out as the camera comes close, so only the label remains near a galaxy.</li><li><b>C.</b> Ticks only at each year instead of a line.</li></ol><figcaption>Proposed</figcaption></figure></div>
+        <p class="accept"><strong>Accept</strong> the creator picks A, B or C. Whatever is chosen, no dash is shorter than 6 px on screen at any zoom, the ring never competes with a memory's cloud (at most 20% of the ink near a galaxy) and a test checks the opacity and that no dash pattern remains if A is chosen.</p>
+      </article>
+
+      <article class="board" data-board="MEMORY-TENSE" id="memory-tense">
+        <header>
+          <p class="meta"><code>MEMORY-TENSE</code><span>Copy · the tense of the memories</span></p>
+          <h3 class="h3">One tense for every memory, and one sentence to confirm</h3>
+          <p><strong>Why.</strong> The memories mix tenses: some tell the moment in the historic present (“At twelve I notice that girls are different”) and others in the past. The voice rules need one, in both languages, and the brand page's voice section says present for the site and past for a moment. One guide sentence also still asks the creator to confirm it.</p>
+        </header>
+        <div class="pair"><figure><ol class="rules"><li>“At twelve I notice that girls are different.” (present)</li><li>“Five years as a junior developer never weighed on me.” (past)</li><li>Guide: “A cloud is a memory; the bigger it is, the more it changed” (to be confirmed).</li></ol><figcaption>Now</figcaption></figure><figure><ol class="rules"><li><b>A.</b> The historic present for every memory: it is where the person was; the site speaks in the present.</li><li><b>B.</b> The past for every memory, the present only for the site and for what is ahead.</li><li>The guide line is confirmed, reworded or dropped, in both languages.</li></ol><figcaption>Proposed</figcaption></figure></div>
+        <p class="accept"><strong>Accept</strong> the creator chooses A or B and rules on the guide sentence. Then every memory in both languages is rewritten in that tense in one change, the voice section of <code>design/index.html</code> says it, and the creator approves each rewritten sentence, since it is his own voice.</p>
+      </article>
+
+      <article class="board" data-board="AUDIO-ENTRANCE" id="audio-entrance">
+        <header>
+          <p class="meta"><code>AUDIO-ENTRANCE</code><span>Sound · the first note</span></p>
+          <h3 class="h3">Sound as early as a browser allows</h3>
+          <p><strong>Why.</strong> A browser allows sound only after a click, a tap or a key; moving the mouse or scrolling does not count. Today the sound begins at the first gesture and takes about ten seconds to fade in, while the opening lasts five. A button that asks to enter with or without sound was tried and rejected as ugly.</p>
+        </header>
+        <div class="pair"><figure><ol class="rules"><li>No sound until the first gesture.</li><li>Then a ten-second fade in, longer than the opening.</li><li>The sound button turns it off if it is the first gesture.</li></ol><figcaption>Now</figcaption></figure><figure><ol class="rules"><li><b>A.</b> The same first gesture, a fade in of two to three seconds, so the sound arrives while the galaxies are still forming.</li><li><b>B.</b> A and the opening held on the quiet sky until the first gesture or six seconds, whichever comes first.</li><li><b>C.</b> Leave it as it is.</li></ol><figcaption>Proposed</figcaption></figure></div>
+        <p class="accept"><strong>Accept</strong> the creator picks A, B or C. A shortens the fade (a test pins at most three seconds); B also moves the start of the opening and so changes the rule that the first spark comes inside the first second. Nothing asks the visitor to enter and nothing plays before a gesture.</p>
       </article>
     </main>
   </body>

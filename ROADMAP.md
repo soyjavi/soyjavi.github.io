@@ -119,6 +119,9 @@ _None._
   commits the image after the copy tasks he wants are in.
   accept: the image shows the current hero; no banned word in it.
 
+- **VERIFY-BRAND** — The new header, favicon, lockup and type scale on a screen
+  `verify · creator · high`
+  accept: with `npm test` (the browser tests need Chromium) and by eye at 1280×640 and 390×844: the wordmark in the header sits on the nav labels' baseline and the left gutter in both themes, the favicon reads as a j in a tab at 16 px in both lights, the lockups and the clone's disclosure sit at the foot of both cards without pushing the form off screen, and the labels at 12 px and the tags at 17 px (16 on a phone) fit the cards and the scene. Anything off becomes a bug.
 - **VERIFY-WAITLIST** — The two forms against a real Buttondown account
   `verify · creator · high`
   depends: BUTTONDOWN
@@ -159,24 +162,29 @@ Ordered by what must be decided or applied first; each group names what it waits
 - **COPY-WAITLIST** — Softer words for the lists and the nudge
   board: COPY-WAITLIST
   No time promises, no tool words on the lists; the creator decides whether the nudge may appear on memories about loss.
+- **MEMORY-TENSE** — One tense for every memory, and one sentence to confirm
+  `decision · creator · normal`
+  board: MEMORY-TENSE
+  Historic present or past for all the memories in both languages, and the guide sentence about what changed and mattered.
 - **COPY-META** — What a search result and a shared link say
   board: COPY-META
   A description of at most 155 characters in both languages, and a 404 in the sky's vocabulary.
 
-### 2. Mark and type — after the name is settled
+### 2. Scene and sound — decisions on feel
 
-- **BRAND-WORDMARK** — Eight ways to draw the name, and the two worth keeping
-  board: BRAND-WORDMARK
-  The header draws the name as live text although the rule is the outlined SVG; ship the outlined wordmark from a tool and a test, in the chosen treatment.
-- **BRAND-SMALL** — The mark at 16 px, the home-screen icon and the share card
-  board: BRAND-SMALL
-  A bolder j at 16, 32 and 180 px, an apple-touch icon and PNG fallbacks, and a share image regenerated from the current home (today it shows the old spiral and a Writing link that no longer exists).
-- **BRAND-TYPE-SCALE** — A named scale, and nothing structural below 12 px
-  board: BRAND-TYPE-SCALE
-  Name the sizes and tracking as tokens with a test, raise the anchors to 12 px and the tags to 17 px; replaces the sizes shipped with ONE-LABEL-VOICE.
-- **BRAND-LOCKUP** — One author, two works: by javi, with javi
-  board: BRAND-LOCKUP
-  A mono preposition and the wordmark at the foot of the book's and the clone's cards, and the naming rule for the clone without tool words.
+- **ENTRANCE-CHOREOGRAPHY** — Scene · the first ten seconds as one piece
+  `decision · creator · normal`
+  board: ENTRANCE-CHOREOGRAPHY
+  Sky first, galaxies in life order with their glow, names last; the creator says the feeling and which beats stay.
+- **YEAR-RINGS** — Rings that read as rings when you come close
+  `decision · creator · low`
+  board: YEAR-RINGS
+  The dashed year rings look like loose strokes close to a galaxy: a continuous hairline, a ring that fades near, or ticks.
+- **AUDIO-ENTRANCE** — Sound as early as a browser allows
+  `decision · creator · low`
+  board: AUDIO-ENTRANCE
+  Shorten the fade to two or three seconds, or also hold the opening until the first gesture; a gate was tried and rejected.
+
 
 
 ### 3. Reading the memories — creator decisions on the look

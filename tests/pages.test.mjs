@@ -470,3 +470,49 @@ test("the old single-page resume assets are gone", () => {
   assert.ok(existsSync(`${root}assets/avatar.jpg`));
   assert.match(read("index.html"), /"image":"https:\/\/www\.soyjavi\.com\/assets\/avatar\.jpg"/);
 });
+
+test("the header draws the name as the outlined wordmark, not as text", async () => {
+  const { files, outline } = await import("../tools/wordmark.mjs");
+  for (const file of ["index.html", "es/index.html", "404.html"]) {
+    const brand = read(file).match(/<a class="brand"[^>]*>([\s\S]*?)<\/a>/)[1];
+    assert.match(brand, /^<svg [^>]*aria-hidden="true"[^>]*><path d="M[^"]+" fill="currentColor"\/><\/svg>$/, `${file}: the brand is an inline SVG`);
+    assert.equal(brand.replace(/<[^>]+>/g, "").trim(), "", `${file}: no live text spells the brand`);
+  }
+  for (const [file, text] of Object.entries(files())) assert.equal(readFileSync(`${root}${file}`, "utf8"), text, `${file} drifted from the font: run node tools/wordmark.mjs`);
+  assert.ok(outline("javi").path.startsWith("M40.80-121"), "the outline starts at the dot of the j");
+});
+
+test("the favicon is a bold j that still reads at 16, 32 and 180 px in both lights, with PNG fallbacks linked and committed", async () => {
+  const { files, render, tile } = await import("../tools/icons.mjs");
+  for (const [file, data] of Object.entries(files())) assert.ok(Buffer.from(readFileSync(`${root}${file}`)).equals(Buffer.from(data)), `${file} drifted: run node tools/icons.mjs`);
+  const ink = (size, theme, ground) => {
+    const { pixels } = render(tile(theme, { round: false }), size);
+    let count = 0;
+    for (let i = 0; i < pixels.length; i += 4) if (Math.abs(pixels[i] - ground) > 96) count++;
+    return count;
+  };
+  for (const [theme, ground] of [["dark", 0x0c], ["light", 0xec]]) {
+    assert.ok(ink(16, theme, ground) >= 12, `${theme}: the j at 16 px`);
+    assert.ok(ink(32, theme, ground) >= 50, `${theme}: the j at 32 px`);
+    assert.ok(ink(180, theme, ground) >= 1500, `${theme}: the j at 180 px`);
+  }
+  for (const file of ["index.html", "es/index.html", "404.html"]) {
+    const html = read(file);
+    assert.match(html, /<link rel="icon" href="\/favicon-32\.png" type="image\/png" sizes="32x32" \/>/);
+    assert.match(html, /<link rel="apple-touch-icon" href="\/apple-touch-icon\.png" \/>/);
+  }
+  assert.equal(readFileSync(`${root}apple-touch-icon.png`).readUInt32BE(16), 180, "the touch icon is 180 px wide");
+});
+
+test("the book's card and the clone's card end with the same lockup, and the clone says it is not him", () => {
+  for (const [file, lang, prepositions] of [["index.html", "en", ["by", "with"]], ["es/index.html", "es", ["de", "con"]]]) {
+    const html = read(file);
+    const panels = ["book", "clone"].map((kind) => html.match(new RegExp(`<div data-panel="${kind}">([\\s\\S]*?)\\n          </div>`))[1]);
+    panels.forEach((panel, k) => {
+      const lockup = panel.match(/<p class="lockup"><span class="prep">([^<]+)<\/span><span class="brand-mark"><svg [\s\S]*?<\/svg><span class="visually-hidden">javi<\/span><\/span><\/p>\s*$/);
+      assert.ok(lockup, `${file}: the lockup closes the ${["book", "clone"][k]} panel`);
+      assert.equal(lockup[1], prepositions[k]);
+    });
+    assert.match(panels[1], new RegExp(`<p class="note">${lang === "en" ? "It is a program built from what I wrote; it is not me\\." : "Es un programa hecho a partir de lo que escribí; no soy yo\\."}</p>`));
+  }
+});

@@ -7,6 +7,7 @@
   },
   "ui": {
     "skip": "Saltar al contenido",
+    "lockup": { "book": "de", "clone": "con" },
     "hint": "Arrastra para explorar · rueda o pellizco para acercar",
     "switchLabel": "English",
     "navLabel": "Secciones",
@@ -149,7 +150,8 @@
     }
   },
   "clone": {
-    "kicker": "08 / Habla conmigo",
+    "disclosure": "Es un programa hecho a partir de lo que escribí; no soy yo.",
+    "kicker": "08 / Lo que te diría",
     "ask": {
       "label": "Preguntas para mi clon",
       "title": "Pregunta y mira de qué bebería",

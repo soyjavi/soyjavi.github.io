@@ -65,8 +65,8 @@ Rules of the loop:
   needs a page in `tests/browser/`. Check that a new test bites by breaking the code it guards.
 - Copy lives in `content/`, never in templates or the engine. A new key goes into `en.json` and `es.json` in the same
   change; a memory is one file in `content/memories/` with both languages. Archives are imported with `npm run import`, which only writes entries marked public.
-- Generated files are never edited by hand: `index.html`, `es/`, `404.html`, `sitemap.xml`, `robots.txt` and
-  `assets/site.js`. The sources are `content/`, `src/`, `assets/js/` and `tools/build.mjs`; `npm run build` rewrites
+- Generated files are never edited by hand: `index.html`, `es/`, `404.html`, `sitemap.xml`, `robots.txt`,
+  `assets/site.js`, `assets/brand/*.svg`, `favicon.svg` and the two PNG icons (`npm run brand` rewrites them from the font). The sources are `content/`, `src/`, `assets/js/` and `tools/build.mjs`; `npm run build` rewrites
   `es/` entirely.
 - The page is HTML first. Every station is a real element with `data-station` and every panel a `data-panel`; the
   engine reads them (with the threads, people, places and links of each memory) and clones the panel into the card, so

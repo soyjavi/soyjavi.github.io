@@ -407,7 +407,7 @@ the only inline script and is not executable. GitHub Pages cannot send headers, 
 
 Instrument Serif for the wordmark, headings and milestone titles, Geist for text, Geist Mono for dates, labels and
 addresses; the three are open licence and ship in `assets/fonts/` with `LICENSES.txt`. The wordmark and monogram are
-outlined SVG in `assets/brand/`; `favicon.svg` is the j on night and inverts with the system theme. Hairlines, no shadows,
+outlined SVG in `assets/brand/`, generated from the font by `tools/wordmark.mjs` (kerning from the font, quadratic paths, ink and bone and `currentColor` variants); the header inlines the `currentColor` one at 28 px high (24 px on a phone) so no live text spells the name. `favicon.svg` is the j at 72% of the tile with a 0.03 em stroke, on night, and inverts with the system theme; `favicon-32.png` and the opaque 180 px `apple-touch-icon.png` come from `tools/icons.mjs`. `npm run brand` rewrites all of them. Type is a named scale in `brand.css` (`--fs-*`, `--track-*`): labels at 12 px, small 14, body 17 (16 on a phone), tags and edge markers in serif at 17 (16 on a phone), and no stylesheet declares a literal size or tracking. The book's and the clone's cards end with the same lockup (a mono preposition and the wordmark at 20 px; *by* / *with*, *de* / *con*), and the clone's also says it is a program built from what he wrote and not him. Hairlines, no shadows,
 square corners, round dots. `design/index.html` shows all of it.
 
 ## Tests
@@ -436,8 +436,10 @@ square corners, round dots. `design/index.html` shows all of it.
   *usted*, *ratón*, *Saluda* or *anillo vacío*, « » in Spanish and “ ” in English; the offer named *my clone* / *mi clon*.
 - `design.test.mjs`: the brand page against `brand.css` (twelve neutral tokens, true contrast ratios, no stray colour in
   any stylesheet), the stations table, the interface controls and the sky numbers and figure against the home page and the code, the
-  proposal boards against the ROADMAP, the absence of a blog, and
-  the outlined brand files.
+  proposal boards against the ROADMAP, the absence of a blog, the outlined brand files and the type scale (every size and
+  tracking is a token, none below 12 px, no serif under 16 px). `pages.test.mjs` also checks that the header is the outlined
+  wordmark, that the brand files and icons match what the tools generate, that the favicon keeps its ink at 16, 32 and 180 px in
+  both lights (rendered in Node with resvg) and that both cards end with the lockup.
 - `browser/immersive.test.mjs`: Chromium with SwiftShader WebGL: the accessibility tree and the keyboard, the card, Earlier
   and Later, hashes (including malformed ones) and the address, the canvas drawing in both themes, night as the first
   look and the switch to paper remembered across pages, language redirects, the flat fallbacks and the size switch,

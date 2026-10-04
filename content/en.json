@@ -7,6 +7,7 @@
   },
   "ui": {
     "skip": "Skip to content",
+    "lockup": { "book": "by", "clone": "with" },
     "hint": "Drag to explore · scroll or pinch to zoom",
     "switchLabel": "Español",
     "navLabel": "Sections",
@@ -149,7 +150,8 @@
     }
   },
   "clone": {
-    "kicker": "08 / Talk to me",
+    "disclosure": "It is a program built from what I wrote; it is not me.",
+    "kicker": "08 / What I'd tell you",
     "ask": {
       "label": "Questions for my clone",
       "title": "Ask, and see what it would draw on",

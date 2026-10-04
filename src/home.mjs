@@ -1,5 +1,5 @@
 import { esc, homePath, kicker, otherLang } from "./html.mjs";
-import { footer, head, masthead, personLd, tools, websiteLd } from "./layout.mjs";
+import { footer, head, masthead, personLd, tools, websiteLd, wordmark } from "./layout.mjs";
 import { FACETS } from "../assets/js/life.js";
 import { explore, stats } from "./explore.mjs";
 import { rail } from "./rail.mjs";
@@ -35,6 +35,8 @@ const waitlist = (site, d, list) => {
             <p class="status" role="status" aria-live="polite"></p>
           </form>`;
 };
+
+const lockup = (d, kind) => `<p class="lockup"><span class="prep">${esc(d.ui.lockup[kind])}</span><span class="brand-mark">${wordmark}<span class="visually-hidden">javi</span></span></p>`;
 
 const countdown = (site, d) =>
   site.book.date
@@ -128,6 +130,7 @@ export function home({ site, life, dict }, lang) {
             <p class="kicker">${kicker(d.book.kicker)}</p>
             <h2 class="h2">${d.book.title}</h2>
             <p>${esc(d.book.body)}</p>${countdown(site, d)}
+            ${lockup(d, "book")}
           </div>
           ${waitlist(site, d, "book")}
         </div>
@@ -139,6 +142,8 @@ export function home({ site, life, dict }, lang) {
             <p class="kicker">${kicker(d.clone.kicker)}</p>
             <h2 class="h2">${d.clone.title}</h2>
             <p>${esc(d.clone.body)}</p>${asks(life, d)}
+            <p class="note">${esc(d.clone.disclosure)}</p>
+            ${lockup(d, "clone")}
           </div>
           ${waitlist(site, d, "clone")}
         </div>

@@ -165,6 +165,8 @@
         <ul class="plain" style="margin-top: 40px">
           <li>Never in dots, in colour, in outline, in roman, stretched or on a busy picture without the translucent ground of a panel.</li>
           <li>The wordmark is always <code>javi</code> in lowercase italic; the monogram is the <code>j</code>.</li>
+          <li>One author, two works: the book's card and the clone's card end with a mono preposition and the wordmark at 20 px (<em>by javi</em>, <em>with javi</em>; <em>de javi</em>, <em>con javi</em>). The clone's card also says in one sentence that it is not him.</li>
+          <li>The header draws the wordmark as the outlined SVG, inline, in the text colour, 28 px high (24 px on a phone); <code>tools/wordmark.mjs</code> generates the files from the font and a test fails when they drift.</li>
         </ul>
       </section>
 
@@ -218,8 +220,20 @@
           <div><p class="kicker">Milestone title · Instrument Serif</p><p class="h3">A book: CoffeeScript</p></div>
           <div><p class="kicker">Lede and body · Geist</p><p class="lede">I'm Javi. These are the moments that made me, from a farmhouse in the Basque Country to today.</p></div>
           <div><p class="kicker">Label · Geist Mono, 0.18em, uppercase</p><p class="kicker"><b>02</b> / The craft · 2001–2011</p></div>
-          <div><p class="kicker">Date · Geist Mono, 0.14em, uppercase</p><p class="mono" style="font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted)">Jun 2001 · ~1981 · 2020</p></div>
+          <div><p class="kicker">Date · Geist Mono, 0.12em, uppercase</p><p class="mono" style="font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted)">Jun 2001 · ~1981 · 2020</p></div>
         </div>
+        <p class="kicker" style="margin: 48px 0 20px">The scale · tokens in brand.css</p>
+        <table>
+          <thead><tr><th>Token</th><th>Size</th><th>Use</th></tr></thead>
+          <tbody>
+            <tr><td>--fs-label</td><td>12 px mono, 0.12em, capitals</td><td>Anchors, dates, counts; nothing structural is smaller, and muted ink over the scene only at 12 px or more</td></tr>
+            <tr><td>--fs-small</td><td>14 px sans</td><td>Notes, forms, status</td></tr>
+            <tr><td>--fs-body</td><td>17 px sans (16 px on a phone)</td><td>Reading</td></tr>
+            <tr><td>--fs-tag</td><td>17 px serif italic (16 px on a phone)</td><td>Relations and edge markers; no serif is drawn smaller</td></tr>
+            <tr><td>--fs-title</td><td>26 px serif italic</td><td>The open memory's heading</td></tr>
+            <tr><td>--fs-display, --fs-h2, --fs-h3</td><td>Fluid, as today</td><td>Card titles and the hero</td></tr>
+          </tbody>
+        </table>
       </section>
 
       <section id="sky">
@@ -418,8 +432,11 @@
           <tbody>
             <tr><td>assets/brand/javi-ink.svg</td><td>The wordmark in ink, outlined</td></tr>
             <tr><td>assets/brand/javi-bone.svg</td><td>The wordmark in bone, outlined</td></tr>
+            <tr><td>assets/brand/javi-current.svg</td><td>The wordmark in the text colour, inlined in every header</td></tr>
             <tr><td>assets/brand/monogram-*.svg</td><td>The j in ink and in bone</td></tr>
-            <tr><td>favicon.svg</td><td>The j on night, inverting with the system theme</td></tr>
+            <tr><td>favicon.svg</td><td>The j at 72% of the tile with a 0.03 em stroke, on night, inverting with the system theme</td></tr>
+            <tr><td>favicon-32.png</td><td>PNG fallback at 32 px, from tools/icons.mjs</td></tr>
+            <tr><td>apple-touch-icon.png</td><td>180 px opaque square for the iOS home screen</td></tr>
             <tr><td>og-image.png</td><td>The hero in the dark theme, made by <code>npm run og</code></td></tr>
             <tr><td>assets/avatar.jpg</td><td>The masked portrait, used as the person's image in the page data</td></tr>
             <tr><td>assets/fonts/</td><td>Instrument Serif, Geist, Geist Mono and their licences</td></tr>

@@ -11,10 +11,13 @@
     "serve": "python3 -m http.server ${PORT:-4173}",
     "og": "node tools/og.mjs",
     "browsers": "playwright-core install chromium-headless-shell",
-    "import": "node tools/import.mjs"
+    "import": "node tools/import.mjs",
+    "brand": "node tools/wordmark.mjs && node tools/icons.mjs"
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "esbuild": "0.25.10",
+    "fontkit": "^2.0.4",
     "playwright-core": "1.63.0"
   }
 }

@@ -186,3 +186,20 @@ test("the stations named in SPEC and AGENTS exist in the code", () => {
   assert.match(spec, /galax/);
   assert.doesNotMatch(spec, /river/i);
 });
+
+test("type is a named scale: every size and tracking is a token, nothing structural is below 12 px and no serif is under 16 px", () => {
+  const tokens = Object.fromEntries([...css.matchAll(/--((?:fs|track)-[\w-]+):\s*([^;]+);/g)].map((m) => [m[1], m[2].trim()]));
+  assert.ok(Object.keys(tokens).length > 15);
+  for (const file of ["assets/brand.css", "assets/site.css", "assets/page.css"]) {
+    const sheet = read(file);
+    for (const [, property, value] of sheet.matchAll(/(?<![-\w])(font-size|letter-spacing):\s*([^;}]+)/g)) {
+      const ok = /^var\(--(?:fs|track)-[\w-]+\)$/.test(value.trim()) || (property === "letter-spacing" && ["0", "normal"].includes(value.trim())) || value.trim() === "inherit";
+      assert.ok(ok, `${file}: ${property}: ${value} is not a token`);
+    }
+    for (const [, name] of sheet.matchAll(/var\(--((?:fs|track)-[\w-]+)\)/g)) assert.ok(name in tokens, `${file}: --${name} is not defined`);
+  }
+  const px = (name) => Number(tokens[name].match(/^(\d+)px$/)[1]);
+  for (const name of ["fs-label", "fs-small", "fs-text", "fs-body", "fs-tag", "fs-tag-phone", "fs-title"]) assert.ok(px(name) >= 12, `${name} is at least 12 px`);
+  assert.equal(px("fs-label"), 12);
+  assert.ok(px("fs-tag") >= 17 && px("fs-tag-phone") >= 16 && px("fs-title") >= 17, "a serif is never drawn under 17 px (16 on a phone)");
+});

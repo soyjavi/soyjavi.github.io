@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { esc, homePath, jsonLd, otherLang } from "./html.mjs";
 
 export const CSP = [
@@ -8,6 +9,8 @@ export const CSP = [
   "form-action 'self' https://buttondown.com",
   "base-uri 'self'",
 ].join("; ");
+
+export const wordmark = readFileSync(new URL("../assets/brand/javi-current.svg", import.meta.url), "utf8").trim().replace(/ role="img" aria-label="javi"/, ' aria-hidden="true" focusable="false"');
 
 const OG_LOCALE = { en: "en_US", es: "es_ES" };
 
@@ -38,6 +41,8 @@ export function head({ site, dict, lang, title, description, path, alternates, t
     <meta name="twitter:image" content="${site.url}/og-image.png" />
     <meta name="theme-color" content="#0c0c0b" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="preload" href="/assets/fonts/geist.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/assets/fonts/instrument-serif-italic.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="/assets/brand.css" />${extra}
@@ -55,7 +60,7 @@ export function masthead({ dict, lang, nav, switchHref, brandHref, controls = ""
   const links = nav.map(({ label, href, go, cta }) => `<a href="${href}"${go ? ` data-go="${go}"` : ""}${cta ? ' class="cta"' : ""}>${esc(label)}</a>`).join("\n        ");
   return `<a class="skip" href="#main">${esc(dict.ui.skip)}</a>
     <header class="masthead">
-      <a class="brand" href="${brandHref}"${brandHref.startsWith("#") ? ' data-go="top"' : ""} aria-label="Javi">javi</a>
+      <a class="brand" href="${brandHref}"${brandHref.startsWith("#") ? ' data-go="top"' : ""} aria-label="Javi">${wordmark}</a>
       <nav aria-label="${esc(dict.ui.navLabel)}">
         ${links}
       </nav>

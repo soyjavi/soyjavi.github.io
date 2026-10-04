@@ -43,8 +43,8 @@ main {
 
 .countdown {
   font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.14em;
+  font-size: var(--fs-label);
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   color: var(--soft);
 }
@@ -78,7 +78,7 @@ main {
 
 .ask-answers {
   margin-top: 4px;
-  font-size: 14px;
+  font-size: var(--fs-small);
   color: var(--muted);
 }
 
@@ -89,7 +89,7 @@ main {
 button.ask-q {
   padding: 8px 14px;
   font: inherit;
-  font-size: 14px;
+  font-size: var(--fs-small);
   line-height: 1.35;
   text-align: left;
   color: var(--soft);
@@ -113,8 +113,8 @@ button.ask-q[aria-pressed="true"] {
 .actions .link {
   padding: 10px 0;
   font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.14em;
+  font-size: var(--fs-label);
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   text-underline-offset: 4px;
   color: var(--soft);
@@ -161,8 +161,8 @@ button.ask-q[aria-pressed="true"] {
 
 .milestones time {
   font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.14em;
+  font-size: var(--fs-label);
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   color: var(--muted);
 }
@@ -183,7 +183,7 @@ button.ask-q[aria-pressed="true"] {
   flex-wrap: wrap;
   gap: 8px 22px;
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: var(--fs-label);
 }
 
 .proof a {
@@ -206,8 +206,8 @@ button.ask-q[aria-pressed="true"] {
 
 .waitlist label {
   font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.14em;
+  font-size: var(--fs-label);
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   color: var(--soft);
 }
@@ -223,7 +223,7 @@ button.ask-q[aria-pressed="true"] {
   min-width: 0;
   padding: 15px 16px;
   font: inherit;
-  font-size: 16px;
+  font-size: var(--fs-text);
   color: var(--fg);
   background: var(--raised);
   border: 1px solid var(--line);
@@ -237,7 +237,7 @@ button.ask-q[aria-pressed="true"] {
 
 .waitlist .note,
 .waitlist .status {
-  font-size: 14px;
+  font-size: var(--fs-small);
   color: var(--muted);
 }
 
@@ -252,8 +252,8 @@ button.ask-q[aria-pressed="true"] {
 
 .button.address {
   text-transform: none;
-  letter-spacing: 0.02em;
-  font-size: 14px;
+  letter-spacing: 0;
+  font-size: var(--fs-small);
 }
 
 .stats {
@@ -266,8 +266,8 @@ ul.facets {
   flex-wrap: wrap;
   gap: 6px 16px;
   font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
+  font-size: var(--fs-label);
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   color: var(--muted);
 }
@@ -332,8 +332,8 @@ ul.facets {
 .chip,
 .legend button {
   font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
+  font-size: var(--fs-label);
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   color: var(--soft);
   background: transparent;
@@ -384,8 +384,8 @@ ul.facets {
   content: attr(aria-label) / "";
   margin-right: 6px;
   font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
+  font-size: var(--fs-label);
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   color: var(--muted);
 }
@@ -426,7 +426,7 @@ ul.facets {
   width: 100%;
   padding: 12px 14px;
   font: inherit;
-  font-size: 16px;
+  font-size: var(--fs-text);
   color: var(--fg);
   background: var(--raised);
   border: 1px solid var(--line);
@@ -479,22 +479,22 @@ ul.facets {
 
 .finder .preview time {
   font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.14em;
+  font-size: var(--fs-label);
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   color: var(--muted);
 }
 
 .finder .preview strong {
   font-family: var(--serif);
-  font-size: 26px;
+  font-size: var(--fs-title);
   font-weight: 400;
   line-height: 1.05;
   color: var(--fg);
 }
 
 .finder .preview p {
-  font-size: 14px;
+  font-size: var(--fs-small);
   line-height: 1.5;
   color: var(--soft);
 }
@@ -502,15 +502,15 @@ ul.facets {
 .finder .results .group {
   padding: 12px 0 4px;
   font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
+  font-size: var(--fs-label);
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   color: var(--muted);
 }
 
 .finder .none {
   grid-column: 1 / -1;
-  font-size: 14px;
+  font-size: var(--fs-small);
   color: var(--muted);
 }
 
@@ -565,11 +565,11 @@ ul.facets {
 }
 
 .card[data-fit="2"] .display {
-  font-size: clamp(40px, 5vh, 56px);
+  font-size: var(--fs-display-fit);
 }
 
 .card[data-fit="3"] .card-form .note {
-  font-size: 12px;
+  font-size: var(--fs-label);
   line-height: 1.35;
 }
 
@@ -587,7 +587,7 @@ ul.facets {
 }
 
 .card[data-fit="3"] .display {
-  font-size: 30px;
+  font-size: var(--fs-heading-sm);
 }
 
 .card[data-fit="3"] .card-form {
@@ -600,8 +600,8 @@ ul.facets {
 
 .card[data-fit="3"] .actions .link {
   padding: 4px 0;
-  font-size: 11px;
-  letter-spacing: 0.08em;
+  font-size: var(--fs-label);
+  letter-spacing: var(--track-label);
 }
 
 .card[data-fit="3"] .waitlist {
@@ -625,7 +625,7 @@ ul.facets {
   height: 36px;
   padding: 0;
   font-family: var(--mono);
-  font-size: 16px;
+  font-size: var(--fs-text);
   color: var(--soft);
   background: none;
   border: 0;
@@ -647,43 +647,43 @@ ul.facets {
 }
 
 .card .kicker {
-  font-size: 12px;
+  font-size: var(--fs-label);
 }
 
 .card .h2 {
-  font-size: 40px;
+  font-size: var(--fs-heading);
 }
 
 .card .h3 {
-  font-size: 40px;
+  font-size: var(--fs-heading);
   line-height: 1.04;
 }
 
 .card .display {
-  font-size: clamp(56px, 6.2vw, 88px);
+  font-size: var(--fs-display-card);
   line-height: 0.95;
 }
 
 .card[data-kind="contact"] .display {
-  font-size: clamp(48px, 5vw, 72px);
+  font-size: var(--fs-display-contact);
 }
 
 .card .lede,
 .card-body p:not(.kicker) {
-  font-size: 17px;
+  font-size: var(--fs-body);
   line-height: 1.55;
   color: var(--soft);
   max-width: none;
 }
 
 .card .lede {
-  font-size: 18px;
+  font-size: var(--fs-lede-card);
 }
 
 .card time {
   font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.14em;
+  font-size: var(--fs-label);
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   color: var(--muted);
 }
@@ -695,7 +695,7 @@ ul.facets {
 }
 
 .card .period-head .h2 {
-  font-size: 32px;
+  font-size: var(--fs-heading-sm);
 }
 
 .card .stats {
@@ -707,7 +707,7 @@ ul.facets {
 }
 
 .card .proof {
-  font-size: 15px;
+  font-size: var(--fs-small);
 }
 
 .card .w {
@@ -766,7 +766,7 @@ ul.facets {
   padding: 7px 0;
   text-align: left;
   font: inherit;
-  font-size: 16px;
+  font-size: var(--fs-text);
   color: var(--soft);
   background: none;
   border: 0;
@@ -774,7 +774,7 @@ ul.facets {
 }
 
 .peer time {
-  font-size: 11px;
+  font-size: var(--fs-label);
 }
 
 .peer:hover {
@@ -793,7 +793,7 @@ ul.facets {
   content: "↗";
   content: "↗" / "";
   color: var(--muted);
-  font-size: 14px;
+  font-size: var(--fs-small);
 }
 
 .minimap {
@@ -864,7 +864,7 @@ ul.facets {
   border: 0;
   background: none;
   font-family: var(--serif);
-  font-size: 15px;
+  font-size: var(--fs-tag);
   line-height: 1.2;
   white-space: nowrap;
   color: var(--soft);
@@ -886,8 +886,8 @@ ul.facets {
   margin-top: 8px;
   padding: 6px 0;
   font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
+  font-size: var(--fs-label);
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   color: var(--soft);
   background: none;
@@ -991,8 +991,8 @@ ul.facets {
   right: 0;
   bottom: 2px;
   font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
+  font-size: var(--fs-label);
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   color: var(--soft);
   pointer-events: none;
@@ -1013,8 +1013,8 @@ ul.facets {
 .step {
   padding: 8px 0;
   font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.12em;
+  font-size: var(--fs-label);
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   color: var(--soft);
   background: none;
@@ -1043,7 +1043,7 @@ ul.facets {
   gap: 8px;
   white-space: nowrap;
   font-family: var(--serif);
-  font-size: 15px;
+  font-size: var(--fs-tag);
   line-height: 1;
   color: var(--soft);
   opacity: 0;
@@ -1101,7 +1101,7 @@ ul.facets {
 }
 
 .tag[data-hot="1"] {
-  font-size: 22px;
+  font-size: var(--fs-hot);
   color: var(--fg);
   animation: drift 7s ease-in-out infinite;
 }
@@ -1118,9 +1118,9 @@ ul.facets {
 
 .tag b {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: var(--fs-label);
   font-weight: 400;
-  letter-spacing: 0.12em;
+  letter-spacing: var(--track-label);
   color: var(--muted);
 }
 
@@ -1130,7 +1130,7 @@ ul.facets {
   top: 0;
   font-family: var(--serif);
   font-style: italic;
-  font-size: 15px;
+  font-size: var(--fs-tag);
   color: var(--soft);
   opacity: 0;
   visibility: hidden;
@@ -1141,9 +1141,9 @@ ul.facets {
 
 .ahead.now {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: var(--fs-label);
   font-style: normal;
-  letter-spacing: 0.1em;
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   color: var(--muted);
 }
@@ -1155,8 +1155,8 @@ ul.facets {
   translate: -50% -50%;
   padding: 6px 8px;
   font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.14em;
+  font-size: var(--fs-label);
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   white-space: nowrap;
   color: var(--muted);
@@ -1184,8 +1184,8 @@ ul.facets {
   top: 0;
   translate: -50% -50%;
   font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
+  font-size: var(--fs-label);
+  letter-spacing: var(--track-label);
   color: var(--muted);
   opacity: 0;
   visibility: hidden;
@@ -1262,8 +1262,8 @@ ul.facets {
 
 .rail-name {
   font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
+  font-size: var(--fs-label);
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -1403,8 +1403,8 @@ ul.facets {
   padding: 6px 10px;
   white-space: nowrap;
   font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.08em;
+  font-size: var(--fs-label);
+  letter-spacing: var(--track-label);
   color: var(--fg);
   background: var(--bg);
   border: 1px solid var(--line);
@@ -1432,8 +1432,8 @@ ul.facets {
   display: inline-block;
   padding: 2px 4px 2px 0;
   font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
+  font-size: var(--fs-label);
+  letter-spacing: var(--track-label);
   color: var(--muted);
   text-decoration: none;
 }
@@ -1576,16 +1576,16 @@ html:not(.immersive) .masthead {
 
   .card .h2,
   .card .h3 {
-    font-size: 30px;
+    font-size: var(--fs-heading-sm);
   }
 
   .card .display {
-    font-size: 46px;
+    font-size: var(--fs-heading-lg);
   }
 
   .card .lede,
   .card-body p:not(.kicker) {
-    font-size: 16px;
+    font-size: var(--fs-text);
   }
 
   .card .cue {
@@ -1593,11 +1593,11 @@ html:not(.immersive) .masthead {
   }
 
   .tag {
-    font-size: 14px;
+    font-size: var(--fs-tag-phone);
   }
 
   .tag[data-hot="1"] {
-    font-size: 19px;
+    font-size: var(--fs-hot-phone);
   }
 }
 
@@ -1618,8 +1618,8 @@ html:not(.immersive) .masthead {
   }
 
   .rail-name {
-    font-size: 9px;
-    letter-spacing: 0.04em;
+    font-size: var(--fs-label);
+    letter-spacing: 0;
   }
 }
 
@@ -1689,7 +1689,7 @@ html:not(.immersive) .explore .sheet {
   grid-template-columns: 28px 1fr;
   gap: 12px;
   align-items: center;
-  font-size: 14px;
+  font-size: var(--fs-small);
   line-height: 1.35;
   color: var(--soft);
 }
@@ -1744,8 +1744,8 @@ html:not(.immersive) .explore .sheet {
 
 .guide .keys {
   font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
+  font-size: var(--fs-label);
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   color: var(--muted);
 }
@@ -1783,7 +1783,7 @@ html[data-focus="1"] .labels {
   }
 
   .immersive .brand {
-    font-size: 28px;
+    --brand-height: 24px;
   }
 
   .immersive .controls {
@@ -1866,7 +1866,7 @@ html[data-focus="1"] .labels {
   }
 
   .guide li {
-    font-size: 13px;
+    font-size: var(--fs-small);
   }
 
   .guide .keys {
@@ -1965,8 +1965,8 @@ html[data-focus="1"] .edge-mark {
   gap: 4px;
   padding: 0 0 0 12px;
   font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
+  font-size: var(--fs-label);
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   color: var(--soft);
   background: color-mix(in srgb, var(--bg) 90%, transparent);
@@ -2000,4 +2000,25 @@ html[data-focus="1"] .edge-mark {
 html:not(.immersive) .nudge,
 html[data-focus="1"] .nudge {
   display: none;
+}
+
+.lockup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 22px 0 0;
+  color: var(--soft);
+}
+
+.lockup .prep {
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+}
+
+.lockup .brand-mark svg {
+  display: block;
+  width: auto;
+  height: 20px;
 }

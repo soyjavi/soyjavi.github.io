@@ -145,7 +145,7 @@ const touch = async (page, steps) => {
 
 const BORN = "01 / Origins · Born in Bilbao";
 const BOOK = "07 / The book";
-const CLONE = "08 / Talk to me";
+const CLONE = "08 / What I'd tell you";
 const LISTS = [["book", BOOK], ["clone", CLONE]];
 const TAPQUO = "03 / TapQuo · TapQuo";
 const PHONE = { hasTouch: true, isMobile: true, viewport: { width: 390, height: 844 } };
@@ -1176,7 +1176,7 @@ test("each waitlist card keeps its copy and its form on screen, with the email f
       for (const list of ["book", "clone"]) {
         if (list === "clone") {
           await page.locator(".step[data-step=next]").click();
-          await hud(page, lang === "es" ? "08 / Habla conmigo" : CLONE);
+          await hud(page, lang === "es" ? "08 / Lo que te diría" : CLONE);
         }
         await page.waitForTimeout(500);
         const where = `${lang} ${list} ${width}x${height}`;
@@ -2039,7 +2039,7 @@ test("with five questions the clone's card still shows its email field on laptop
       const { page, close } = await open(lang === "es" ? "/es/" : "/", { viewport: { width, height }, locale: lang === "es" ? "es-ES" : "en-US", hasTouch: mobile, isMobile: mobile, before: withQuestions(lang) });
       await immersive(page);
       await goTo(page, "clone");
-      await hud(page, lang === "es" ? "08 / Habla conmigo" : CLONE);
+      await hud(page, lang === "es" ? "08 / Lo que te diría" : CLONE);
       await page.waitForTimeout(500);
       const where = `${lang} ${width}x${height}`;
       const [card, field] = [await box(page, ".card"), await box(page, "#waitlist-clone-email")];
