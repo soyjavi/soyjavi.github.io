@@ -36,6 +36,7 @@ export function head({ site, dict, lang, title, description, path, alternates, t
     <meta property="og:locale" content="${OG_LOCALE[lang]}" />
     <meta property="og:title" content="${esc(title)}" />
     <meta property="og:description" content="${esc(description)}" />
+    <meta name="twitter:description" content="${esc(description)}" />
     <meta property="og:image" content="${site.url}/og-image.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="${site.url}/og-image.png" />

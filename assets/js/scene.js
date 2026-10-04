@@ -14,6 +14,8 @@ const MAX_LINKS = 40;
 const DRAG_PIXELS = 6;
 const RING_SPREAD = 0.5;
 const RATE = 4.2;
+const DOT_MAX = 900;
+const DOT_GAP = 10;
 const DRIFT = { rate: 0.11, yaw: 0.14, pitch: 0.02, rest: 2.5 };
 
 export function createScene({ canvas, cloud, marks, future, today, mobile, sky, kinds = [] }) {
@@ -144,6 +146,74 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
     return material;
   };
   const geometryOf = (vertices) => new THREE.BufferGeometry().setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+  const dotMap = (() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 32;
+    const ctx = canvas.getContext("2d");
+    const gradient = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
+    gradient.addColorStop(0, "rgba(255,255,255,1)");
+    gradient.addColorStop(0.5, "rgba(255,255,255,1)");
+    gradient.addColorStop(0.75, "rgba(255,255,255,0.3)");
+    gradient.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 32, 32);
+    return new THREE.CanvasTexture(canvas);
+  })();
+  let dotSize = 1.6;
+  const dotScratch = new THREE.Vector3();
+  const dotScreen = new Float32Array(3 * 1024);
+  const dottedPath = (opacity) => {
+    const positions = new Float32Array(DOT_MAX * 3);
+    const attribute = new THREE.BufferAttribute(positions, 3).setUsage(THREE.DynamicDrawUsage);
+    const geometry = new THREE.BufferGeometry().setAttribute("position", attribute);
+    geometry.setDrawRange(0, 0);
+    const material = new THREE.PointsMaterial({ map: dotMap, size: 3, sizeAttenuation: false, transparent: true, depthTest: false, depthWrite: false });
+    if (opacity) lineMaterials.push({ material, opacity });
+    const points = new THREE.Points(geometry, material);
+    points.frustumCulled = false;
+    points.userData.lay = (vertices, closed = false) => {
+      const count = vertices.length / 3;
+      const total = Math.min(1023, closed ? count + 1 : count);
+      for (let i = 0; i < total; i++) {
+        const j = (i % count) * 3;
+        dotScratch.set(vertices[j], vertices[j + 1], vertices[j + 2]).project(camera);
+        dotScreen[i * 3] = (dotScratch.x * 0.5 + 0.5) * innerWidth;
+        dotScreen[i * 3 + 1] = (-dotScratch.y * 0.5 + 0.5) * innerHeight;
+        dotScreen[i * 3 + 2] = dotScratch.z > -1 && dotScratch.z < 1 ? 1 : 0;
+      }
+      let carry = 0;
+      let out = 0;
+      for (let i = 0; i < total - 1 && out < DOT_MAX; i++) {
+        const [x0, y0, ok0, x1, y1, ok1] = [dotScreen[i * 3], dotScreen[i * 3 + 1], dotScreen[i * 3 + 2], dotScreen[i * 3 + 3], dotScreen[i * 3 + 4], dotScreen[i * 3 + 5]];
+        if (!ok0 || !ok1) {
+          carry = 0;
+          continue;
+        }
+        const length = Math.hypot(x1 - x0, y1 - y0);
+        if (length < 1e-6) continue;
+        const margin = 120;
+        const outside = (x, y) => (x < -margin ? 1 : x > innerWidth + margin ? 2 : 0) | (y < -margin ? 4 : y > innerHeight + margin ? 8 : 0);
+        if (outside(x0, y0) & outside(x1, y1)) {
+          carry = (((carry - length) % DOT_GAP) + DOT_GAP) % DOT_GAP;
+          continue;
+        }
+        const a = (i % count) * 3;
+        const b = ((i + 1) % count) * 3;
+        while (carry <= length && out < DOT_MAX) {
+          const t = carry / length;
+          for (let k = 0; k < 3; k++) positions[out * 3 + k] = vertices[a + k] + (vertices[b + k] - vertices[a + k]) * t;
+          out++;
+          carry += DOT_GAP;
+        }
+        carry -= length;
+      }
+      geometry.setDrawRange(0, out);
+      attribute.needsUpdate = true;
+      material.size = dotSize * renderer.getPixelRatio();
+    };
+    return points;
+  };
+  const dotPaths = [];
   const guides = new THREE.Group();
   const addGuide = (object, opacity, year = START) => {
     object.frustumCulled = false;
@@ -167,45 +237,47 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
       const centre = sky.list[k].centre;
       const lines = addGuide(new THREE.LineSegments(geometryOf(figure.map((value, n) => value - centre[n % 3])), lineMaterial(0.34)), 0.34, sky.list[k].end);
       lines.position.set(...centre);
+      lines.userData.constellation = true;
       turning.push({ lines, k });
     });
     const arc = (from, to) => {
       const vertices = [];
       const steps = Math.max(8, Math.ceil((to - from) / 1.5));
       for (let step = 0; step <= steps; step++) vertices.push(...onPath(sky, from + ((to - from) * step) / steps));
-      return geometryOf(vertices);
+      return vertices;
     };
     sky.list.forEach((galaxy, k) => {
       const outline = [];
-      for (let step = 0; step <= 120; step++) {
+      for (let step = 0; step < 120; step++) {
         const angle = (Math.PI * 2 * step) / 120;
-        outline.push(galaxy.centre[0] + (galaxy.radius + 1.6) * Math.sin(angle), galaxy.centre[1] + (galaxy.radius + 1.6) * Math.cos(angle), galaxy.centre[2]);
+        const point = dotScratch.set(Math.sin(angle), Math.cos(angle), 0).multiplyScalar(galaxy.radius + 1.6);
+        outline.push(galaxy.centre[0] + point.x, galaxy.centre[1] + point.y, galaxy.centre[2] + point.z);
       }
-      const ring = new THREE.Line(geometryOf(outline), lineMaterial(0.16, true));
-      ring.computeLineDistances();
-      addGuide(ring, 0.16, galaxy.start);
+      const dotted = addGuide(dottedPath(0.42), 0.42, galaxy.start);
+      dotted.userData.dots = true;
+      dotPaths.push({ points: dotted, vertices: outline, closed: true });
       const next = sky.list[k + 1];
-      if (next) addGuide(new THREE.Line(arc(galaxy.along + galaxy.radius + 1.6, next.along - next.radius - 1.6), lineMaterial(0.22)), 0.22, next.start);
+      if (next) {
+        const between = addGuide(dottedPath(0.5), 0.5, next.start);
+        between.userData.dots = true;
+        dotPaths.push({ points: between, vertices: arc(galaxy.along + galaxy.radius + 1.6, next.along - next.radius - 1.6), closed: false });
+      }
     });
     const final = sky.list.at(-1);
-    const ahead = new THREE.Line(arc(final.along + final.radius + 1.6, sky.length), lineMaterial(0.36, true));
-    ahead.computeLineDistances();
-    addGuide(ahead, 0.36, today);
+    const ahead = addGuide(dottedPath(0.55), 0.55, today);
+    ahead.userData.dots = true;
+    dotPaths.push({ points: ahead, vertices: arc(final.along + final.radius + 1.6, sky.length), closed: false });
   };
   constellations();
   scene.add(guides);
-
   const MAX_RING_LINES = 8;
-  const unitCircle = [];
-  for (let step = 0; step <= 120; step++) unitCircle.push(Math.sin((Math.PI * 2 * step) / 120), Math.cos((Math.PI * 2 * step) / 120), 0);
-  const ringLines = Array.from({ length: MAX_RING_LINES }, () => {
-    const line = new THREE.Line(geometryOf(unitCircle), lineMaterial(0.3, true));
-    line.computeLineDistances();
-    line.frustumCulled = false;
-    line.visible = false;
-    scene.add(line);
-    return line;
+  const ringDots = Array.from({ length: MAX_RING_LINES }, () => {
+    const points = dottedPath(0);
+    points.visible = false;
+    scene.add(points);
+    return points;
   });
+  const ringVertices = new Float32Array(96 * 3);
   const yearRing = { list: [], centre: [0, 0, 0], want: 0, fade: 0 };
 
   const linkBuffer = (opacity) => {
@@ -525,7 +597,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
     const form = smoothstep(0.25, 0.9, intro);
     const drawn = Math.min(formed, state.reveal ?? Infinity);
     guides.visible = form > 0.01;
-    guides.children.forEach((object) => (object.material.opacity = object.userData.opacity * form * Math.min(1, Math.max(0, (drawn - object.userData.year) / 2))));
+    guides.children.forEach((object) => (object.material.opacity = object.userData.opacity * form * (object.userData.constellation ? 1 - far : 1) * (object.userData.dots ? 0.5 + 0.25 * (1 - far) : 1) * Math.min(1, Math.max(0, (drawn - object.userData.year) / 2))));
     previewLine.indices = state.preview >= 0 && state.selection >= 0 && state.preview !== state.selection ? [state.preview] : [];
     for (const links of [strong, soft, previewLine]) {
       const want = links.indices.length ? 1 : 0;
@@ -545,15 +617,23 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
     }
 
     yearRing.fade += (yearRing.want - yearRing.fade) * (1 - Math.exp(-5 * dt));
-    ringLines.forEach((line, n) => {
+    dotSize = 0.95 + 0.3 * (1 - far);
+    dotPaths.forEach(({ points, vertices, closed }) => points.userData.lay(vertices, closed));
+    ringDots.forEach((points, n) => {
       const ring = yearRing.list[n];
-      line.visible = !!ring && yearRing.fade > 0.01;
-      if (!line.visible) return;
-      line.position.set(...yearRing.centre);
-      line.scale.setScalar(ring.radius);
-      line.material.dashSize = 0.5 / ring.radius;
-      line.material.gapSize = 1.6 / ring.radius;
-      line.material.opacity = 0.34 * yearRing.fade * form;
+      const shown = !!ring && yearRing.fade > 0.01;
+      points.visible = shown;
+      if (!shown) return;
+      for (let step = 0; step < 96; step++) {
+        const angle = (Math.PI * 2 * step) / 96;
+        const point = dotScratch.set(Math.sin(angle), Math.cos(angle), 0).multiplyScalar(ring.radius);
+        ringVertices[step * 3] = yearRing.centre[0] + point.x;
+        ringVertices[step * 3 + 1] = yearRing.centre[1] + point.y;
+        ringVertices[step * 3 + 2] = yearRing.centre[2] + point.z;
+      }
+      points.userData.lay(ringVertices, true);
+      points.material.color.copy(ink.value);
+      points.material.opacity = 0.26 * (1 - 0.5 * (n / Math.max(1, yearRing.list.length - 1))) * yearRing.fade * form;
     });
     const ringsTag = yearRing.want && yearRing.fade > 0.5 ? String(yearRing.list.length) : "";
     if (canvas.dataset.rings !== ringsTag) canvas.dataset.rings = ringsTag;

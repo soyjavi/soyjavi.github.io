@@ -594,7 +594,7 @@ async function start() {
 
   const updateNudge = () => {
     const station = stations[current];
-    const want = !invite.closed && invite.opened.size >= 3 && station.kind === "milestone";
+    const want = !invite.closed && invite.opened.size >= 3 && station.kind === "milestone" && !station.element.dataset.quiet;
     nudge.hidden = !want;
     if (!want) return;
     const target = invite.sawClone ? "clone" : "book";

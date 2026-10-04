@@ -61,3 +61,35 @@ test("the clone is named my clone in both languages on the site's cards and list
   assert.match(dict.en.hero.clone, /my clone/);
   assert.match(dict.es.hero.clone, /mi clon/);
 });
+
+test("the copy tells the same story in both languages: the hero, the book, the clone, the lists, the search snippet and the 404", () => {
+  const words = (text) => text.trim().split(/\s+/).length;
+  for (const [lang, parts] of Object.entries({
+    en: { went: "what went well and what went wrong", gone: "no longer here", ready: "isn't ready yet", clone: "My clone", write: "Write" },
+    es: { went: "lo que salió bien y lo que salió mal", gone: "ya no esté", ready: "Todavía no está listo", clone: "Mi clon", write: "Escríbeme" },
+  })) {
+    const d = dict[lang];
+    assert.ok(words(d.hero.lede) <= 45, `${lang}: the hero says it in 45 words or fewer`);
+    assert.ok(d.meta.description.length <= 155, `${lang}: the description fits a search result`);
+    assert.doesNotMatch(d.meta.description, /personal site|web personal|milestone|hitos/i);
+    assert.ok(d.book.body.includes(parts.went) && /hijos|children/.test(d.book.body), `${lang}: the book is for his children and for whoever wants it, honest about both halves`);
+    assert.ok(d.clone.body.includes(parts.gone) && d.clone.body.includes(parts.ready), `${lang}: the clone says what it is for and that it is not ready`);
+    assert.doesNotMatch(d.clone.body, /based on|basada|anyone|cualquiera|forever|answer/i);
+    assert.equal(d.ui.nav.clone, parts.clone);
+    assert.ok(d.clone.kicker.endsWith(parts.clone));
+    assert.match(d.contact.title, new RegExp(parts.write));
+    assert.doesNotMatch(d.notFound.title + d.notFound.home, /day|días|día/i, `${lang}: the 404 speaks of the sky, not of days`);
+  }
+  for (const file of ["index.html", "es/index.html"]) {
+    const html = read(file);
+    const description = html.match(/<meta name="description" content="([^"]*)"/)[1];
+    assert.equal(html.match(/<meta property="og:description" content="([^"]*)"/)[1], description);
+    assert.equal(html.match(/<meta name="twitter:description" content="([^"]*)"/)[1], description);
+  }
+});
+
+test("memories of loss are marked quiet: no invitation to a list appears on them", () => {
+  for (const id of ["grandfather", "floods", "separation"]) assert.match(read("index.html"), new RegExp(`<li id="m-${id}"[^>]*data-quiet="1"`), id);
+  assert.doesNotMatch(read("index.html"), /<li id="m-farmhouse"[^>]*data-quiet/);
+  assert.match(read("assets/js/engine.js"), /station\.kind === "milestone" && !station\.element\.dataset\.quiet/);
+});

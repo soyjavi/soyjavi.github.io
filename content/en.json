@@ -3,7 +3,7 @@
   "locale": "en_US",
   "meta": {
     "title": "Javi · A life in milestones",
-    "description": "Javi's personal site: a life from 1980 to today told in milestones, a book for my children and my clone. Join the waitlist for the book or my clone."
+    "description": "Javi's life from 1980 to today as a sky of memories, with a book for his children and a clone to keep talking with him. Join a waitlist."
   },
   "ui": {
     "skip": "Skip to content",
@@ -14,7 +14,7 @@
     "nav": {
       "life": "Life",
       "book": "The book",
-      "clone": "Talk to me",
+      "clone": "My clone",
       "contact": "Contact"
     },
     "theme": {
@@ -60,8 +60,8 @@
       "lit": "{n} memories light up: {names}",
       "all": "All related ({n})",
       "fewer": "Fewer",
-      "nudgebook": "Join the book's waitlist →",
-      "nudgeclone": "Join my clone's waitlist →",
+      "nudgebook": "Hear about the book →",
+      "nudgeclone": "Hear about my clone →",
       "nudgeclose": "Close",
       "menu": "More"
     },
@@ -75,7 +75,7 @@
       "title": "How to read this sky",
       "button": "How to read this sky",
       "cloud": "A cloud is a memory; the bigger it is, the more it changed",
-      "galaxy": "A dashed circle is a period of my life; time runs from its core to its rim",
+      "galaxy": "A dotted circle is a period of my life; time runs from its core to its rim",
       "line": "A line joins related memories",
       "ring": "A hollow ring is still ahead: the book and my clone",
       "today": "Today",
@@ -96,10 +96,10 @@
   "hero": {
     "kicker": "javi · 1980 – today",
     "title": "A life, <em>in milestones.</em>",
-    "lede": "I'm Javi. These are the moments that made me, from a farmhouse in the Basque Country to today. Each cloud of dots is a memory and each galaxy a stage of my life: open one, follow it to the next, or look for a person, a place or a thread. Work is one of many. Two things come next: a book for my children and my clone, a place to keep talking with me.",
+    "lede": "I'm Javi. This is my life from 1980 to today: a cloud of dots per memory, a galaxy per stage. Explore it as you like. Ahead: a book for my children, and my clone, for those who want to keep talking with me.",
     "primary": "Join the book's waitlist",
     "secondary": "Travel through it",
-    "clone": "Or join my clone's waitlist →",
+    "clone": "About my clone →",
     "region": "Join the book's waitlist"
   },
   "periods": {
@@ -136,9 +136,9 @@
   },
   "book": {
     "kicker": "07 / The book",
-    "expected": "Expected",
+    "expected": "Aiming for",
     "title": "A book <em>for my children.</em>",
-    "body": "I'm writing my story so that it serves them: what happened, what I learnt and who I was at each moment. It isn't ready yet. Leave your email and I'll tell you when it is.",
+    "body": "It's for my children, and for anyone who wants it: my life, what I've learnt, what went well and what went wrong. Leave your email and I'll write to you when it's out.",
     "form": {
       "label": "Your email",
       "placeholder": "you@example.com",
@@ -151,14 +151,14 @@
   },
   "clone": {
     "disclosure": "It is a program built from what I wrote; it is not me.",
-    "kicker": "08 / What I'd tell you",
+    "kicker": "08 / My clone",
     "ask": {
       "label": "Questions for my clone",
       "title": "Ask, and see what it would draw on",
       "draws": "Draws on:"
     },
-    "title": "My <em>clone.</em>",
-    "body": "I'm building a version of me that anyone can talk to, based on what I've written and gathered over the years. It isn't ready yet. Leave your email and I'll tell you when it is.",
+    "title": "A place to <em>keep talking.</em>",
+    "body": "I'm building my clone, a version of me for whoever wants to keep talking with me when I'm no longer here, especially those who knew me. It isn't ready yet.",
     "form": {
       "label": "Your email",
       "placeholder": "you@example.com",
@@ -171,15 +171,15 @@
   },
   "contact": {
     "kicker": "09 / Say hello",
-    "title": "Want to <em>talk?</em>",
+    "title": "Write <em>to me.</em>",
     "lede": "Email is best.",
     "elsewhere": "Elsewhere",
     "follow": "Follow me on X"
   },
   "notFound": {
-    "title": "Lost day · Javi",
-    "heading": "This day isn't on the calendar.",
+    "title": "Not found · Javi",
+    "heading": "This page isn't in the sky.",
     "body": "The page you wanted doesn't exist, or it moved.",
-    "home": "Back to the days"
+    "home": "Back to the sky"
   }
 }

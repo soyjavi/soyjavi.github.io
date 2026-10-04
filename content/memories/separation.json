@@ -1,6 +1,7 @@
 {
   "date": "1988-03",
   "kind": "personal",
+  "quiet": true,
   "weight": 2,
   "period": "origins",
   "threads": [

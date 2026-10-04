@@ -78,6 +78,7 @@ export function importArchive(data, dir = CONTENT) {
     const memory = { date, ...(entry.approx ? { approx: true } : {}), kind: entry.kind, weight: entry.weight, period: entry.period, threads: entry.threads };
     for (const key of LISTS) if (entry[key]?.length) memory[key] = entry[key];
     if (entry.order !== undefined) memory.order = entry.order;
+    if (entry.quiet) memory.quiet = true;
     for (const lang of LANGS) memory[lang] = { title: entry[lang]?.title, body: entry[lang]?.body };
     return [entry.id, memory];
   });

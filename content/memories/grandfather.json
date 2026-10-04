@@ -1,6 +1,7 @@
 {
   "date": "2025-02",
   "kind": "personal",
+  "quiet": true,
   "weight": 2,
   "period": "now",
   "threads": [

@@ -65,7 +65,7 @@ const milestone = (d, life, entry, head) => {
   const period = d.periods[entry.period];
   const attributes = FACETS.filter((facet) => life[facet]?.length && entry[facet]?.length).map((facet) => ` data-${facet}="${entry[facet].join(",")}"`).join("");
   const links = entry.links?.length ? ` data-links="${entry.links.join(",")}"` : "";
-  return `<li id="m-${entry.id}" data-station="milestone" data-panel="m-${entry.id}" data-milestone="${entry.id}" data-date="${entry.date}" data-weight="${entry.weight}" data-kind="${entry.kind}" data-period="${entry.period}"${attributes}${links} data-hud="${esc(`${period.kicker.split(" · ")[0]} · ${copy.title}`)}">
+  return `<li id="m-${entry.id}" data-station="milestone" data-panel="m-${entry.id}" data-milestone="${entry.id}" data-date="${entry.date}" data-weight="${entry.weight}" data-kind="${entry.kind}"${entry.quiet ? ' data-quiet="1"' : ""} data-period="${entry.period}"${attributes}${links} data-hud="${esc(`${period.kicker.split(" · ")[0]} · ${copy.title}`)}">
             <p class="kicker">${kicker(period.kicker)}</p>${head ? `\n            <div class="period-head"><h2 class="h2">${period.title}</h2><p class="intro">${esc(period.intro)}</p></div>` : ""}
             <time datetime="${entry.date}">${esc(when(d.locale, entry.date, entry.approx))}</time>
             <h3 class="h3">${esc(copy.title)}</h3>

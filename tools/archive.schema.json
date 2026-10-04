@@ -75,6 +75,7 @@
         "places": { "type": "array", "items": { "$ref": "#/$defs/id" } },
         "links": { "type": "array", "items": { "$ref": "#/$defs/id" }, "description": "Other memories, declared once and read in both directions." },
         "order": { "type": "number", "description": "Breaks a tie between memories of the same date." },
+        "quiet": { "type": "boolean", "description": "A memory of loss or hardship: no invitation to a waitlist appears on it." },
         "en": { "$ref": "#/$defs/memoryCopy" },
         "es": { "$ref": "#/$defs/memoryCopy" }
       }

@@ -1,6 +1,7 @@
 {
   "date": "2024-10",
   "kind": "personal",
+  "quiet": true,
   "weight": 1,
   "period": "home",
   "threads": [

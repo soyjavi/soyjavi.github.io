@@ -181,7 +181,7 @@ test("the schema and the example describe exactly what the importer reads", () =
   assert.deepEqual(Object.keys(schema.properties).sort(), ["ahead", "memories", "people", "periods", "places", "threads"]);
   assert.deepEqual(Object.keys(example).sort(), Object.keys(schema.properties).sort(), "the example uses every block");
   const memory = schema.$defs.memory;
-  const read = ["id", "public", "date", "approx", "kind", "weight", "period", "threads", "people", "places", "links", "order", "en", "es"];
+  const read = ["id", "public", "date", "approx", "kind", "weight", "period", "threads", "people", "places", "links", "order", "quiet", "en", "es"];
   assert.deepEqual(Object.keys(memory.properties).sort(), [...read].sort(), "every field the importer keeps, and no other");
   assert.deepEqual(memory.required, ["id", "public", "date", "kind", "weight", "period", "threads", "en", "es"]);
   assert.deepEqual(memory.properties.kind.enum, ["personal", "professional", "product", "education"]);

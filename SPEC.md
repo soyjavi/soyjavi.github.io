@@ -135,8 +135,8 @@ site in memory and compares it, and the bundle, with the disk.
   star's distance follows its brightness (the brightest at 900 units, the faintest at 1,600), so the near ones move more
   than the far ones as the camera turns. Sizes grow with brightness and each star twinkles on its own phase. Every dot of
   the memories starts on the same shell.
-- **Guides.** A dashed outline around each galaxy, a line joining the memories of each thread inside it in order (its
-  constellation), an arc from galaxy to galaxy and a dashed arc through the opening. Labels for them are DOM nodes
+- **Guides.** A dotted outline around each galaxy (soft dots spaced ten pixels apart on screen, from just under a pixel in the whole-life view to a pixel and a quarter close up, and 50% to 75% of their strength), a line joining the memories of each thread inside it in order (its
+  constellation, drawn only when the camera is close: it fades with `uFar`, so the whole-life view shows clouds, names and dotted guides only), an arc from galaxy to galaxy and a dashed arc through the opening. Labels for them are DOM nodes
   projected every frame.
 
 ### Shaders
@@ -204,12 +204,12 @@ Two and a half seconds after the last touch, wherever it is (the hero, a memory,
 
 ### The invitation, the book's date and the clone's questions
 
-- After the visitor has opened three distinct memories (the idle tour does not count), a quiet line (`.nudge`: a link and a
+- After the visitor has opened three distinct memories (the idle tour does not count), a quiet line (`.nudge`, never on a memory marked `quiet` in its file, which is how a memory of loss is kept free of invitations: a link and a
   close button) sits at the card's foot, beside it on a laptop and above it on a stacked layout, on a memory's card only. It
   links to the book's waitlist, or to the clone's once the visitor has seen the clone's station; closing it hides it for the rest
   of the visit and nothing is stored. It is not drawn in the flat page, which already holds both lists.
 
-- With `book.date` set, the book's panel carries `<p class="countdown" data-until>`: "Expected" and the month as text,
+- With `book.date` set, the book's panel carries `<p class="countdown" data-until>`: "Aiming for" and the month as text,
   which a script (`countdown.js`, on every page) completes with the months left on the visitor's calendar
   (`monthsUntil`, `untilText` in `life.js`, through `Intl.RelativeTimeFormat`, so "in 8 months" and "dentro de 8 meses") and
   a scale of one tick per month up to 24 (`--months`, ten pixels each). A date that has passed hides the line. The stage
@@ -244,7 +244,7 @@ Two and a half seconds after the last touch, wherever it is (the hero, a memory,
   flat page, which hides everything else of the controls, still shows them. Escape, a press elsewhere, choosing something or
   tabbing out of the sheet closes it, and the focus goes back to the More button (to the first thread after Filter); a
   filter in force is shown by a dot on More and in its accessible name. The thread legend, the guide and the finder open as
-  panels under that row. In the sections, The book and Talk to me carry `.cta`: full ink, underlined and a 44 px
+  panels under that row. In the sections, The book and My clone carry `.cta`: full ink, underlined and a 44 px
   target, because they are what the site offers; no control is drawn inverted unless the visitor pressed it, and Sound
   shows its state by the waves or the slash of its icon, never by a fill.
 - **Relations.** The relations of a memory are its explicit links in both directions and its neighbours in time inside each of
@@ -253,7 +253,7 @@ Two and a half seconds after the last touch, wherever it is (the hero, a memory,
   (`STRONG`). At rest the scene draws, names and lights only those three; a button in the card, "All related (n)"
   (`.expander`, `aria-expanded`), shows all of them in the card's list, draws all the lines, names up to eight and lights
   them all, and "Fewer" puts it back. Any memory a card row or the finder points at is previewed on top of that.
-- **Guide.** The ? button or the `?` key opens a panel of six marks drawn with the real glyphs (a cloud, a dashed
+- **Guide.** The ? button or the `?` key opens a panel of six marks drawn with the real glyphs (a cloud, a dotted
   circle, a line, a hollow ring, today, the dust) and the keys; Escape, a press on the sky, the finder or the thread
   legend closes it. It never covers the card (on a phone it is capped above it and scrolls).
 - **Gentle first look.** The first memory a visit opens (the idle tour counts) starts a gentle state (`data-gentle` on the
@@ -342,7 +342,7 @@ of sixteen places around the mark that touches nothing, starting a clearance of 
 any distance, and are left unnamed when none does; they publish their mark's position and radius as `--cx`, `--cy` and
 `--r`.
 
-**Year rings.** With a memory open, its galaxy shows one dashed ring for each year at the distance a memory of that
+**Year rings.** With a memory open, its galaxy shows one dotted ring (soft dots at 26% of the ink, fading outwards to half of that, spaced ten pixels apart whatever the zoom) for each year at the distance a memory of that
 year sits from the core (`yearRings`: the integer years inside the period, every second, fifth or tenth year when it
 spans more than eight), each labelled in mono along one ray, hidden where they would touch the card or the controls and
 absent from the whole-life view and during the gentle first look; `data-rings` on `#scene` carries how many show.

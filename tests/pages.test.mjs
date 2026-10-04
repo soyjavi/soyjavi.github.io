@@ -396,7 +396,7 @@ test("questions for the clone render in the clone's panel with their memories li
 
 test("a book date shows in both languages as a month with its countdown hooks, and without a date nothing is drawn", () => {
   const dated = renderSite({ ...content, site: { ...content.site, book: { ...content.site.book, date: "2027-06" } } });
-  const expected = { en: ["Expected", "Jun 2027"], es: ["Previsto", "jun 2027"] };
+  const expected = { en: ["Aiming for", "Jun 2027"], es: ["Apunto a", "jun 2027"] };
   for (const lang of ["en", "es"]) {
     const html = dated.get(homes[lang]);
     const book = html.match(/<section class="chapter" id="book"[\s\S]*?<\/section>/)[0];

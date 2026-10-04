@@ -148,45 +148,19 @@ does not want the word AI on the site). Nothing here is approved.
 
 Ordered by what must be decided or applied first; each group names what it waits on.
 
-### 1. Copy of the home and the two offers — after CLONE-NAME and BOOK-DETAILS; the voice rules are in `design/index.html` and tested
+### 1. Copy — the voice rules are in `design/index.html` and tested
 
-- **COPY-CLONE** — A place to keep talking, when I am no longer here
-  board: COPY-CLONE
-  The clone's card says its purpose in his words, that it is not ready, and nothing it can do; the nav and kicker say My clone. The public name stays CLONE-NAME.
-- **COPY-BOOK** — For my children, and for whoever wants it
-  board: COPY-BOOK
-  The book's card says who it is for and what it holds (what went well and what went wrong) and promises no date.
-- **COPY-HERO** — A hero that says who, what and what comes next, in 45 words
-  board: COPY-HERO
-  Replace the 74-word lede and the clone link; both offers named, no AI.
-- **COPY-WAITLIST** — Softer words for the lists and the nudge
-  board: COPY-WAITLIST
-  No time promises, no tool words on the lists; the creator decides whether the nudge may appear on memories about loss.
 - **MEMORY-TENSE** — One tense for every memory, and one sentence to confirm
   `decision · creator · normal`
   board: MEMORY-TENSE
   Historic present or past for all the memories in both languages, and the guide sentence about what changed and mattered.
-- **COPY-META** — What a search result and a shared link say
-  board: COPY-META
-  A description of at most 155 characters in both languages, and a 404 in the sky's vocabulary.
 
-### 2. Scene and sound — decisions on feel
+### 2. Review
 
-- **ENTRANCE-CHOREOGRAPHY** — Scene · the first ten seconds as one piece
-  `decision · creator · normal`
-  board: ENTRANCE-CHOREOGRAPHY
-  Sky first, galaxies in life order with their glow, names last; the creator says the feeling and which beats stay.
-- **YEAR-RINGS** — Rings that read as rings when you come close
-  `decision · creator · low`
-  board: YEAR-RINGS
-  The dashed year rings look like loose strokes close to a galaxy: a continuous hairline, a ring that fades near, or ticks.
-- **AUDIO-ENTRANCE** — Sound as early as a browser allows
-  `decision · creator · low`
-  board: AUDIO-ENTRANCE
-  Shorten the fade to two or three seconds, or also hold the opening until the first gesture; a gate was tried and rejected.
-
-
-
+- **ART-REVIEW** — An art review by an expert subagent, with screenshots of every screen
+  `chore · agent · normal`
+  A read-only subagent with an art and interface direction brief goes through the site screen by screen (the opening, the whole-life view, a galaxy, a memory open, the finder, the guide, the book and the clone cards, the contact, the flat page, the light theme, 1280×640 and 390×844 and a large screen) and returns ranked, evidence-backed findings on composition, hierarchy, motion, type, colour, the dots and the glass. It needs screenshots, so it launches a browser: the creator has asked that no browser is started without his word, so this task waits for his explicit go-ahead and for the screenshots to be kept in the scratchpad, never in the repository.
+  accept: a ranked report with one screenshot per finding; the creator turns what he approves into tasks.
 
 ### 3. Depth and the book — need content or approvals from the creator
 

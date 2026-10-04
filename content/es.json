@@ -3,7 +3,7 @@
   "locale": "es_ES",
   "meta": {
     "title": "Javi · Una vida en hitos",
-    "description": "La web personal de Javi: una vida de 1980 a hoy contada en hitos, un libro para mis hijos y mi clon. Apúntate a la lista de espera del libro o de mi clon."
+    "description": "La vida de Javi de 1980 a hoy como un cielo de recuerdos, un libro para sus hijos y un clon para seguir hablando con él. Apúntate a una lista de espera."
   },
   "ui": {
     "skip": "Saltar al contenido",
@@ -14,7 +14,7 @@
     "nav": {
       "life": "Vida",
       "book": "El libro",
-      "clone": "Habla conmigo",
+      "clone": "Mi clon",
       "contact": "Contacto"
     },
     "theme": {
@@ -60,8 +60,8 @@
       "lit": "Se iluminan {n} recuerdos: {names}",
       "all": "Todos los relacionados ({n})",
       "fewer": "Menos",
-      "nudgebook": "Apúntate a la lista del libro →",
-      "nudgeclone": "Apúntate a la lista de mi clon →",
+      "nudgebook": "Entérate del libro →",
+      "nudgeclone": "Entérate de mi clon →",
       "nudgeclose": "Cerrar",
       "menu": "Más"
     },
@@ -75,7 +75,7 @@
       "title": "Cómo leer este cielo",
       "button": "Cómo leer este cielo",
       "cloud": "Una nube es un recuerdo; cuanto más grande, más cambió",
-      "galaxy": "Un círculo discontinuo es una etapa de mi vida; el tiempo va del núcleo al borde",
+      "galaxy": "Un círculo de puntos es una etapa de mi vida; el tiempo va del núcleo al borde",
       "line": "Una línea une recuerdos relacionados",
       "ring": "Un anillo hueco está por llegar: el libro y mi clon",
       "today": "Hoy",
@@ -96,10 +96,10 @@
   "hero": {
     "kicker": "javi · 1980 – hoy",
     "title": "Una vida, <em>en hitos.</em>",
-    "lede": "Soy Javi. Estos son los momentos que me hicieron, desde un caserío del País Vasco hasta hoy. Cada nube de puntos es un recuerdo y cada galaxia una etapa de mi vida: abre uno, sigue hasta el siguiente, o busca a una persona, un lugar o un hilo. El trabajo es uno entre muchos. Vienen dos cosas: un libro para mis hijos y mi clon, un lugar donde seguir hablando conmigo.",
+    "lede": "Soy Javi. Esta es mi vida de 1980 a hoy: una nube de puntos por cada recuerdo y una galaxia por cada etapa. Recórrela como quieras. Lo que viene: un libro para mis hijos y mi clon, para quien quiera seguir hablando conmigo.",
     "primary": "Apúntate a la lista del libro",
     "secondary": "Recórrelo",
-    "clone": "O apúntate a la lista de mi clon →",
+    "clone": "Sobre mi clon →",
     "region": "Apúntate a la lista del libro"
   },
   "periods": {
@@ -136,9 +136,9 @@
   },
   "book": {
     "kicker": "07 / El libro",
-    "expected": "Previsto",
+    "expected": "Apunto a",
     "title": "Un libro <em>para mis hijos.</em>",
-    "body": "Estoy escribiendo mi historia para que les sirva: lo que pasó, lo que aprendí y quién era en cada momento. Todavía no está listo. Déjame tu email y te aviso cuando lo esté.",
+    "body": "Es para mis hijos y para quien lo quiera: mi vida, lo que he aprendido, lo que salió bien y lo que salió mal. Déjame tu email y te escribo cuando salga.",
     "form": {
       "label": "Tu email",
       "placeholder": "tu@ejemplo.com",
@@ -151,18 +151,18 @@
   },
   "clone": {
     "disclosure": "Es un programa hecho a partir de lo que escribí; no soy yo.",
-    "kicker": "08 / Lo que te diría",
+    "kicker": "08 / Mi clon",
     "ask": {
       "label": "Preguntas para mi clon",
       "title": "Pregunta y mira de qué bebería",
       "draws": "Se apoya en:"
     },
-    "title": "Mi <em>clon.</em>",
-    "body": "Estoy construyendo una versión de mí con la que cualquiera pueda hablar, basada en lo que he escrito y recogido durante años. Todavía no está lista. Déjame tu email y te aviso cuando lo esté.",
+    "title": "Un sitio donde <em>seguir hablando.</em>",
+    "body": "Estoy construyendo mi clon, una versión de mí para quien quiera seguir hablando conmigo cuando ya no esté, sobre todo quienes me conocieron. Todavía no está listo.",
     "form": {
       "label": "Tu email",
       "placeholder": "tu@ejemplo.com",
-      "button": "Avísame cuando esté lista",
+      "button": "Avísame cuando esté listo",
       "region": "Lista de espera de mi clon",
       "note": "Solo te escribiré sobre mi clon. Puedes darte de baja cuando quieras.",
       "opened": "Se ha abierto Buttondown en una pestaña nueva para terminar tu suscripción.",
@@ -171,15 +171,15 @@
   },
   "contact": {
     "kicker": "09 / Di hola",
-    "title": "¿Hablamos?",
+    "title": "<em>Escríbeme.</em>",
     "lede": "Lo mejor es el email.",
     "elsewhere": "En otros sitios",
     "follow": "Sígueme en X"
   },
   "notFound": {
-    "title": "Día perdido · Javi",
-    "heading": "Este día no está en el calendario.",
+    "title": "No encontrada · Javi",
+    "heading": "Esta página no está en el cielo.",
     "body": "La página que buscas no existe o ha cambiado de sitio.",
-    "home": "Volver a los días"
+    "home": "Volver al cielo"
   }
 }

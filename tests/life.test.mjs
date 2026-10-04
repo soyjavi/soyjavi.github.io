@@ -534,3 +534,34 @@ test("every method the engine calls on the scene exists in the scene", async () 
   const api = scene.slice(scene.lastIndexOf("  return {\n    camera,"));
   for (const name of new Set([...engine.matchAll(/(?<![/\w])scene\.([a-zA-Z]+)/g)].map((m) => m[1]))) assert.match(api, new RegExp(`^    ${name}\\b`, "m"), `scene.${name} is called by the engine but the scene does not export it`);
 });
+
+test("every guide is a line of soft dots spaced by the screen: the year rings, the outlines, the arcs between galaxies and the one ahead", async () => {
+  const { readFileSync } = await import("node:fs");
+  const source = readFileSync(new URL("../assets/js/scene.js", import.meta.url), "utf8");
+  assert.ok(Number(source.match(/const DOT_GAP = (\d+)/)[1]) >= 10, "dots at least ten pixels apart");
+  assert.match(source, /material\.size = dotSize \* renderer\.getPixelRatio\(\)/, "a soft dot whose size follows the zoom");
+  assert.match(source, /0\.26 \* \(1 - 0\.5 \* \(n \/ Math\.max\(1, yearRing\.list\.length - 1\)\)\)/, "each ring fainter than the one inside it");
+  assert.doesNotMatch(source, /ringLines|RING_STYLES/, "no dashed ring is left");
+  assert.doesNotMatch(source, /lineMaterial\([\d.]+, true\)/, "no guide is drawn dashed any more, the arc towards the book and the clone included");
+  assert.doesNotMatch(source, /new THREE\.Line\(arc\(/, "the arcs between galaxies are dots too");
+  assert.match(source, /dotSize = 0\.95 \+ 0\.3 \* \(1 - far\)/, "smaller dots from far away");
+  assert.match(source, /userData\.dots \? 0\.5 \+ 0\.25 \* \(1 - far\) : 1/, "and fainter guides from far away");
+  assert.match(source, /carry \+= DOT_GAP/, "the dots are laid at a constant distance along the screen path");
+});
+
+
+test("the constellations appear only when the camera is close to the sky: the whole-life view carries nothing but clouds, names and dots", async () => {
+  const { readFileSync } = await import("node:fs");
+  const source = readFileSync(new URL("../assets/js/scene.js", import.meta.url), "utf8");
+  assert.match(source, /lines\.userData\.constellation = true/);
+  assert.match(source, /object\.userData\.constellation \? 1 - far : 1/, "they fade out as the camera pulls away");
+});
+
+test("the guides are built and added to the scene", async () => {
+  const { readFileSync } = await import("node:fs");
+  const source = readFileSync(new URL("../assets/js/scene.js", import.meta.url), "utf8");
+  assert.match(source, /^  constellations\(\);$/m, "the guides are built");
+  assert.match(source, /^  scene\.add\(guides\);$/m, "and they are in the scene");
+  assert.ok(source.indexOf("constellations();") > source.indexOf("const constellations = () =>"), "after they are defined");
+  assert.match(source, /dotPaths\.forEach\(\(\{ points, vertices, closed \}\) => points\.userData\.lay\(vertices, closed\)\)/, "and the dots are laid every frame");
+});

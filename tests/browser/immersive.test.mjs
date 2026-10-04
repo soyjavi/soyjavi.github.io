@@ -145,7 +145,7 @@ const touch = async (page, steps) => {
 
 const BORN = "01 / Origins · Born in Bilbao";
 const BOOK = "07 / The book";
-const CLONE = "08 / What I'd tell you";
+const CLONE = "08 / My clone";
 const LISTS = [["book", BOOK], ["clone", CLONE]];
 const TAPQUO = "03 / TapQuo · TapQuo";
 const PHONE = { hasTouch: true, isMobile: true, viewport: { width: 390, height: 844 } };
@@ -154,7 +154,7 @@ test("screen readers and keyboards reach every chapter in immersive mode", async
   const { page, errors, close } = await open();
   await immersive(page);
   const outline = await page.locator("main").ariaSnapshot();
-  for (const text of ["A life, in milestones", "Born in Bilbao", "First job", "Life, not craft", "A book for my children", "My clone", "Want to talk"]) assert.match(outline, new RegExp(text), text);
+  for (const text of ["A life, in milestones", "Born in Bilbao", "First job", "Life, not craft", "A book for my children", "A place to keep talking", "Write to me"]) assert.match(outline, new RegExp(text), text);
   assert.match(outline, /link "hello@soyjavi\.com"/);
   assert.deepEqual(await page.locator("main .contact a[href^='http']").evaluateAll((nodes) => nodes.map((node) => node.href)), ["https://twitter.com/soyjavi"], "the contact offers X and nothing else outside the site");
   assert.deepEqual(await page.locator("footer a[href^='http']").evaluateAll((nodes) => nodes.map((node) => node.href)), ["https://twitter.com/soyjavi"], "the footer's Elsewhere is X only");
@@ -934,8 +934,8 @@ test("the book and the clone wait at two named rings that open their cards", asy
         .map((node) => ({ text: node.textContent, cx: +node.style.getPropertyValue("--cx"), cy: +node.style.getPropertyValue("--cy") })),
     );
   await page.waitForFunction(() => [...document.querySelectorAll(".labels .ahead:not(.now)")].filter((node) => node.style.visibility === "visible" && +node.style.opacity > 0.2).length === 2, null, { timeout: 30000 });
-  assert.deepEqual((await rings()).map((ring) => ring.text).sort(), ["Talk to me", "The book"]);
-  for (const [text, label] of [["The book", BOOK], ["Talk to me", CLONE]]) {
+  assert.deepEqual((await rings()).map((ring) => ring.text).sort(), ["My clone", "The book"]);
+  for (const [text, label] of [["The book", BOOK], ["My clone", CLONE]]) {
     const ring = (await rings()).find((candidate) => candidate.text === text);
     await page.mouse.move(ring.cx, ring.cy);
     await page.waitForTimeout(250);
@@ -1176,7 +1176,7 @@ test("each waitlist card keeps its copy and its form on screen, with the email f
       for (const list of ["book", "clone"]) {
         if (list === "clone") {
           await page.locator(".step[data-step=next]").click();
-          await hud(page, lang === "es" ? "08 / Lo que te diría" : CLONE);
+          await hud(page, lang === "es" ? "08 / Mi clon" : CLONE);
         }
         await page.waitForTimeout(500);
         const where = `${lang} ${list} ${width}x${height}`;
@@ -2039,7 +2039,7 @@ test("with five questions the clone's card still shows its email field on laptop
       const { page, close } = await open(lang === "es" ? "/es/" : "/", { viewport: { width, height }, locale: lang === "es" ? "es-ES" : "en-US", hasTouch: mobile, isMobile: mobile, before: withQuestions(lang) });
       await immersive(page);
       await goTo(page, "clone");
-      await hud(page, lang === "es" ? "08 / Lo que te diría" : CLONE);
+      await hud(page, lang === "es" ? "08 / Mi clon" : CLONE);
       await page.waitForTimeout(500);
       const where = `${lang} ${width}x${height}`;
       const [card, field] = [await box(page, ".card"), await box(page, "#waitlist-clone-email")];
