@@ -1,0 +1,21 @@
+{
+  "date": "2024-12",
+  "kind": "personal",
+  "weight": 1,
+  "period": "home",
+  "threads": [
+    "family"
+  ],
+  "people": [
+    "eki",
+    "benji"
+  ],
+  "en": {
+    "title": "Discipline for my children",
+    "body": "Passing on discipline in a world built to distract. I think my generation was one of the last to take in deeply rooted values."
+  },
+  "es": {
+    "title": "Disciplina para mis hijos",
+    "body": "Transmitir disciplina en un mundo hecho para distraer. Creo que mi generación fue de las últimas en absorber valores con raíces profundas."
+  }
+}

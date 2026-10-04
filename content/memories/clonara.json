@@ -1,0 +1,20 @@
+{
+  "date": "2025-09",
+  "kind": "product",
+  "weight": 3,
+  "period": "now",
+  "threads": [
+    "ventures"
+  ],
+  "links": [
+    "satoshi"
+  ],
+  "en": {
+    "title": "The first version of Clonara",
+    "body": "An app to digitise a person's legacy and keep it forever, built on alpi. «A historic day for Satoshi Limited»."
+  },
+  "es": {
+    "title": "La primera versión de Clonara",
+    "body": "Una aplicación para digitalizar el legado de una persona y preservarlo para siempre, construida sobre alpi. «Un día histórico para Satoshi Limited»."
+  }
+}

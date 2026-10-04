@@ -1,0 +1,20 @@
+{
+  "name": "soyjavi-site",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=21"
+  },
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "test": "node --test --test-concurrency=1 \"tests/**/*.test.mjs\"",
+    "serve": "python3 -m http.server ${PORT:-4173}",
+    "og": "node tools/og.mjs",
+    "browsers": "playwright-core install chromium-headless-shell",
+    "import": "node tools/import.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.10",
+    "playwright-core": "1.63.0"
+  }
+}

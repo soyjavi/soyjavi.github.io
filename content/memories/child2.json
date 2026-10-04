@@ -1,0 +1,25 @@
+{
+  "date": "2022-12",
+  "kind": "personal",
+  "weight": 3,
+  "period": "home",
+  "threads": [
+    "family"
+  ],
+  "people": [
+    "benji",
+    "yuri",
+    "eki"
+  ],
+  "links": [
+    "house"
+  ],
+  "en": {
+    "title": "My second child is born",
+    "body": "The family grows to four."
+  },
+  "es": {
+    "title": "Nace mi segundo hijo",
+    "body": "La familia crece hasta ser cuatro."
+  }
+}

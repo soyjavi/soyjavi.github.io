@@ -1,0 +1,23 @@
+.page {
+  max-width: 54rem;
+  margin: 0 auto;
+  padding: 160px var(--gutter) 96px;
+  display: grid;
+  gap: 56px;
+}
+
+.page section {
+  display: grid;
+  gap: 20px;
+  justify-items: start;
+}
+
+.plain .masthead {
+  background: linear-gradient(to bottom, var(--bg) 60%, transparent);
+}
+
+@media (max-width: 760px) {
+  .page {
+    padding-top: 120px;
+  }
+}

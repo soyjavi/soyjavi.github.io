@@ -1,0 +1,23 @@
+{
+  "periods": [
+    "origins",
+    "craft",
+    "tapquo",
+    "remote",
+    "home",
+    "now"
+  ],
+  "threads": [
+    "home",
+    "family",
+    "body",
+    "craft",
+    "ventures",
+    "learning",
+    "love"
+  ],
+  "ahead": {
+    "book": "family",
+    "clone": "ventures"
+  }
+}

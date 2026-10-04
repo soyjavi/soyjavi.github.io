@@ -1,0 +1,27 @@
+{
+  "date": "2024-11",
+  "kind": "personal",
+  "weight": 2,
+  "period": "home",
+  "threads": [
+    "home"
+  ],
+  "people": [
+    "yuri"
+  ],
+  "places": [
+    "hua-hin"
+  ],
+  "links": [
+    "floods",
+    "hua-hin"
+  ],
+  "en": {
+    "title": "We decide to move to Hua Hin",
+    "body": "After the floods, and after looking at cities like Sriracha, the decision comes in November. In December the house is let."
+  },
+  "es": {
+    "title": "Decidimos mudarnos a Hua Hin",
+    "body": "Tras las inundaciones, y después de mirar ciudades como Sriracha, la decisión llega en noviembre. En diciembre alquilamos la casa."
+  }
+}

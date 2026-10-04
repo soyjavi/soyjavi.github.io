@@ -1,0 +1,17 @@
+{
+  "date": "2020",
+  "kind": "professional",
+  "weight": 1,
+  "period": "home",
+  "threads": [
+    "craft"
+  ],
+  "en": {
+    "title": "Lookiero",
+    "body": "Another stop in my career."
+  },
+  "es": {
+    "title": "Lookiero",
+    "body": "Otra parada en mi carrera."
+  }
+}

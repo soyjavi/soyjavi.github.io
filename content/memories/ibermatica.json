@@ -1,0 +1,17 @@
+{
+  "date": "2006-06",
+  "kind": "professional",
+  "weight": 2,
+  "period": "craft",
+  "threads": [
+    "craft"
+  ],
+  "en": {
+    "title": "Ibermática",
+    "body": "I join as Senior Developer: C#, Java, C++, WPF and Oracle, until 2011."
+  },
+  "es": {
+    "title": "Ibermática",
+    "body": "Entro como Senior Developer: C#, Java, C++, WPF y Oracle, hasta 2011."
+  }
+}

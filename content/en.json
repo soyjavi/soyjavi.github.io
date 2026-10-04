@@ -1,0 +1,178 @@
+{
+  "lang": "en",
+  "locale": "en_US",
+  "meta": {
+    "title": "Javi · A life in milestones",
+    "description": "Javi's personal site: a life from 1980 to today told in milestones, a book for my children and an AI you will be able to talk to. Join the waitlist for the book or the AI."
+  },
+  "ui": {
+    "skip": "Skip to content",
+    "hint": "Drag to explore · scroll or pinch to zoom",
+    "switchLabel": "Español",
+    "navLabel": "Sections",
+    "nav": {
+      "life": "Life",
+      "book": "The book",
+      "clone": "Talk to me",
+      "contact": "Contact"
+    },
+    "theme": {
+      "toLight": "Switch to the light theme",
+      "toDark": "Switch to the dark theme"
+    },
+    "hudHero": "javi",
+    "footer": {
+      "site": "Site",
+      "elsewhere": "Elsewhere",
+      "colophon": "Colophon",
+      "colophonText": "Thousands of dots. No tracking."
+    },
+    "rail": {
+      "label": "Timeline",
+      "overview": "Back to the whole life",
+      "decade": "The {year}s",
+      "play": "Play: watch the life grow",
+      "pause": "Pause",
+      "overviewName": "Whole life",
+      "playName": "Play",
+      "pauseName": "Pause"
+    },
+    "today": "Today",
+    "explore": {
+      "label": "Explore the memories",
+      "threads": "Threads",
+      "find": "Find",
+      "findLabel": "Find a memory",
+      "findPlaceholder": "Search the memories",
+      "findNone": "No memory matches",
+      "surprise": "Surprise me",
+      "filters": "Filter",
+      "related": "Related",
+      "earlier": "Earlier",
+      "later": "Later",
+      "filter": "Show only {thread}",
+      "unfilter": "Show everything",
+      "people": "People",
+      "places": "Places",
+      "more": "{n} more",
+      "sound": "Sound",
+      "lit": "{n} memories light up: {names}",
+      "menu": "More"
+    },
+    "count": {
+      "memories": "{n} memories",
+      "threads": "{n} threads",
+      "people": "{n} people",
+      "places": "{n} places"
+    },
+    "guide": {
+      "title": "How to read this sky",
+      "button": "How to read this sky",
+      "cloud": "A cloud is a memory; the bigger it is, the more it changed",
+      "galaxy": "A dashed circle is a period of my life; time runs from its core to its rim",
+      "line": "A line joins related memories",
+      "ring": "A hollow ring is still ahead: the book and the AI",
+      "today": "Today",
+      "dust": "The fine dust is the days, thicker where more happened",
+      "keys": "/ find · ? this guide · H only the sky · Esc back"
+    },
+    "focus": "Interface hidden. Move or press a key to bring it back."
+  },
+  "threads": {
+    "home": "Home",
+    "family": "Family",
+    "body": "Body",
+    "craft": "Craft",
+    "ventures": "Ventures",
+    "learning": "Learning",
+    "love": "Love"
+  },
+  "hero": {
+    "kicker": "javi · 1980 – today",
+    "title": "A life, <em>in milestones.</em>",
+    "lede": "I'm Javi. These are the moments that made me, from a farmhouse in the Basque Country to today. Each cloud of dots is a memory and each galaxy a stage of my life: open one, follow it to the next, or look for a person, a place or a thread. Work is one of many. Two things come next: a book for my children and an AI you will be able to talk to.",
+    "primary": "Join the book's waitlist",
+    "secondary": "Travel through it",
+    "clone": "Or wait for the AI →",
+    "region": "Join the book's waitlist"
+  },
+  "periods": {
+    "origins": {
+      "kicker": "01 / Origins · 1980–1994",
+      "title": "A Basque <em>childhood.</em>",
+      "intro": "A farmhouse, a flat, the mountains at weekends and camping in summer."
+    },
+    "craft": {
+      "kicker": "02 / The craft · 2001–2011",
+      "title": "Learning <em>the trade.</em>",
+      "intro": "Corporate teams first, then the web, then open source."
+    },
+    "tapquo": {
+      "kicker": "03 / TapQuo · 2011–2015",
+      "title": "A startup, a classroom <em>and a plane.</em>",
+      "intro": "I found a company, teach, write a book and leave Spain."
+    },
+    "remote": {
+      "kicker": "04 / Remote · 2015–2019",
+      "title": "Working from <em>anywhere.</em>",
+      "intro": "Remote before it was fashionable: teams, books, blockchain and a new habit."
+    },
+    "home": {
+      "kicker": "05 / Home · 2020–2024",
+      "title": "A company, <em>a family, a house.</em>",
+      "intro": "Satoshi, two children and a house I built."
+    },
+    "now": {
+      "kicker": "06 / Now · 2025–2026",
+      "title": "Where <em>I am.</em>",
+      "intro": "Still working out what I want to teach."
+    }
+  },
+  "book": {
+    "kicker": "07 / The book",
+    "expected": "Expected",
+    "title": "A book <em>for my children.</em>",
+    "body": "I'm writing my story so that it serves them: what happened, what I learnt and who I was at each moment. It's coming soon. Leave your email and I'll tell you the day it's out.",
+    "form": {
+      "label": "Your email",
+      "placeholder": "you@example.com",
+      "button": "Tell me when it's out",
+      "region": "Waitlist for the book",
+      "note": "I'll only write to you about the book. Unsubscribe anytime.",
+      "opened": "Buttondown opened in a new tab to finish your signup.",
+      "soon": "The waitlist opens very soon."
+    }
+  },
+  "clone": {
+    "kicker": "08 / Talk to me",
+    "ask": {
+      "label": "Questions the AI could answer",
+      "title": "Ask, and see what it would draw on",
+      "draws": "Draws on:"
+    },
+    "title": "An AI <em>you can talk to.</em>",
+    "body": "I'm building a version of me that anyone can talk to, based on what I've written and gathered over the years. It isn't ready yet. Leave your email and I'll tell you when it is.",
+    "form": {
+      "label": "Your email",
+      "placeholder": "you@example.com",
+      "button": "Tell me when it's ready",
+      "region": "Waitlist for the AI",
+      "note": "I'll only write to you about the AI. Unsubscribe anytime.",
+      "opened": "Buttondown opened in a new tab to finish your signup.",
+      "soon": "The waitlist opens very soon."
+    }
+  },
+  "contact": {
+    "kicker": "09 / Say hello",
+    "title": "Want to <em>talk?</em>",
+    "lede": "Email is best.",
+    "elsewhere": "Elsewhere",
+    "follow": "Follow me on X"
+  },
+  "notFound": {
+    "title": "Lost day · Javi",
+    "heading": "This day isn't on the calendar.",
+    "body": "The page you wanted doesn't exist, or it moved.",
+    "home": "Back to the days"
+  }
+}

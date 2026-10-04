@@ -1,0 +1,17 @@
+{
+  "date": "2021-08",
+  "kind": "personal",
+  "weight": 1,
+  "period": "home",
+  "threads": [
+    "learning"
+  ],
+  "en": {
+    "title": "Two pieces on Europe",
+    "body": "I write two reflections on Europe, one in standard Spanish and one in a colloquial voice."
+  },
+  "es": {
+    "title": "Dos textos sobre Europa",
+    "body": "Escribo dos reflexiones sobre Europa, una en español estándar y otra en registro coloquial."
+  }
+}

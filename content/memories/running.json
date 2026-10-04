@@ -1,0 +1,24 @@
+{
+  "date": "2017",
+  "kind": "personal",
+  "weight": 2,
+  "period": "remote",
+  "threads": [
+    "body"
+  ],
+  "places": [
+    "chiang-mai"
+  ],
+  "links": [
+    "race",
+    "taekwondo"
+  ],
+  "en": {
+    "title": "I start running",
+    "body": "Ten kilometres a day become non-negotiable."
+  },
+  "es": {
+    "title": "Empiezo a correr",
+    "body": "Los diez kilómetros diarios se vuelven innegociables."
+  }
+}

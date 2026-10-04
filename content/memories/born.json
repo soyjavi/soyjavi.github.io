@@ -1,0 +1,28 @@
+{
+  "date": "1980-04",
+  "kind": "personal",
+  "weight": 3,
+  "period": "origins",
+  "threads": [
+    "family",
+    "home"
+  ],
+  "people": [
+    "merche",
+    "francisco"
+  ],
+  "places": [
+    "bilbao"
+  ],
+  "links": [
+    "farmhouse"
+  ],
+  "en": {
+    "title": "Born in Bilbao",
+    "body": "I'm born in Bilbao, in the Basque Country."
+  },
+  "es": {
+    "title": "Nazco en Bilbao",
+    "body": "Nazco en Bilbao, en el País Vasco."
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "date": "2025-01",
+  "kind": "personal",
+  "weight": 2,
+  "period": "now",
+  "threads": [
+    "home",
+    "family"
+  ],
+  "people": [
+    "yuri",
+    "eki",
+    "benji"
+  ],
+  "places": [
+    "hua-hin"
+  ],
+  "en": {
+    "title": "We arrive in Hua Hin",
+    "body": "At the end of January, after more than ten years in Chiang Mai."
+  },
+  "es": {
+    "title": "Llegamos a Hua Hin",
+    "body": "A finales de enero, después de más de diez años en Chiang Mai."
+  }
+}

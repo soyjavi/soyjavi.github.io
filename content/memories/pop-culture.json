@@ -1,0 +1,22 @@
+{
+  "date": "1986",
+  "approx": true,
+  "kind": "personal",
+  "weight": 1,
+  "period": "origins",
+  "threads": [
+    "learning",
+    "family"
+  ],
+  "people": [
+    "aitor"
+  ],
+  "en": {
+    "title": "The TV of my childhood",
+    "body": "Cousteau with my father's motorbike goggles, wrestling, Dragon Ball, Captain Tsubasa and Sesame Street, all shared with Aitor."
+  },
+  "es": {
+    "title": "La tele de mi infancia",
+    "body": "Cousteau con las gafas de moto de mi padre, la lucha libre, Dragon Ball, Campeones y Barrio Sésamo, todo compartido con Aitor."
+  }
+}

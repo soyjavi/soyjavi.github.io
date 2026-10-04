@@ -1,0 +1,27 @@
+{
+  "date": "2011-10",
+  "kind": "professional",
+  "weight": 3,
+  "period": "tapquo",
+  "threads": [
+    "ventures",
+    "family"
+  ],
+  "people": [
+    "aitor",
+    "iker"
+  ],
+  "links": [
+    "teaching",
+    "shares",
+    "github"
+  ],
+  "en": {
+    "title": "TapQuo",
+    "body": "I found a startup with my brother and a friend: outsiders building technology nobody needed, which still caught Google's attention."
+  },
+  "es": {
+    "title": "TapQuo",
+    "body": "Fundo una startup con mi hermano y un amigo: unos outsiders haciendo tecnología que nadie necesitaba y que aun así despertó el interés de Google."
+  }
+}

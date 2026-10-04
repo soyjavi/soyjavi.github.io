@@ -1,0 +1,27 @@
+{
+  "date": "2015-01",
+  "kind": "personal",
+  "weight": 2,
+  "period": "tapquo",
+  "threads": [
+    "home"
+  ],
+  "people": [
+    "cata",
+    "pasku"
+  ],
+  "places": [
+    "bali"
+  ],
+  "links": [
+    "leaves"
+  ],
+  "en": {
+    "title": "Bali, where I decided no",
+    "body": "Less than two weeks in Kuta: police trying to scam us and not one pedestrian street. Not a place of my life: the place where I decided no."
+  },
+  "es": {
+    "title": "Bali, donde decidí que no",
+    "body": "Menos de dos semanas en Kuta: policías que intentaban estafar y ni una calle peatonal. No es un lugar de mi vida: es donde decidí que no."
+  }
+}

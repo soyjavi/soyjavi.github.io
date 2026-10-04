@@ -1,0 +1,30 @@
+{
+  "date": "1984",
+  "approx": true,
+  "kind": "personal",
+  "weight": 1,
+  "period": "origins",
+  "threads": [
+    "love",
+    "home"
+  ],
+  "people": [
+    "lander",
+    "koldo",
+    "jon"
+  ],
+  "places": [
+    "galdacano"
+  ],
+  "links": [
+    "flat"
+  ],
+  "en": {
+    "title": "The playground on Barandiarán street",
+    "body": "Lander, Koldo and my second cousin Jon Mikel, who lived in the block opposite: the friends of the playground."
+  },
+  "es": {
+    "title": "El patio de Barandiarán",
+    "body": "Lander, Koldo y mi primo segundo Jon Mikel, que vivía en el bloque de enfrente: los amigos del patio."
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "date": "2012-09",
+  "kind": "education",
+  "weight": 2,
+  "period": "tapquo",
+  "threads": [
+    "learning"
+  ],
+  "en": {
+    "title": "The classroom",
+    "body": "I teach JavaScript and HTML5 at IronHack and on a master's at the University of Deusto, until 2014."
+  },
+  "es": {
+    "title": "El aula",
+    "body": "Doy clases de JavaScript y HTML5 en IronHack y en un máster de la Universidad de Deusto, hasta 2014."
+  }
+}

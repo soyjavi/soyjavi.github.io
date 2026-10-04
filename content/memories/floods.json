@@ -1,0 +1,24 @@
+{
+  "date": "2024-10",
+  "kind": "personal",
+  "weight": 1,
+  "period": "home",
+  "threads": [
+    "home",
+    "family"
+  ],
+  "people": [
+    "yuri"
+  ],
+  "places": [
+    "chiang-mai"
+  ],
+  "en": {
+    "title": "The floods",
+    "body": "They leave the house unlivable. We restore it in fifty days."
+  },
+  "es": {
+    "title": "Las inundaciones",
+    "body": "Dejan la casa inhabitable. La restauramos en cincuenta días."
+  }
+}

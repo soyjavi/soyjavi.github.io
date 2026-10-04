@@ -1,0 +1,21 @@
+{
+  "date": "2020",
+  "kind": "professional",
+  "weight": 3,
+  "period": "home",
+  "threads": [
+    "ventures",
+    "craft"
+  ],
+  "places": [
+    "hong-kong"
+  ],
+  "en": {
+    "title": "Satoshi Ltd.",
+    "body": "I found it in Hong Kong: my consultancy and my own products, among them alpi, Money, SplitPass and Arca."
+  },
+  "es": {
+    "title": "Satoshi Ltd.",
+    "body": "La fundo en Hong Kong: mi consultoría y mis propios productos, entre ellos alpi, Money, SplitPass y Arca."
+  }
+}

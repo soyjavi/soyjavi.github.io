@@ -1,0 +1,17 @@
+{
+  "date": "2024-12",
+  "kind": "personal",
+  "weight": 1,
+  "period": "home",
+  "threads": [
+    "body"
+  ],
+  "en": {
+    "title": "My fight with bedtime",
+    "body": "I struggle to go to bed early and always find a reason to keep working at the computer."
+  },
+  "es": {
+    "title": "Mi pelea con el sueño",
+    "body": "Me cuesta acostarme temprano y siempre encuentro una excusa para seguir trabajando en el ordenador."
+  }
+}

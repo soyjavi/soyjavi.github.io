@@ -1,0 +1,27 @@
+{
+  "date": "1984-03",
+  "kind": "personal",
+  "weight": 2,
+  "period": "origins",
+  "threads": [
+    "family"
+  ],
+  "people": [
+    "aitor",
+    "merche",
+    "francisco",
+    "paco",
+    "agustina"
+  ],
+  "links": [
+    "tortillas"
+  ],
+  "en": {
+    "title": "The day my brother is born",
+    "body": "I'm almost four and it's my first clear memory: what they had promised me, and the small print of the disappointment."
+  },
+  "es": {
+    "title": "El día que nace mi hermano",
+    "body": "Tengo casi cuatro años y es mi primer recuerdo nítido: lo que me habían prometido y la letra pequeña de la decepción."
+  }
+}

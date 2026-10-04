@@ -1,0 +1,25 @@
+{
+  "date": "2023",
+  "approx": true,
+  "kind": "personal",
+  "weight": 2,
+  "period": "home",
+  "threads": [
+    "home",
+    "family"
+  ],
+  "places": [
+    "chiang-mai"
+  ],
+  "links": [
+    "floods"
+  ],
+  "en": {
+    "title": "A house I design and build",
+    "body": "One of the biggest projects of my life."
+  },
+  "es": {
+    "title": "Una casa que diseño y construyo",
+    "body": "Uno de los proyectos más grandes de mi vida."
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "date": "2009",
+  "approx": true,
+  "kind": "product",
+  "weight": 1,
+  "period": "craft",
+  "threads": [
+    "craft",
+    "ventures"
+  ],
+  "people": [
+    "iker"
+  ],
+  "links": [
+    "tapquo"
+  ],
+  "en": {
+    "title": "A front end for the Bizkaibus",
+    "body": "I find its public API and build a front end for it with my own HTML5 framework. It's where TapQuo really begins."
+  },
+  "es": {
+    "title": "Un frontal para el Bizkaibus",
+    "body": "Encuentro su API pública y le monto un frontal con mi propio framework HTML5. Ahí empieza de verdad TapQuo."
+  }
+}

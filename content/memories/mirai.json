@@ -1,0 +1,17 @@
+{
+  "date": "2022-02",
+  "kind": "professional",
+  "weight": 2,
+  "period": "home",
+  "threads": [
+    "craft"
+  ],
+  "en": {
+    "title": "Mirai",
+    "body": "I join as Senior JavaScript Engineer and frontend lead, in a team I'd wanted to join for a long time."
+  },
+  "es": {
+    "title": "Mirai",
+    "body": "Entro como Senior JavaScript Engineer y frontend lead, en un equipo al que llevaba tiempo queriendo entrar."
+  }
+}

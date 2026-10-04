@@ -1,0 +1,22 @@
+{
+  "date": "2001-06",
+  "kind": "professional",
+  "weight": 3,
+  "period": "craft",
+  "threads": [
+    "craft"
+  ],
+  "people": [
+    "luisma",
+    "ruben",
+    "javi-perez"
+  ],
+  "en": {
+    "title": "First job",
+    "body": "My first payroll: Junior Developer at Staples, in a team I loved."
+  },
+  "es": {
+    "title": "Primer trabajo",
+    "body": "Mi primera nómina: Junior Developer en Staples, con un equipo que me encantaba."
+  }
+}

@@ -1,0 +1,178 @@
+{
+  "lang": "es",
+  "locale": "es_ES",
+  "meta": {
+    "title": "Javi · Una vida en hitos",
+    "description": "La web personal de Javi: una vida de 1980 a hoy contada en hitos, un libro para mis hijos y una IA con la que podrás hablar. Apúntate a la lista de espera del libro o de la IA."
+  },
+  "ui": {
+    "skip": "Saltar al contenido",
+    "hint": "Arrastra para explorar · rueda o pellizco para acercar",
+    "switchLabel": "English",
+    "navLabel": "Secciones",
+    "nav": {
+      "life": "Vida",
+      "book": "El libro",
+      "clone": "Habla conmigo",
+      "contact": "Contacto"
+    },
+    "theme": {
+      "toLight": "Cambiar al tema claro",
+      "toDark": "Cambiar al tema oscuro"
+    },
+    "hudHero": "javi",
+    "footer": {
+      "site": "Sitio",
+      "elsewhere": "En otros sitios",
+      "colophon": "Colofón",
+      "colophonText": "Miles de puntos. Sin rastreo."
+    },
+    "rail": {
+      "label": "Línea de tiempo",
+      "overview": "Volver a la vida entera",
+      "decade": "Los {year}",
+      "play": "Ver crecer la vida",
+      "pause": "Pausa",
+      "overviewName": "Vida entera",
+      "playName": "Ver",
+      "pauseName": "Pausa"
+    },
+    "today": "Hoy",
+    "explore": {
+      "label": "Explorar los recuerdos",
+      "threads": "Hilos",
+      "find": "Buscar",
+      "findLabel": "Buscar un recuerdo",
+      "findPlaceholder": "Buscar entre los recuerdos",
+      "findNone": "Ningún recuerdo coincide",
+      "surprise": "Sorpréndeme",
+      "filters": "Filtrar",
+      "related": "Relacionados",
+      "earlier": "Antes",
+      "later": "Después",
+      "filter": "Ver solo {thread}",
+      "unfilter": "Ver todo",
+      "people": "Personas",
+      "places": "Lugares",
+      "more": "{n} más",
+      "sound": "Sonido",
+      "lit": "Se iluminan {n} recuerdos: {names}",
+      "menu": "Más"
+    },
+    "count": {
+      "memories": "{n} recuerdos",
+      "threads": "{n} hilos",
+      "people": "{n} personas",
+      "places": "{n} lugares"
+    },
+    "guide": {
+      "title": "Cómo leer este cielo",
+      "button": "Cómo leer este cielo",
+      "cloud": "Una nube es un recuerdo; cuanto más grande, más cambió",
+      "galaxy": "Un círculo discontinuo es una etapa de mi vida; el tiempo va del núcleo al borde",
+      "line": "Una línea une recuerdos relacionados",
+      "ring": "Un anillo vacío está por llegar: el libro y la IA",
+      "today": "Hoy",
+      "dust": "El polvo fino son los días, más denso donde pasó más",
+      "keys": "/ buscar · ? esta guía · H solo el cielo · Esc volver"
+    },
+    "focus": "Interfaz oculta. Mueve el ratón o pulsa una tecla para recuperarla."
+  },
+  "threads": {
+    "home": "Hogar",
+    "family": "Familia",
+    "body": "Cuerpo",
+    "craft": "Oficio",
+    "ventures": "Empresas",
+    "learning": "Aprender",
+    "love": "Amor"
+  },
+  "hero": {
+    "kicker": "javi · 1980 – hoy",
+    "title": "Una vida, <em>en hitos.</em>",
+    "lede": "Soy Javi. Estos son los momentos que me hicieron, desde un caserío del País Vasco hasta hoy. Cada nube de puntos es un recuerdo y cada galaxia una etapa de mi vida: abre uno, sigue hasta el siguiente, o busca a una persona, un lugar o un hilo. El trabajo es uno entre muchos. Vienen dos cosas: un libro para mis hijos y una IA con la que podrás hablar.",
+    "primary": "Apúntate a la lista del libro",
+    "secondary": "Recórrelo",
+    "clone": "O espera a la IA →",
+    "region": "Apúntate a la lista del libro"
+  },
+  "periods": {
+    "origins": {
+      "kicker": "01 / Orígenes · 1980–1994",
+      "title": "Una infancia <em>vasca.</em>",
+      "intro": "Un caserío, un piso, el monte los fines de semana y el camping en verano."
+    },
+    "craft": {
+      "kicker": "02 / El oficio · 2001–2011",
+      "title": "Aprender <em>el oficio.</em>",
+      "intro": "Primero equipos corporativos, luego la web y luego el open source."
+    },
+    "tapquo": {
+      "kicker": "03 / TapQuo · 2011–2015",
+      "title": "Una startup, un aula <em>y un avión.</em>",
+      "intro": "Fundo una empresa, doy clases, escribo un libro y dejo España."
+    },
+    "remote": {
+      "kicker": "04 / En remoto · 2015–2019",
+      "title": "Trabajar desde <em>cualquier sitio.</em>",
+      "intro": "En remoto antes de que estuviera de moda: equipos, libros, blockchain y un hábito nuevo."
+    },
+    "home": {
+      "kicker": "05 / Hogar · 2020–2024",
+      "title": "Una empresa, <em>una familia, una casa.</em>",
+      "intro": "Satoshi, dos hijos y una casa que construí."
+    },
+    "now": {
+      "kicker": "06 / Ahora · 2025–2026",
+      "title": "Dónde <em>estoy.</em>",
+      "intro": "Todavía descubriendo qué quiero enseñar."
+    }
+  },
+  "book": {
+    "kicker": "07 / El libro",
+    "expected": "Previsto",
+    "title": "Un libro <em>para mis hijos.</em>",
+    "body": "Estoy escribiendo mi historia para que les sirva: lo que pasó, lo que aprendí y quién era en cada momento. Muy pronto sale. Déjame tu email y te aviso el día que salga.",
+    "form": {
+      "label": "Tu email",
+      "placeholder": "tu@ejemplo.com",
+      "button": "Avísame cuando salga",
+      "region": "Lista de espera del libro",
+      "note": "Solo te escribiré sobre el libro. Puedes darte de baja cuando quieras.",
+      "opened": "Se ha abierto Buttondown en una pestaña nueva para terminar tu suscripción.",
+      "soon": "La lista de espera se abre muy pronto."
+    }
+  },
+  "clone": {
+    "kicker": "08 / Habla conmigo",
+    "ask": {
+      "label": "Preguntas que la IA podría responder",
+      "title": "Pregunta y mira de qué bebería",
+      "draws": "Se apoya en:"
+    },
+    "title": "Una IA <em>con la que hablar.</em>",
+    "body": "Estoy construyendo una versión de mí con la que cualquiera pueda hablar, basada en lo que he escrito y recogido durante años. Todavía no está lista. Déjame tu email y te aviso cuando lo esté.",
+    "form": {
+      "label": "Tu email",
+      "placeholder": "tu@ejemplo.com",
+      "button": "Avísame cuando esté lista",
+      "region": "Lista de espera de la IA",
+      "note": "Solo te escribiré sobre la IA. Puedes darte de baja cuando quieras.",
+      "opened": "Se ha abierto Buttondown en una pestaña nueva para terminar tu suscripción.",
+      "soon": "La lista de espera se abre muy pronto."
+    }
+  },
+  "contact": {
+    "kicker": "09 / Saluda",
+    "title": "¿Hablamos?",
+    "lede": "Lo mejor es el email.",
+    "elsewhere": "En otros sitios",
+    "follow": "Sígueme en X"
+  },
+  "notFound": {
+    "title": "Día perdido · Javi",
+    "heading": "Este día no está en el calendario.",
+    "body": "La página que buscas no existe o ha cambiado de sitio.",
+    "home": "Volver a los días"
+  }
+}

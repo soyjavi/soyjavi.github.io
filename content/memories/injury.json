@@ -1,0 +1,27 @@
+{
+  "date": "1992",
+  "kind": "personal",
+  "weight": 2,
+  "period": "origins",
+  "threads": [
+    "body"
+  ],
+  "people": [
+    "francisco",
+    "javi-ramirez"
+  ],
+  "places": [
+    "galdacano"
+  ],
+  "links": [
+    "taekwondo"
+  ],
+  "en": {
+    "title": "Three months at home",
+    "body": "I tear a thigh muscle jumping a wall and keep playing without a word. My father picks a cast up to the groin over surgery, and Javi Ramírez brings me the classwork."
+  },
+  "es": {
+    "title": "Tres meses en casa",
+    "body": "Me rompo el vasto interno saltando un muro y sigo jugando sin decir nada. Mi padre elige la escayola hasta la ingle en vez del quirófano y Javi Ramírez me trae los deberes."
+  }
+}

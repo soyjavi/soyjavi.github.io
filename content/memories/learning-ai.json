@@ -1,0 +1,18 @@
+{
+  "date": "2026-09",
+  "kind": "personal",
+  "weight": 1,
+  "period": "now",
+  "threads": [
+    "learning",
+    "craft"
+  ],
+  "en": {
+    "title": "Learning, until AI arrived",
+    "body": "Five years as a junior developer never weighed on me: ten thousand hours, and learning as a lifelong trade."
+  },
+  "es": {
+    "title": "Aprender, hasta que llegó la IA",
+    "body": "Cinco años como Junior Developer nunca me pesaron: las diez mil horas, y aprender como oficio de toda una vida."
+  }
+}

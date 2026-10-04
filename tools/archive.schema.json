@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://www.soyjavi.com/tools/archive.schema.json",
+  "title": "A life archive for npm run import",
+  "description": "One file holds the whole life. Only entries with public true are written; a day in a date is cut to its month; if anything is wrong nothing is written and every reason is printed.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "periods": {
+      "description": "The stages of the life in order; each is a galaxy. Replaces the periods of content/life.json and their copy.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/period" }
+    },
+    "threads": {
+      "description": "The lines the memories belong to, in order. Replaces the threads of content/life.json and their names.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/thread" }
+    },
+    "ahead": {
+      "description": "The thread each of the book and the AI belongs to.",
+      "type": "object",
+      "required": ["book", "clone"],
+      "properties": { "book": { "$ref": "#/$defs/id" }, "clone": { "$ref": "#/$defs/id" } }
+    },
+    "people": { "type": "object", "additionalProperties": { "$ref": "#/$defs/named" } },
+    "places": { "type": "object", "additionalProperties": { "$ref": "#/$defs/named" } },
+    "memories": { "type": "array", "items": { "$ref": "#/$defs/memory" } }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z0-9-]+$", "description": "Lowercase letters, digits and hyphens." },
+    "text": { "type": "string", "minLength": 1 },
+    "period": {
+      "type": "object",
+      "required": ["id", "en", "es"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "en": { "$ref": "#/$defs/periodCopy" },
+        "es": { "$ref": "#/$defs/periodCopy" }
+      }
+    },
+    "periodCopy": {
+      "type": "object",
+      "required": ["kicker", "title", "intro"],
+      "properties": {
+        "kicker": { "$ref": "#/$defs/text", "description": "Number, name and years, e.g. 01 / Origins · 1980–1994." },
+        "title": { "$ref": "#/$defs/text" },
+        "intro": { "$ref": "#/$defs/text" }
+      }
+    },
+    "thread": {
+      "type": "object",
+      "required": ["id", "en", "es"],
+      "properties": { "id": { "$ref": "#/$defs/id" }, "en": { "$ref": "#/$defs/text" }, "es": { "$ref": "#/$defs/text" } }
+    },
+    "named": {
+      "type": "object",
+      "required": ["public", "en", "es"],
+      "properties": { "public": { "type": "boolean", "description": "Only true is written." }, "en": { "$ref": "#/$defs/text" }, "es": { "$ref": "#/$defs/text" } }
+    },
+    "memory": {
+      "type": "object",
+      "required": ["id", "public", "date", "kind", "weight", "period", "threads", "en", "es"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "public": { "type": "boolean", "description": "Only true is written." },
+        "date": { "type": "string", "pattern": "^\\d{4}(-\\d{2})?(-\\d{2})?$", "description": "YYYY or YYYY-MM; a day is cut to its month." },
+        "approx": { "type": "boolean" },
+        "kind": { "enum": ["personal", "professional", "product", "education"] },
+        "weight": { "enum": [1, 2, 3], "description": "1 a moment, 2 it mattered, 3 it changed everything." },
+        "period": { "$ref": "#/$defs/id" },
+        "threads": { "type": "array", "minItems": 1, "maxItems": 3, "items": { "$ref": "#/$defs/id" }, "description": "The first one decides the lane." },
+        "people": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+        "places": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+        "links": { "type": "array", "items": { "$ref": "#/$defs/id" }, "description": "Other memories, declared once and read in both directions." },
+        "order": { "type": "number", "description": "Breaks a tie between memories of the same date." },
+        "en": { "$ref": "#/$defs/memoryCopy" },
+        "es": { "$ref": "#/$defs/memoryCopy" }
+      }
+    },
+    "memoryCopy": {
+      "type": "object",
+      "required": ["title", "body"],
+      "properties": { "title": { "$ref": "#/$defs/text" }, "body": { "type": "string", "minLength": 1, "maxLength": 260, "description": "First person, one to three sentences." } }
+    }
+  }
+}

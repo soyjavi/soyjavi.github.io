@@ -1,0 +1,20 @@
+{
+  "date": "2026-07",
+  "kind": "personal",
+  "weight": 2,
+  "period": "now",
+  "threads": [
+    "home"
+  ],
+  "places": [
+    "asturias"
+  ],
+  "en": {
+    "title": "A stone house in Asturias",
+    "body": "The seed of going back to Spain: a stone house, the mountains, a vegetable garden, slowing down and teaching."
+  },
+  "es": {
+    "title": "Una casa de piedra en Asturias",
+    "body": "La semilla de volver a España: una casa de piedra, la montaña, el huerto, el retiro y enseñar."
+  }
+}

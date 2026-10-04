@@ -1,0 +1,21 @@
+{
+  "date": "2013-12",
+  "kind": "education",
+  "weight": 2,
+  "period": "tapquo",
+  "threads": [
+    "learning"
+  ],
+  "links": [
+    "leaves",
+    "react"
+  ],
+  "en": {
+    "title": "A book: CoffeeScript",
+    "body": "I publish it on Leanpub, written on one of my trips to Asia."
+  },
+  "es": {
+    "title": "Un libro: CoffeeScript",
+    "body": "Lo publico en Leanpub, escrito en uno de mis viajes a Asia."
+  }
+}

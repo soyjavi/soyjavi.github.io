@@ -1,0 +1,25 @@
+{
+  "date": "2025-02",
+  "kind": "personal",
+  "weight": 2,
+  "period": "now",
+  "threads": [
+    "family"
+  ],
+  "people": [
+    "jose",
+    "lucy",
+    "merche"
+  ],
+  "places": [
+    "galicia"
+  ],
+  "en": {
+    "title": "My grandfather José dies",
+    "body": "My mother's father, a Galician merchant seaman from Cangas do Morrazo."
+  },
+  "es": {
+    "title": "Muere mi abuelo José",
+    "body": "El padre de mi madre, marino mercante gallego de Cangas do Morrazo."
+  }
+}

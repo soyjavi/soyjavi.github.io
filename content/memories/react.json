@@ -1,0 +1,17 @@
+{
+  "date": "2016-01",
+  "kind": "education",
+  "weight": 2,
+  "period": "remote",
+  "threads": [
+    "learning"
+  ],
+  "en": {
+    "title": "A book: Descubre React",
+    "body": "I publish it on Leanpub when React is still little known."
+  },
+  "es": {
+    "title": "Un libro: Descubre React",
+    "body": "Lo publico en Leanpub cuando React aún es poco conocido."
+  }
+}
