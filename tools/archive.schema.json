@@ -19,7 +19,7 @@
       "items": { "$ref": "#/$defs/thread" }
     },
     "ahead": {
-      "description": "The thread each of the book and the AI belongs to.",
+      "description": "The thread each of the book and the clone belongs to.",
       "type": "object",
       "required": ["book", "clone"],
       "properties": { "book": { "$ref": "#/$defs/id" }, "clone": { "$ref": "#/$defs/id" } }

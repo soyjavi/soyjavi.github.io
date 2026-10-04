@@ -23,11 +23,13 @@ export function head({ site, dict, lang, title, description, path, alternates, t
     <meta http-equiv="Content-Security-Policy" content="${esc(CSP)}" />
     <title>${esc(title)}</title>
     <meta name="description" content="${esc(description)}" />
+    <meta name="author" content="${esc(site.name)}" />
+    <meta name="application-name" content="${esc(site.name)}" />
     <link rel="canonical" href="${url}" />
     ${links}${xDefault}
     <meta property="og:type" content="${type}" />
     <meta property="og:url" content="${url}" />
-    <meta property="og:site_name" content="Javi" />
+    <meta property="og:site_name" content="${esc(site.name)}" />
     <meta property="og:locale" content="${OG_LOCALE[lang]}" />
     <meta property="og:title" content="${esc(title)}" />
     <meta property="og:description" content="${esc(description)}" />
@@ -95,4 +97,14 @@ export const personLd = (site) =>
     image: `${site.url}/assets/avatar.jpg`,
     email: site.email,
     sameAs: [site.links.x],
+  });
+
+export const websiteLd = (site, lang) =>
+  jsonLd({
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: site.name,
+    alternateName: site.handle,
+    url: site.url,
+    inLanguage: lang,
   });

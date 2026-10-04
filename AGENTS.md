@@ -2,7 +2,7 @@
 
 The personal site of Javi (@soyjavi): one immersive three.js space where a life from 1980 to today is a cloud of dots per
 memory, gathered into a galaxy per period of the life and explored freely, with two rings ahead for a book for his
-children and an AI you will be able to talk to, each with its own waitlist. It is not a portfolio and has no blog: it
+children and his clone, each with its own waitlist. It is not a portfolio and has no blog: it
 shows a life and sells those two things. English and Spanish, light and dark, static, no tracking. These are the rules for working on it. Personal rules of the creator live in
 `~/.claude/CLAUDE.md` and apply on top.
 
@@ -85,6 +85,17 @@ Rules of the loop:
 - Parallel shell calls use absolute paths; a `cd` in one call leaks into its siblings.
 - Remote: `git@github.com:soyjavi/soyjavi.github.io.git`, branch `main`. Never rewrite pushed history.
 
+## Voice and copy
+
+Every sentence on the site and in the documents follows the twelve rules in the voice section of `design/index.html`,
+and `tests/voice.test.mjs` enforces the mechanical ones. The four that were broken before:
+
+- The offer is "my clone" / "mi clon" on the site and "the clone" in documents; the words the test bans never appear
+  anywhere, tests aside, and the list lives only in the test.
+- No promise of time or of ability: say the state ("isn't open yet"), what it is for, and that it is not ready.
+- The site is "I" and the reader "you" / "tú"; one word per thing (memory, cloud, galaxy, stage, thread, hollow ring).
+- A new key goes into both languages together, with the Spanish written, not translated word for word.
+
 ## Design kit
 
 `design/index.html` is the hand-written brand: essence, name, wordmark, colour in two lights, type, the sky, the scene, the interface,
@@ -102,7 +113,7 @@ no ROADMAP entry or is malformed.
 - The site is a life, not a résumé, and it is explored, not scrolled: a soft cloud of dots for each memory (not a sharp
   point) from 1980 to today, a free camera, one galaxy per period of the life, threads, people and places as filters,
   and what a memory is related to lit when it is open. Two hollow rings
-  ahead are the book and the AI. The form is clear and the memories are diffuse; the name is never spelled with dots.
+  ahead are the book and the clone. The form is clear and the memories are diffuse; the name is never spelled with dots.
   Nothing is only reachable in order: clicking, the rail, the finder, Surprise me, related memories and the keyboard
   all get there, and Earlier and Later are one way among them.
 - The brand is `javi` in outlined Instrument Serif Italic; `soyjavi` is an address (domain, X, email), not the
@@ -116,15 +127,15 @@ no ROADMAP entry or is malformed.
   public text with only the date precision he allows: here a year or a month, never a day. Everything he has not
   approved stays in his own archive and never enters the repository, its history, a test, a fixture or a doc, and no
   document here names what is held back. People, his children included, appear by their own names, as in his archive:
-  names are not private. No person carries a day or a photo unless he decides otherwise, and the AI is named publicly
+  names are not private. No person carries a day or a photo unless he decides otherwise, and the clone is named publicly
   only as he says. Who took part in a public memory may come from his archive; nothing else private does.
 - The site is not a portfolio and has no blog, writing section or feed. It shows a life and sells two things: the book
-  and the AI. Contact is the email address and X, nothing else (no GitHub, no companies).
-- The book and the AI are announced and each has its own waitlist, but the repository carries no title, blurb, cover or
-  date for the book and no public name for the AI until the creator provides them.
+  and the clone. Contact is the email address and X, nothing else (no GitHub, no companies).
+- The book and the clone are announced and each has its own waitlist, but the repository carries no title, blurb, cover or
+  date for the book and no public name for the clone until the creator provides them.
 - Each waitlist is a Buttondown embed form, one newsletter with a tag per list (`book`, `clone`): the only third-party
   origin on the site, reached on submit and never on load, in a visible new tab; the site never says a signup
-  succeeded. Without a username in `content/site.json` the lists say they open soon. There is no `mailto` for joining.
+  succeeded. Without a username in `content/site.json` the lists say they aren't open yet. There is no `mailto` for joining.
 - Reduced motion, no WebGL2 or a window too small to read the panels gets the flat page, which carries every
   section; it is not a degraded version.
 - The repository is served as it is: `.nojekyll` stays, and nothing on the host builds or rewrites a file.

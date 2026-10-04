@@ -220,7 +220,7 @@ test("two hundred and fifty memories stay inside the dot budget, keep their clou
   assert.ok([...gaps].sort((a, b) => a - b)[Math.floor(gaps.length * 0.1)] > 1.2, "a tenth of the clouds sit on top of another");
 });
 
-test("the timeline rail maps years to a percentage and keeps the book and the AI after today", () => {
+test("the timeline rail maps years to a percentage and keeps the book and the clone after today", () => {
   assert.equal(railPercent(RAIL.start), 0);
   assert.equal(railPercent(RAIL.end), 100);
   assert.ok(railPercent(2000) > 39 && railPercent(2000) < 40);
@@ -337,7 +337,7 @@ test("in the sky every memory is a star inside its period's galaxy, later ones f
   assert.ok(near(fractionIn(sky.list[0], sky.list[0].start), 0));
 });
 
-test("today, the book and the AI follow the path outwards past the last period, and the trail fills the galaxies", () => {
+test("today, the book and the clone follow the path outwards past the last period, and the trail fills the galaxies", () => {
   const sky = skyOfLife();
   const ahead = futures(sky);
   const final = sky.list.at(-1);
@@ -346,7 +346,7 @@ test("today, the book and the AI follow the path outwards past the last period, 
   assert.deepEqual(ahead.book, onPath(sky, sky.ahead + SKY.ahead[0] * SKY.future));
   assert.deepEqual(ahead.clone, onPath(sky, sky.ahead + SKY.ahead[1] * SKY.future));
   for (const point of [now, ahead.book, ahead.clone]) assert.ok(flatGap(point, final.centre) > final.radius, "outside the last galaxy");
-  assert.ok(fromPole(sky, now) < fromPole(sky, ahead.book) && fromPole(sky, ahead.book) < fromPole(sky, ahead.clone), "today, then the book, then the AI, further out each time");
+  assert.ok(fromPole(sky, now) < fromPole(sky, ahead.book) && fromPole(sky, ahead.book) < fromPole(sky, ahead.clone), "today, then the book, then the clone, further out each time");
   assert.ok(ahead.clone[2] > final.centre[2], "and higher than the past");
   const placed = marks();
   const cloud = memories({ marks: placed, today: TODAY, random: seeded(8), facets, sky, trail: 3000 });

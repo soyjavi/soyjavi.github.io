@@ -11,7 +11,7 @@ export function rail({ life, dict }) {
   const ticks = placed.map((year, i) => `<i data-weight="${life.milestones[i].weight}" style="--x:${pct(year)}%"></i>`);
   const decades = DECADES.map((decade) => {
     const first = life.milestones.find((_, i) => placed[i] >= decade && placed[i] < decade + 10) ?? life.milestones.find((_, i) => placed[i] >= decade) ?? life.milestones.at(-1);
-    return `<li style="--x:${pct(decade)}%"><a href="#m-${first.id}" data-go="m-${first.id}" aria-label="${esc(fill(copy.decade, { year: decade }))}">${decade}</a></li>`;
+    return `<li style="--x:${pct(decade)}%"><a href="#m-${first.id}" data-go="m-${first.id}" aria-label="${esc(fill(copy.decade, { year: decade, label: decade < 2000 ? decade % 100 : decade }))}">${decade}</a></li>`;
   });
   return `<nav class="rail" aria-label="${esc(copy.label)}">
       <a class="rail-home" href="#top" data-go="top" aria-label="${esc(copy.overview)}" title="${esc(copy.overview)}"><i aria-hidden="true"></i><span class="rail-name">${esc(copy.overviewName)}</span></a>

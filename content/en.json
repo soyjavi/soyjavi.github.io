@@ -3,7 +3,7 @@
   "locale": "en_US",
   "meta": {
     "title": "Javi · A life in milestones",
-    "description": "Javi's personal site: a life from 1980 to today told in milestones, a book for my children and an AI you will be able to talk to. Join the waitlist for the book or the AI."
+    "description": "Javi's personal site: a life from 1980 to today told in milestones, a book for my children and my clone. Join the waitlist for the book or my clone."
   },
   "ui": {
     "skip": "Skip to content",
@@ -60,7 +60,7 @@
       "all": "All related ({n})",
       "fewer": "Fewer",
       "nudgebook": "Join the book's waitlist →",
-      "nudgeclone": "Join the AI's waitlist →",
+      "nudgeclone": "Join my clone's waitlist →",
       "nudgeclose": "Close",
       "menu": "More"
     },
@@ -76,7 +76,7 @@
       "cloud": "A cloud is a memory; the bigger it is, the more it changed",
       "galaxy": "A dashed circle is a period of my life; time runs from its core to its rim",
       "line": "A line joins related memories",
-      "ring": "A hollow ring is still ahead: the book and the AI",
+      "ring": "A hollow ring is still ahead: the book and my clone",
       "today": "Today",
       "dust": "The fine dust is the days, thicker where more happened",
       "keys": "/ find · ? this guide · H only the sky · Esc back"
@@ -95,10 +95,10 @@
   "hero": {
     "kicker": "javi · 1980 – today",
     "title": "A life, <em>in milestones.</em>",
-    "lede": "I'm Javi. These are the moments that made me, from a farmhouse in the Basque Country to today. Each cloud of dots is a memory and each galaxy a stage of my life: open one, follow it to the next, or look for a person, a place or a thread. Work is one of many. Two things come next: a book for my children and an AI you will be able to talk to.",
+    "lede": "I'm Javi. These are the moments that made me, from a farmhouse in the Basque Country to today. Each cloud of dots is a memory and each galaxy a stage of my life: open one, follow it to the next, or look for a person, a place or a thread. Work is one of many. Two things come next: a book for my children and my clone, a place to keep talking with me.",
     "primary": "Join the book's waitlist",
     "secondary": "Travel through it",
-    "clone": "Or wait for the AI →",
+    "clone": "Or join my clone's waitlist →",
     "region": "Join the book's waitlist"
   },
   "periods": {
@@ -137,7 +137,7 @@
     "kicker": "07 / The book",
     "expected": "Expected",
     "title": "A book <em>for my children.</em>",
-    "body": "I'm writing my story so that it serves them: what happened, what I learnt and who I was at each moment. It's coming soon. Leave your email and I'll tell you the day it's out.",
+    "body": "I'm writing my story so that it serves them: what happened, what I learnt and who I was at each moment. It isn't ready yet. Leave your email and I'll tell you when it is.",
     "form": {
       "label": "Your email",
       "placeholder": "you@example.com",
@@ -145,26 +145,26 @@
       "region": "Waitlist for the book",
       "note": "I'll only write to you about the book. Unsubscribe anytime.",
       "opened": "Buttondown opened in a new tab to finish your signup.",
-      "soon": "The waitlist opens very soon."
+      "soon": "The waitlist isn't open yet."
     }
   },
   "clone": {
     "kicker": "08 / Talk to me",
     "ask": {
-      "label": "Questions the AI could answer",
+      "label": "Questions for my clone",
       "title": "Ask, and see what it would draw on",
       "draws": "Draws on:"
     },
-    "title": "An AI <em>you can talk to.</em>",
+    "title": "My <em>clone.</em>",
     "body": "I'm building a version of me that anyone can talk to, based on what I've written and gathered over the years. It isn't ready yet. Leave your email and I'll tell you when it is.",
     "form": {
       "label": "Your email",
       "placeholder": "you@example.com",
       "button": "Tell me when it's ready",
-      "region": "Waitlist for the AI",
-      "note": "I'll only write to you about the AI. Unsubscribe anytime.",
+      "region": "Waitlist for my clone",
+      "note": "I'll only write to you about my clone. Unsubscribe anytime.",
       "opened": "Buttondown opened in a new tab to finish your signup.",
-      "soon": "The waitlist opens very soon."
+      "soon": "The waitlist isn't open yet."
     }
   },
   "contact": {

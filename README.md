@@ -1,11 +1,10 @@
 # soyjavi.com
 
 The personal site of Javi ([@soyjavi](https://github.com/soyjavi)). One three.js space: a **life, from 1980 to today, as
-soft clouds of dots, one for each memory**, and two hollow rings ahead, a book for his children and an AI you will be able
-to talk to, each with its own waitlist. It opens on a starry sky where the memories spark, period by period, into
+soft clouds of dots, one for each memory**, and two hollow rings ahead, a book for his children and his clone, each with its own waitlist. It opens on a starry sky where the memories spark, period by period, into
 galaxies along a path that turns outwards. It is explored, not scrolled: drag, zoom, open a memory, follow it to the
 ones it relates to, filter by a thread, a person or a place and watch it jump between galaxies, or play the life year
-by year. It is not a portfolio and it has no blog: it shows a life and sells the book and the AI.
+by year. It is not a portfolio and it has no blog: it shows a life and sells the book and the clone.
 
 English at [`/`](https://www.soyjavi.com/) and Spanish at `/es/`; the browser's language decides on first visit. Light
 and dark themes, night first and a remembered switch to paper. Static pages on GitHub Pages: no tracking, no cookies, no third-party scripts.
@@ -35,7 +34,7 @@ fails when a generated file is stale.
 | Periods, threads and what waits ahead | `content/life.json`, with their names in `content/en.json` and `content/es.json` |
 | Email, X, the book, the Buttondown account and its two tags | `content/site.json` |
 | The book's expected month (`book.date`, `YYYY-MM`, never a day) | `content/site.json`; it shows a countdown only when set |
-| Three to five questions the AI could answer, each on public memories | `content/questions.json`: `[{ "id", "memories": [ids], "en", "es" }]` |
+| Three to five questions for the clone, each on public memories | `content/questions.json`: `[{ "id", "memories": [ids], "en", "es" }]` |
 | Layout of a page | `src/home.mjs`, `src/layout.mjs`, `src/notfound.mjs` |
 | The scene | `assets/js/life.js` (geometry: the sky), `assets/js/explore.js` (search, related, filters), `assets/js/orbit.js` (camera maths), `assets/js/scene.js` and `shaders.js` (three.js), `assets/js/engine.js` (card, controls, labels), `src/explore.mjs` and `src/rail.mjs` (the controls and the timeline rail) |
 | Look | `assets/brand.css` (tokens and themes), `assets/site.css` (home), `assets/page.css` (the 404) |
@@ -91,7 +90,7 @@ flag of your own) is ignored.
 
 - `periods` and `threads` (both optional) replace the ones in `content/life.json` and their copy in both dictionaries, in
   the order given: a period is a galaxy and its `kicker` carries its number and years; the first thread of a memory
-  decides its lane; `ahead` says which thread the book and the AI belong to. The import stops if a period or thread that
+  decides its lane; `ahead` says which thread the book and the clone belong to. The import stops if a period or thread that
   memories already use would disappear.
 - `kind` is personal, professional, product or education; `weight` is 1 (a moment), 2 (it mattered) or 3 (it changed
   everything); `date` is `YYYY` or `YYYY-MM` (`"approx": true` when it is roughly then); `order` breaks a tie between
@@ -101,10 +100,10 @@ flag of your own) is ignored.
 
 ### The waitlists
 
-There are two, one for the book and one for the AI, both posting to [Buttondown](https://buttondown.com): one
+There are two, one for the book and one for the clone, both posting to [Buttondown](https://buttondown.com): one
 newsletter, one tag per list. Put the newsletter's username in `content/site.json` (`buttondown.username`) and keep the
 two tags (`buttondown.tags.book`, `buttondown.tags.clone`), then run `npm run build`. Until there is a username each list
-says it opens soon; there is no email fallback.
+says it isn't open yet; there is no email fallback.
 
 ## Publish it
 

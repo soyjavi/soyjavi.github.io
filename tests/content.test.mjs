@@ -185,7 +185,7 @@ test("today is the visitor's calendar day in every time zone", () => {
   }
 });
 
-test("the questions for the AI are three to five, each in both languages and on memories that exist, or none yet", () => {
+test("the questions for the clone are three to five, each in both languages and on memories that exist, or none yet", () => {
   const { questions } = content.life;
   assert.ok(questions.length === 0 || (questions.length >= 3 && questions.length <= 5), `${questions.length} questions`);
   assert.equal(new Set(questions.map((question) => question.id)).size, questions.length, "ids are unique");

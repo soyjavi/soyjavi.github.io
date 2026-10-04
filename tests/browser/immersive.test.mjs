@@ -154,13 +154,13 @@ test("screen readers and keyboards reach every chapter in immersive mode", async
   const { page, errors, close } = await open();
   await immersive(page);
   const outline = await page.locator("main").ariaSnapshot();
-  for (const text of ["A life, in milestones", "Born in Bilbao", "First job", "Life, not craft", "A book for my children", "An AI you can talk to", "Want to talk"]) assert.match(outline, new RegExp(text), text);
+  for (const text of ["A life, in milestones", "Born in Bilbao", "First job", "Life, not craft", "A book for my children", "My clone", "Want to talk"]) assert.match(outline, new RegExp(text), text);
   assert.match(outline, /link "hello@soyjavi\.com"/);
   assert.deepEqual(await page.locator("main .contact a[href^='http']").evaluateAll((nodes) => nodes.map((node) => node.href)), ["https://twitter.com/soyjavi"], "the contact offers X and nothing else outside the site");
   assert.deepEqual(await page.locator("footer a[href^='http']").evaluateAll((nodes) => nodes.map((node) => node.href)), ["https://twitter.com/soyjavi"], "the footer's Elsewhere is X only");
   assert.equal(await page.locator("a[href^='http'][href*='github'], a[href^='http'][href*='mirai'], a[href^='http'][href*='satoshi']").count(), 0, "no portfolio links on the home page");
   const kinds = await page.locator("main [data-station]").evaluateAll((nodes) => nodes.map((node) => node.dataset.station));
-  assert.equal(kinds.length, content.life.milestones.length + 4, "the stations are the hero, the milestones, the book, the AI and the contact");
+  assert.equal(kinds.length, content.life.milestones.length + 4, "the stations are the hero, the milestones, the book, the clone and the contact");
   assert.deepEqual([kinds[0], ...kinds.slice(-3)], ["hero", "book", "clone", "contact"]);
   assert.equal(kinds.filter((kind) => kind === "milestone").length, content.life.milestones.length);
   assert.equal(await page.locator(".labels").getAttribute("aria-hidden"), null);
@@ -646,7 +646,7 @@ test("walking the finder's results with the arrows does not step through the mem
   await close();
 });
 
-test("Escape inside an email field leaves the reader at the book or the AI with what they typed", async () => {
+test("Escape inside an email field leaves the reader at the book or the clone with what they typed", async () => {
   for (const [list, label] of LISTS) {
     const { page, close } = await open(`/#${list}`, { before: withForm() });
     await hud(page, label);
@@ -923,7 +923,7 @@ test("a memory card shows Earlier and Later at the foot of the card however long
   await close();
 });
 
-test("the book and the AI wait at two named rings that open their cards", async () => {
+test("the book and the clone wait at two named rings that open their cards", async () => {
   const { page, errors, close } = await open("/", { viewport: { width: 1440, height: 860 } });
   await immersive(page);
   await hud(page, "javi");
@@ -1033,7 +1033,7 @@ test("each waitlist appears only at its own station and sends the reader to Butt
   await hud(page, BOOK);
   assert.equal(await page.locator(".card-form form.waitlist").count(), 3, "the real forms live in the card");
   assert.equal(await page.locator(".card-form[data-for=book]").isVisible(), true, "the book's list is visible at the book");
-  assert.equal(await page.locator(".card-form[data-for=clone]").isVisible(), false, "and the AI's is not");
+  assert.equal(await page.locator(".card-form[data-for=clone]").isVisible(), false, "and the clone's is not");
   await page.locator("#waitlist-book-email").fill("reader@example.com");
   const first = page.waitForEvent("popup");
   await page.locator(".card-form[data-for=book] button[type=submit]").click();
@@ -1049,9 +1049,9 @@ test("each waitlist appears only at its own station and sends the reader to Butt
   assert.equal(await page.locator("iframe").count(), 0, "no hidden frame");
   await page.locator(".step[data-step=next]").click();
   await hud(page, CLONE);
-  assert.equal(await page.locator(".card-form[data-for=book]").isVisible(), false, "the book's list is hidden at the AI");
-  assert.equal(await page.locator(".card-form[data-for=clone]").isVisible(), true, "and the AI's is visible");
-  assert.equal(await page.locator(".card-form[data-for=clone] .status").innerText(), "", "the AI's list does not inherit the book's status");
+  assert.equal(await page.locator(".card-form[data-for=book]").isVisible(), false, "the book's list is hidden at the clone");
+  assert.equal(await page.locator(".card-form[data-for=clone]").isVisible(), true, "and the clone's is visible");
+  assert.equal(await page.locator(".card-form[data-for=clone] .status").innerText(), "", "the clone's list does not inherit the book's status");
   await page.locator("#waitlist-clone-email").fill("other@example.com");
   const second = page.waitForEvent("popup");
   await page.locator(".card-form[data-for=clone] button[type=submit]").click();
@@ -1064,7 +1064,7 @@ test("each waitlist appears only at its own station and sends the reader to Butt
   assert.match(await page.locator(".card-form[data-for=clone] .status").innerText(), /opened in a new tab/);
   await page.locator(".step[data-step=previous]").click();
   await hud(page, BOOK);
-  assert.equal(await page.locator(".card-form[data-for=clone]").isVisible(), false, "hidden after the AI");
+  assert.equal(await page.locator(".card-form[data-for=clone]").isVisible(), false, "hidden after the clone");
   assert.deepEqual(errors, []);
   await close();
 });
@@ -1074,14 +1074,14 @@ test("without a Buttondown account each waitlist says it opens soon and offers n
   await immersive(page);
   assert.equal(await page.locator(".card-form .waitlist").count(), 3);
   assert.deepEqual(await page.locator(".card-form .waitlist").evaluateAll((nodes) => nodes.map((node) => node.tagName + node.dataset.list)), ["DIVhero", "DIVbook", "DIVclone"]);
-  assert.equal(await page.locator(".card-form[data-for=hero] .note").innerText(), "The waitlist opens very soon.");
+  assert.equal(await page.locator(".card-form[data-for=hero] .note").innerText(), "The waitlist isn't open yet.");
   assert.equal(await page.locator(".card-form form, .card-form input, .card-form button, .card-form a").count(), 0);
   for (const [list, label] of LISTS) {
     await goTo(page, list);
     await hud(page, label);
     assert.equal(await page.locator(`.card-form[data-for=${list}]`).isVisible(), true);
-    assert.equal(await page.locator(`.card-form[data-for=${list}] .note`).innerText(), "The waitlist opens very soon.");
-    assert.equal(await page.locator(`.card-form[data-for=${list}] [aria-label]`).getAttribute("aria-label"), list === "book" ? "Waitlist for the book" : "Waitlist for the AI");
+    assert.equal(await page.locator(`.card-form[data-for=${list}] .note`).innerText(), "The waitlist isn't open yet.");
+    assert.equal(await page.locator(`.card-form[data-for=${list}] [aria-label]`).getAttribute("aria-label"), list === "book" ? "Waitlist for the book" : "Waitlist for my clone");
     assert.equal(await page.locator(`.card a[href^='mailto:']`).count(), 0, `${list}: nothing to email from the card`);
   }
   await close();
@@ -1121,7 +1121,7 @@ test("a space on a focused button presses it instead of stepping to another memo
   }
 });
 
-test("the calls to action to the book and the AI land on their own email field, for a mouse and for a keyboard", async () => {
+test("the calls to action to the book and the clone land on their own email field, for a mouse and for a keyboard", async () => {
   const { page, close } = await open("/", { before: withForm() });
   await immersive(page);
   await page.waitForTimeout(1500);
@@ -1130,7 +1130,7 @@ test("the calls to action to the book and the AI land on their own email field, 
   assert.deepEqual(await page.locator(".card .actions a").evaluateAll((nodes) => nodes.map((node) => node.getAttribute("tabindex"))), [null, null], "the hero's links are in the tab order");
   await page.locator(".card .actions a").first().focus();
   await page.keyboard.press("Tab");
-  assert.equal(await page.evaluate(() => document.activeElement.dataset.go), "clone", "Tab goes from Travel through it to the AI's card");
+  assert.equal(await page.evaluate(() => document.activeElement.dataset.go), "clone", "Tab goes from Travel through it to the clone's card");
   await page.keyboard.press("Tab");
   assert.equal(await page.evaluate(() => document.activeElement.id), "waitlist-hero-email", "and on to the form");
   await page.locator(".card .actions a[data-go='clone']").click();
@@ -1993,7 +1993,7 @@ const withQuestions = (lang = "en") => async (context) => {
   await context.route(`${base}${lang === "es" ? "/es/" : "/"}`, (route) => route.fulfill({ contentType: "text/html", body: withAsks.get(lang === "es" ? "es/index.html" : "index.html") }));
 };
 
-test("choosing a question lights its memories and draws a line from each to the AI's ring; the same question, Escape or leaving lets go", async () => {
+test("choosing a question lights its memories and draws a line from each to the clone's ring; the same question, Escape or leaving lets go", async () => {
   const { page, errors, close } = await open("/", { before: withQuestions() });
   await immersive(page);
   await page.waitForTimeout(1200);
@@ -2020,7 +2020,7 @@ test("choosing a question lights its memories and draws a line from each to the 
   await page.waitForFunction(() => document.querySelector("#scene").dataset.jumps === "2", null, { timeout: 8000 });
   await page.keyboard.press("Escape");
   assert.equal(await buttons.nth(0).getAttribute("aria-pressed"), "false", "Escape lets go");
-  assert.equal(await page.locator(".hud").textContent(), CLONE, "and stays at the AI");
+  assert.equal(await page.locator(".hud").textContent(), CLONE, "and stays at the clone");
   await page.waitForFunction(() => document.querySelector("#scene").dataset.jumps === "", null, { timeout: 8000 });
   await buttons.nth(2).click();
   await page.waitForFunction(() => document.querySelector("#scene").dataset.jumps === "1", null, { timeout: 8000 });
@@ -2032,7 +2032,7 @@ test("choosing a question lights its memories and draws a line from each to the 
   await close();
 });
 
-test("with five questions the AI's card still shows its email field on laptop and phone screens, in both languages", async () => {
+test("with five questions the clone's card still shows its email field on laptop and phone screens, in both languages", async () => {
   for (const lang of ["en", "es"]) {
     for (const [width, height] of [[1366, 657], [1280, 640], [390, 844], [360, 640]]) {
       const mobile = width < 600;
@@ -2599,7 +2599,7 @@ test("the first memory of a visit opens gently, with no year rings and no minima
   await keyed.close();
 });
 
-test("after three memories a quiet line invites to the book's list, then to the AI's, can be closed for the visit, and never moves the card", async () => {
+test("after three memories a quiet line invites to the book's list, then to the clone's, can be closed for the visit, and never moves the card", async () => {
   for (const [width, height] of [[1280, 640], [1366, 657], [390, 844], [360, 640]]) {
     const mobile = width < 600;
     const { page, errors, close } = await open("/", { viewport: { width, height }, hasTouch: mobile, isMobile: mobile });
@@ -2627,11 +2627,11 @@ test("after three memories a quiet line invites to the book's list, then to the 
     assert.ok(line.bottom <= rail.top + 1 || line.top >= rail.bottom, `${where}: clear of the rail`);
     await goTo(page, "clone");
     await hud(page, CLONE);
-    assert.equal(await nudge.isVisible(), false, `${where}: not on the AI's own card`);
+    assert.equal(await nudge.isVisible(), false, `${where}: not on the clone's own card`);
     await goTo(page, "m-github");
     await hud(page, "02 / The craft · GitHub");
     await settled(page);
-    assert.equal(await nudge.locator("a").getAttribute("data-go"), "clone", `${where}: the AI's list once its station was seen`);
+    assert.equal(await nudge.locator("a").getAttribute("data-go"), "clone", `${where}: the clone's list once its station was seen`);
     await nudge.locator("button").click();
     assert.equal(await nudge.isVisible(), false, `${where}: closed`);
     await goTo(page, "m-born");

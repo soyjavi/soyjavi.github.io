@@ -64,12 +64,6 @@ _None._
   accept: the seven threads (home, family, body, craft, ventures, learning, love), each memory's threads and links, and
   the thread each of the book and the AI belongs to (`ahead`) have been read by the creator and changed where they say
   something he would not say. They were drafted from the milestone texts, nothing else.
-- **BRAND-NAME** — The name of the brand
-  `decision · creator · high`
-  board: BRAND-NAME
-  accept: the creator picks from the board (recommended: `javi` as the brand, `soyjavi` as the address) and says whether
-  the book's byline is a first name or a full name; then an agent task outlines the wordmark and monogram, the favicon,
-  share card, title tags, JSON-LD (name, alternateName, a WebSite node) and author meta (BRAND-WORDMARK, BRAND-SMALL).
 - **LIFE-VISIBILITY** — Review which milestones are public
   `content · creator · high`
   accept: the creator has gone through the published milestones and, in his own milestones file, through the entries
@@ -115,6 +109,16 @@ _None._
 
 ### Checks on real services and devices
 
+- **BRAND-BYLINE** — Is the book's byline a first name or a full name?
+  `decision · creator · normal`
+  The brand is `javi` (decided); the byline of the book is the one open part of the name.
+  accept: the creator answers; BRAND-LOCKUP and BOOK-DETAILS use it.
+- **OG-REGEN** — Regenerate the share image
+  `chore · creator · normal`
+  `og-image.png` still draws the old hero text. It needs headless Chromium, so the creator runs `npm run og` and
+  commits the image after the copy tasks he wants are in.
+  accept: the image shows the current hero; no banned word in it.
+
 - **VERIFY-WAITLIST** — The two forms against a real Buttondown account
   `verify · creator · high`
   depends: BUTTONDOWN
@@ -139,6 +143,28 @@ Visual ideas have a board in `design/proposals.html`; the others are described h
 From the brand and copy review (the creator asked for the name, the type and every sentence to be worked properly, and
 does not want the word AI on the site). Nothing here is approved.
 
+Ordered by what must be decided or applied first; each group names what it waits on.
+
+### 1. Copy of the home and the two offers — after CLONE-NAME and BOOK-DETAILS; the voice rules are in `design/index.html` and tested
+
+- **COPY-CLONE** — A place to keep talking, when I am no longer here
+  board: COPY-CLONE
+  The clone's card says its purpose in his words, that it is not ready, and nothing it can do; the nav and kicker say My clone. The public name stays CLONE-NAME.
+- **COPY-BOOK** — For my children, and for whoever wants it
+  board: COPY-BOOK
+  The book's card says who it is for and what it holds (what went well and what went wrong) and promises no date.
+- **COPY-HERO** — A hero that says who, what and what comes next, in 45 words
+  board: COPY-HERO
+  Replace the 74-word lede and the clone link; both offers named, no AI.
+- **COPY-WAITLIST** — Softer words for the lists and the nudge
+  board: COPY-WAITLIST
+  No time promises, no tool words on the lists; the creator decides whether the nudge may appear on memories about loss.
+- **COPY-META** — What a search result and a shared link say
+  board: COPY-META
+  A description of at most 155 characters in both languages, and a 404 in the sky's vocabulary.
+
+### 2. Mark and type — after the name is settled
+
 - **BRAND-WORDMARK** — Eight ways to draw the name, and the two worth keeping
   board: BRAND-WORDMARK
   The header draws the name as live text although the rule is the outlined SVG; ship the outlined wordmark from a tool and a test, in the chosen treatment.
@@ -151,37 +177,9 @@ does not want the word AI on the site). Nothing here is approved.
 - **BRAND-LOCKUP** — One author, two works: by javi, with javi
   board: BRAND-LOCKUP
   A mono preposition and the wordmark at the foot of the book's and the clone's cards, and the naming rule for the clone without tool words.
-- **COPY-NO-AI** — Say my clone, never AI
-  board: COPY-NO-AI
-  Remove the banned words from content, the documents and the share image, with a test; the creator decides the one memory about AI as an era.
-- **COPY-HERO** — A hero that says who, what and what comes next, in 45 words
-  board: COPY-HERO
-  Replace the 74-word lede and the clone link; both offers named, no AI.
-- **COPY-BOOK** — For my children, and for whoever wants it
-  board: COPY-BOOK
-  The book's card says who it is for and what it holds (what went well and what went wrong) and promises no date.
-- **COPY-CLONE** — A place to keep talking, when I am no longer here
-  board: COPY-CLONE
-  The clone's card says its purpose in his words, that it is not ready, and nothing it can do; the nav and kicker say My clone. The public name stays CLONE-NAME.
-- **COPY-WAITLIST** — Softer words for the lists and the nudge
-  board: COPY-WAITLIST
-  No time promises, no tool words on the lists; the creator decides whether the nudge may appear on memories about loss.
-- **COPY-META** — What a search result and a shared link say
-  board: COPY-META
-  A description of at most 155 characters in both languages, and a 404 in the sky's vocabulary.
-- **COPY-VOICE** — One voice, twelve rules, nine Spanish fixes
-  board: COPY-VOICE
-  The twelve rules in the brand page's voice section with a test for the mechanical ones, and the Spanish pass; the creator picks the tense of the memories.
 
+### 3. Sky — agent work with no content needed, one depth layer at a time
 
-
-- **KIND-TINT** — Show the kind of each memory
-  `decision · creator · normal`
-  board: KIND-TINT
-  A faint tint per kind (an exception to the no-hue rule) or a small mark per kind (one ink), as a toggle.
-- **MEMORY-PAGES** — A page for every memory
-  A static page per memory (`/memories/<id>/` and Spanish) with its own title, description and share image, opening the
-  scene on that memory for visitors, so a memory can be shared and found by search. Both languages, in the sitemap.
 - **SKY-DOME** — A deep field behind the galaxies
   board: SKY-DOME
   On a large screen the night looks almost empty: the stars are a few thousand points and most are too dim to see. Bake a
@@ -195,23 +193,29 @@ does not want the word AI on the site). Nothing here is approved.
 - **GALAXY-GLOW** — A soft glow around every galaxy
   board: GALAXY-GLOW
   An additive glow in proportion to what each period holds, so denser periods read from far away.
-- **SHOOTING-STARS** — A slow light that crosses the sky
-  board: SHOOTING-STARS
-  A rare, slow streak on the whole-life view only, off under reduced motion.
 - **PAPER-GRAIN** — The paper theme with its own sky
   board: PAPER-GRAIN
   A faint grain of fibres and ink specks so the light theme has a sky like the night's.
+- **SHOOTING-STARS** — A slow light that crosses the sky
+  board: SHOOTING-STARS
+  A rare, slow streak on the whole-life view only, off under reduced motion.
+
+### 4. Reading the memories — creator decisions on the look
+
+- **KIND-TINT** — Show the kind of each memory
+  `decision · creator · normal`
+  board: KIND-TINT
+  A faint tint per kind (an exception to the no-hue rule) or a small mark per kind (one ink), as a toggle.
 - **PORTRAIT-DOTS** — The avatar as a dot portrait
   board: PORTRAIT-DOTS
   The masked figure of `assets/avatar.jpg` drawn with the fine dots as a station, to say "more than a person" without
   words.
+
+### 5. Depth and the book — need content or approvals from the creator
+
 - **MILESTONE-MEDIA** — A photo or a sound at a milestone
   board: MILESTONE-MEDIA
   Optional media for a milestone, shown in its card, only where the creator has approved it.
-- **PRIVATE-EDITION** — A family-only edition from the private archive
-  board: PRIVATE-EDITION
-  The book's chapters and the sky for the creator's children, built from the same archive with the private milestones
-  included, outside the public repository.
 - **DEPTH-LOCKED** — Show how much more there is than what is public
   board: DEPTH-LOCKED
   Fine, unnamed dots for the memories the creator keeps for the book and the AI, with a count he chooses to publish, so
@@ -220,10 +224,14 @@ does not want the word AI on the site). Nothing here is approved.
 - **BOOK-CHAPTERS** — The book as nodes
   board: BOOK-CHAPTERS
   Chapters of the book as hollow rings that open a card with their blurb and the memories they draw on.
-- **RELATIONS-VIEW** — A view of who and what was connected
-  board: RELATIONS-VIEW
-  A network view that draws the links themselves, once there are hundreds of them.
+- **PRIVATE-EDITION** — A family-only edition from the private archive
+  board: PRIVATE-EDITION
+  The book's chapters and the sky for the creator's children, built from the same archive with the private milestones
+  included, outside the public repository.
 - **DREAM-ARCS** — What was wished for, done and let go
   board: DREAM-ARCS
   An arc from the memory where something was wished for to the one where it came true; what is still pending is a hollow
   ring ahead, like the book and the AI. Needs the dreams the creator is willing to make public.
+- **RELATIONS-VIEW** — A view of who and what was connected
+  board: RELATIONS-VIEW
+  A network view that draws the links themselves, once there are hundreds of them.

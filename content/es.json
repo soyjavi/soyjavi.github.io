@@ -3,7 +3,7 @@
   "locale": "es_ES",
   "meta": {
     "title": "Javi · Una vida en hitos",
-    "description": "La web personal de Javi: una vida de 1980 a hoy contada en hitos, un libro para mis hijos y una IA con la que podrás hablar. Apúntate a la lista de espera del libro o de la IA."
+    "description": "La web personal de Javi: una vida de 1980 a hoy contada en hitos, un libro para mis hijos y mi clon. Apúntate a la lista de espera del libro o de mi clon."
   },
   "ui": {
     "skip": "Saltar al contenido",
@@ -30,7 +30,7 @@
     "rail": {
       "label": "Línea de tiempo",
       "overview": "Volver a la vida entera",
-      "decade": "Los {year}",
+      "decade": "Los años {label}",
       "play": "Ver crecer la vida",
       "pause": "Pausa",
       "overviewName": "Vida entera",
@@ -60,7 +60,7 @@
       "all": "Todos los relacionados ({n})",
       "fewer": "Menos",
       "nudgebook": "Apúntate a la lista del libro →",
-      "nudgeclone": "Apúntate a la lista de la IA →",
+      "nudgeclone": "Apúntate a la lista de mi clon →",
       "nudgeclose": "Cerrar",
       "menu": "Más"
     },
@@ -76,12 +76,12 @@
       "cloud": "Una nube es un recuerdo; cuanto más grande, más cambió",
       "galaxy": "Un círculo discontinuo es una etapa de mi vida; el tiempo va del núcleo al borde",
       "line": "Una línea une recuerdos relacionados",
-      "ring": "Un anillo vacío está por llegar: el libro y la IA",
+      "ring": "Un anillo hueco está por llegar: el libro y mi clon",
       "today": "Hoy",
       "dust": "El polvo fino son los días, más denso donde pasó más",
       "keys": "/ buscar · ? esta guía · H solo el cielo · Esc volver"
     },
-    "focus": "Interfaz oculta. Mueve el ratón o pulsa una tecla para recuperarla."
+    "focus": "Interfaz oculta. Mueve o pulsa una tecla para recuperarla."
   },
   "threads": {
     "home": "Hogar",
@@ -89,16 +89,16 @@
     "body": "Cuerpo",
     "craft": "Oficio",
     "ventures": "Empresas",
-    "learning": "Aprender",
+    "learning": "Aprendizaje",
     "love": "Amor"
   },
   "hero": {
     "kicker": "javi · 1980 – hoy",
     "title": "Una vida, <em>en hitos.</em>",
-    "lede": "Soy Javi. Estos son los momentos que me hicieron, desde un caserío del País Vasco hasta hoy. Cada nube de puntos es un recuerdo y cada galaxia una etapa de mi vida: abre uno, sigue hasta el siguiente, o busca a una persona, un lugar o un hilo. El trabajo es uno entre muchos. Vienen dos cosas: un libro para mis hijos y una IA con la que podrás hablar.",
+    "lede": "Soy Javi. Estos son los momentos que me hicieron, desde un caserío del País Vasco hasta hoy. Cada nube de puntos es un recuerdo y cada galaxia una etapa de mi vida: abre uno, sigue hasta el siguiente, o busca a una persona, un lugar o un hilo. El trabajo es uno entre muchos. Vienen dos cosas: un libro para mis hijos y mi clon, un lugar donde seguir hablando conmigo.",
     "primary": "Apúntate a la lista del libro",
     "secondary": "Recórrelo",
-    "clone": "O espera a la IA →",
+    "clone": "O apúntate a la lista de mi clon →",
     "region": "Apúntate a la lista del libro"
   },
   "periods": {
@@ -130,14 +130,14 @@
     "now": {
       "kicker": "06 / Ahora · 2025–2026",
       "title": "Dónde <em>estoy.</em>",
-      "intro": "Todavía descubriendo qué quiero enseñar."
+      "intro": "Todavía pensando qué quiero enseñar."
     }
   },
   "book": {
     "kicker": "07 / El libro",
     "expected": "Previsto",
     "title": "Un libro <em>para mis hijos.</em>",
-    "body": "Estoy escribiendo mi historia para que les sirva: lo que pasó, lo que aprendí y quién era en cada momento. Muy pronto sale. Déjame tu email y te aviso el día que salga.",
+    "body": "Estoy escribiendo mi historia para que les sirva: lo que pasó, lo que aprendí y quién era en cada momento. Todavía no está listo. Déjame tu email y te aviso cuando lo esté.",
     "form": {
       "label": "Tu email",
       "placeholder": "tu@ejemplo.com",
@@ -145,30 +145,30 @@
       "region": "Lista de espera del libro",
       "note": "Solo te escribiré sobre el libro. Puedes darte de baja cuando quieras.",
       "opened": "Se ha abierto Buttondown en una pestaña nueva para terminar tu suscripción.",
-      "soon": "La lista de espera se abre muy pronto."
+      "soon": "La lista de espera aún no está abierta."
     }
   },
   "clone": {
     "kicker": "08 / Habla conmigo",
     "ask": {
-      "label": "Preguntas que la IA podría responder",
+      "label": "Preguntas para mi clon",
       "title": "Pregunta y mira de qué bebería",
       "draws": "Se apoya en:"
     },
-    "title": "Una IA <em>con la que hablar.</em>",
+    "title": "Mi <em>clon.</em>",
     "body": "Estoy construyendo una versión de mí con la que cualquiera pueda hablar, basada en lo que he escrito y recogido durante años. Todavía no está lista. Déjame tu email y te aviso cuando lo esté.",
     "form": {
       "label": "Tu email",
       "placeholder": "tu@ejemplo.com",
       "button": "Avísame cuando esté lista",
-      "region": "Lista de espera de la IA",
-      "note": "Solo te escribiré sobre la IA. Puedes darte de baja cuando quieras.",
+      "region": "Lista de espera de mi clon",
+      "note": "Solo te escribiré sobre mi clon. Puedes darte de baja cuando quieras.",
       "opened": "Se ha abierto Buttondown en una pestaña nueva para terminar tu suscripción.",
-      "soon": "La lista de espera se abre muy pronto."
+      "soon": "La lista de espera aún no está abierta."
     }
   },
   "contact": {
-    "kicker": "09 / Saluda",
+    "kicker": "09 / Di hola",
     "title": "¿Hablamos?",
     "lede": "Lo mejor es el email.",
     "elsewhere": "En otros sitios",

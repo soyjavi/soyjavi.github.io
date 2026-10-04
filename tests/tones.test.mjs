@@ -80,7 +80,7 @@ test("the chords wander without repeating the one that just played, and every ch
   assert.equal(spanOf(7), TONES.chordTo);
 });
 
-test("the book and the AI each have their own low swell, and the hover tone is one soft pitch that cannot rattle", () => {
+test("the book and the clone each have their own low swell, and the hover tone is one soft pitch that cannot rattle", () => {
   assert.notEqual(swellOf("book"), swellOf("clone"));
   assert.ok(swellOf("book") < 200 && swellOf("clone") < 200);
   assert.ok(TONES.tick > 300 && TONES.tick < 500);

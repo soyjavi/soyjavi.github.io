@@ -12,9 +12,9 @@ explored, not scrolled: the camera is free (drag, scroll or pinch, right drag), 
 memories are one sky, with no other view to choose. Threads, people and places are filters, found by name: a filter lights
 its memories and draws its jumps from galaxy to galaxy. A memory lights what it is related to and draws a line to each. A timeline rail that can
 play the life year by year, a finder, a surprise button and the keyboard are other ways in, and Earlier and Later give
-the sequence by date. Two hollow rings ahead of today are the book and the AI, each with its own waitlist. The site has no blog and no
+the sequence by date. Two hollow rings ahead of today are the book and the clone, each with its own waitlist. The site has no blog and no
 writing section: it shows a life and sells those two things. Each waitlist is wired for Buttondown, one list per tag, and
-says it opens soon until the account's username is set in `content/site.json`. Light and dark themes, both with a faint
+says it isn't open yet until the account's username is set in `content/site.json`. Light and dark themes, both with a faint
 field of stars.
 
 ## Pages and URLs
@@ -27,7 +27,7 @@ field of stars.
 | `/design/`, `/design/proposals.html` | The brand and the design proposals, `noindex`, not linked from the site |
 
 The home pages declare `rel=canonical`, `hreflang` for `en`, `es` and `x-default`, Open Graph and Twitter card tags with
-`og-image.png` and one `theme-color` that `theme.js` keeps in step with the theme, and carry JSON-LD `Person`.
+`og-image.png` and one `theme-color` that `theme.js` keeps in step with the theme, and carry JSON-LD `Person` and `WebSite`, both named Javi with the handle `soyjavi` as `alternateName` (`WebSite` with its `inLanguage`), and `author` and `application-name` meta. The brand is `javi`; the handle is the address.
 
 ## Languages
 
@@ -44,10 +44,10 @@ The home pages declare `rel=canonical`, `hreflang` for `en`, `es` and `x-default
 
 - `content/site.json`: URL, name, email, `links` (X only: the site is not a portfolio), `buttondown` (`username`, and
   `tags`: one per waitlist, `book` and `clone`) and `book` (`title`, `null` until the creator gives it, and `date`, a month `YYYY-MM` or `null`, never a day).
-- `content/questions.json`: a list of three to five questions for the AI (none until the creator chooses them), each
+- `content/questions.json`: a list of three to five questions for the clone (none until the creator chooses them), each
   `{ id, memories: [memory ids], en, es }`; a question with an unknown memory or a missing language stops the build.
 - `content/life.json`: the periods in order (each is a galaxy of the sky), `threads` (an ordered list of ids) and
-  `ahead` (the thread each of the book and the AI belongs to).
+  `ahead` (the thread each of the book and the clone belongs to).
 - `content/memories/<id>.json`: one file per milestone, named after its id (lowercase letters, digits and hyphens), with
   `date`, optional `approx`, `kind` (personal, professional, product, education), `weight` (1 to 3), `period`, `threads`
   (one to three, the first gives its lane and its constellation), optionally `people`, `places`, `links` (ids of related
@@ -127,7 +127,7 @@ site in memory and compares it, and the bundle, with the disk.
   proportion to how active that was around its year (`activityTable`, `assign`), so a filter leaves the shape of what
   it filters. On a phone the cap is 55,000 and the trail 12,000.
 - **Today and what is next.** **Today** is the visitor's local calendar day (a filled dot with a pulsing ring); **the
-  book and the AI** are hollow rings at 30% and 70% of the path past the last period (`futures`, `aheadPoint`), today at
+  book and the clone** are hollow rings at 30% and 70% of the path past the last period (`futures`, `aheadPoint`), today at
   6% of it, so what is ahead leads away from the start.
 - **Space.** `starfield` puts 9,000 stars (4,000 on a phone) on a shell 900 to 1,600 units from the centre. Their
   brightness has a heavy tail (about nine in ten are faint); 1.5% are the brightest and carry a halo in the night
@@ -170,7 +170,7 @@ carries the strength for tests.
 ### Nodes
 
 Nodes are the elements with `data-station` inside `main.story`, in document order: the hero, every milestone (the `li`
-of each period), the book, the AI and the contact, 66 stations at the moment. Each milestone carries `data-period`. `data-hud` is the label
+of each period), the book, the clone and the contact, 66 stations at the moment. Each milestone carries `data-period`. `data-hud` is the label
 announced when the station opens. The first milestone of each period also carries the period's title and introduction. The story is
 clipped to 1×1 px: it stays the accessible tree and the source of every card.
 
@@ -181,9 +181,9 @@ filled by cloning the `[data-panel]` of the node in view, so copy stays in the d
 and places) as filter chips, the related memories as buttons (explicit links in both directions first, then the
 neighbours in time inside each of its threads, people and places; at most eight are listed, while the scene lights and joins all of them), and Earlier and Later; a related list that scrolls fades at its foot and counts what is hidden ("5 more"), and hovering
 or focusing a row rings that memory in the scene, joins it to the open one with a brighter line and names it. A memory's card shows its three strongest relations and one row of chips, with the rest behind the expander of
-"Relations" (the period's introduction stays in the document and the flat page, not in the card). The hero's card and those of the book and the AI each
+"Relations" (the period's introduction stays in the document and the flat page, not in the card). The hero's card and those of the book and the clone each
 hold their own waitlist, moved there once and shown only at that station. Titles reveal word by word. At the hero it is the
-introduction with the counts, the book's waitlist form (its call to action: the field and the button) and two text links, "Travel through it" and the way to the AI's card, with the invitation to drag; it has no Later, because the link into the life is the way in. Every other card has a close button back to the whole life (the same target as the
+introduction with the counts, the book's waitlist form (its call to action: the field and the button) and two text links, "Travel through it" and the way to the clone's card, with the invitation to drag; it has no Later, because the link into the life is the way in. Every other card has a close button back to the whole life (the same target as the
 button at the left of the rail, which also carries a tooltip), and Earlier and Later stay pinned to its foot while a long
 text scrolls above them. A memory's card always has the same height, so Earlier and Later never move, and its related
 memories scroll inside it when they do not fit (on a phone the whole card scrolls). On a laptop the card sits on the
@@ -192,11 +192,11 @@ their text does not fit, the engine drops the introduction, then the counts and 
 at level 3, hides the form's note, makes its label visually hidden and tightens the spacing
 (`data-fit` 1, 2 and 3), and measures again on resize and when the fonts load.
 
-### The invitation, the book's date and the AI's questions
+### The invitation, the book's date and the clone's questions
 
 - After the visitor has opened three distinct memories (the idle tour does not count), a quiet line (`.nudge`: a link and a
   close button) sits at the card's foot, beside it on a laptop and above it on a stacked layout, on a memory's card only. It
-  links to the book's waitlist, or to the AI's once the visitor has seen the AI's station; closing it hides it for the rest
+  links to the book's waitlist, or to the clone's once the visitor has seen the clone's station; closing it hides it for the rest
   of the visit and nothing is stored. It is not drawn in the flat page, which already holds both lists.
 
 - With `book.date` set, the book's panel carries `<p class="countdown" data-until>`: "Expected" and the month as text,
@@ -205,11 +205,11 @@ at level 3, hides the form's note, makes its label visually hidden and tightens 
   a scale of one tick per month up to 24 (`--months`, ten pixels each). A date that has passed hides the line. The stage
   carries `data-until` and the engine adds one label with the same sentence at the midpoint between today and the book's
   ring, on the path that already joins them. Without a date none of this exists.
-- With questions in `content/questions.json`, the AI's panel lists them (`.ask`, each `li[data-ask][data-memories]` with
+- With questions in `content/questions.json`, the clone's panel lists them (`.ask`, each `li[data-ask][data-memories]` with
   the question and links to its memories, which is what the flat page shows). In the card each becomes a button
-  (`aria-pressed`); choosing one lights exactly its memories (`askLevels`), draws one line from each to the AI's ring
+  (`aria-pressed`); choosing one lights exactly its memories (`askLevels`), draws one line from each to the clone's ring
   (`askPairs`, the scene's jump lines to `scene.slotOf("clone")`), flies to the whole life and tells a screen reader
-  "N memories light up: names" through the card's status line. Choosing it again, Escape or leaving the AI's station lets
+  "N memories light up: names" through the card's status line. Choosing it again, Escape or leaving the clone's station lets
   go. There is no generated answer. `data-asked` on the stage carries the id for tests.
 
 ### Exploring
@@ -224,9 +224,9 @@ at level 3, hides the form's note, makes its label visually hidden and tightens 
   memory, a result of the finder, a point on the rail, Surprise me,
   a link with `data-go`, an address hash (`#book`, `#m-tapquo`, `#period-home`; a malformed one or one that names nothing is
   ignored), a focus on the real document, or Earlier and Later. The address follows the memory in view with
-  `history.replaceState`. A `data-go` link to the book or the AI also puts the cursor in its waitlist field.
+  `history.replaceState`. A `data-go` link to the book or the clone also puts the cursor in its waitlist field.
 - **Pointing.** The nearest cloud within its reach is named and the cursor changes. A drag never opens anything. The
-  book and the AI rings answer the pointer and open their cards like a cloud.
+  book and the clone rings answer the pointer and open their cards like a cloud.
 - **Controls.** Find, Surprise me and a More button (`aria-expanded`) share the top line with the brand and the sections (left); the
   sheet that More drops down holds Filter, Sound, the guide, the theme and the language at every width (from the top
   right on a laptop, under a header of one row of 56 px on a stacked layout: up to 900 px wide, or portrait). The theme
@@ -266,7 +266,7 @@ at level 3, hides the form's note, makes its label visually hidden and tightens 
   with the date (290 to 860 Hz), 3, 4.5 or 6 s long by weight, at most four voices, 0.3 s apart and quieter when
   several ring; changing galaxy adds a slow air sweep (rising for a later memory, falling for an earlier one) and the
   bell arrives 0.9 s after it. The pointer reaching a cloud plays one barely audible 432 Hz tone, at most once every
-  1.4 s; the book and the AI each get a low, slow swell (G2 and D3). Turning it on fades in over about ten seconds;
+  1.4 s; the book and the clone each get a low, slow swell (G2 and D3). Turning it on fades in over about ten seconds;
   turning it off fades out and suspends the context four seconds later, as a hidden tab does and the scene falling back to
   the flat page closes it. Under reduced motion the scene, and so the button, is not there.
 - **Quality.** The scene measures its own frames: from a second after the opening it averages 90 frames, up to three
@@ -326,7 +326,7 @@ rings, today and the countdown) are small mono capitals at 10 px in the muted in
 Each galaxy is named by its period's kicker outside the ring (only the number and name on a phone), kept inside the
 window and hidden where it would touch the card, the controls, the rail, the minimap, an edge marker or another label;
 with a memory open only that memory's galaxy is named. Today
-and the book and the AI are named beside their marks (the nav's own words; the book and the AI in italic serif at 15 px, today as an anchor), at the first
+and the book and the clone are named beside their marks (the nav's own words; the book and the clone in italic serif at 15 px, today as an anchor), at the first
 of sixteen places around the mark that touches nothing, starting a clearance of 8 px beyond the mark's drawn radius
 (`ringClearance`, capped where the shader caps a mark at 140 px across), so the ring never covers the first letters at
 any distance, and are left unnamed when none does; they publish their mark's position and radius as `--cx`, `--cy` and
@@ -347,7 +347,7 @@ memories in its related list with an arrow. `data-edges` on the stage carries ho
 
 **Minimap.** Whenever the camera is closer than 0.75 of the whole-life distance (`MINI_ZOOM`), a 104 by 100 px map of the whole
 sky sits at the lower right above the rail (below the controls on a stacked layout): the galaxies, a dot per memory, the
-book and the AI, a frame around what the window shows (the window's corners cast onto the plane the open memory lies on)
+book and the clone, a frame around what the window shows (the window's corners cast onto the plane the open memory lies on)
 and a ring on the memory in view. Pressing it flies to the galaxy under the press (`miniMap`, `galaxyAt`). It is hidden in
 the whole-life view and the contact, during the gentle first look, on screens narrower than 520 px and, on a stacked
 layout, whenever the card would reach it; it has no button and is not a keyboard stop. `data-map` on the stage says
@@ -359,10 +359,10 @@ A `nav.rail` is fixed at the bottom of the scene: a link back to the whole life 
 glyph with its name beneath it ("Whole life", "Play" or "Pause"), unboxed, with a 44 px target (the button's label says
 play or pause and `aria-pressed` follows it); a track with a bar per year for the
 density (the sum of the weights of its milestones), a tick per memory (larger when heavier), hollow ticks for the book
-and the AI, today, and a cursor that follows the memory in view; and the five decades as links, which with the two
+and the clone, today, and a cursor that follows the memory in view; and the five decades as links, which with the two
 buttons are the only focusable parts. It
 is generated at build time from `content/life.json` (`src/rail.mjs`), so both languages share it. Pressing or dragging
-on the track opens the nearest memory, book or AI; pointing at it shows that memory's date and title. Its bars and ticks rest at 40% and come to full while the pointer is over the rail or the focus is inside it. The rail is hidden
+on the track opens the nearest memory, book or clone; pointing at it shows that memory's date and title. Its bars and ticks rest at 40% and come to full while the pointer is over the rail or the focus is inside it. The rail is hidden
 in the flat page.
 
 ### Flat page
@@ -370,13 +370,13 @@ in the flat page.
 `html.flat` is set when WebGL2 is missing, when `prefers-reduced-motion: reduce` is on, when the scene throws (it logs
 the error), or when the window is smaller than 520 px tall or 320 px wide (a short landscape phone, or a browser zoomed in:
 the card would have to shrink below a readable size). Crossing that size while the page is open reloads it into the other
-mode. The canvas, the controls, the card and the rail are hidden, the forms return to the book and the AI and the document reads as a
-normal page: each period with its milestones as an editorial list with their threads, the book and the AI each with its
+mode. The canvas, the controls, the card and the rail are hidden, the forms return to the book and the clone and the document reads as a
+normal page: each period with its milestones as an editorial list with their threads, the book and the clone each with its
 waitlist, and the contact. The theme switch and the language link work there too (and the scene falling back mid-run removes every listener it added).
 
 ## The waitlists
 
-Two lists, one for the book and one for the AI, each in its own station and card (`data-list="book"` and `"clone"`). The
+Two lists, one for the book and one for the clone, each in its own station and card (`data-list="book"` and `"clone"`). The
 hero's card holds a third form (`data-list="hero"`) that joins the book's list: it carries the book's tag and the
 book's copy, with the hero's own button text and accessible name (`hero.primary`, `hero.region`).
 
@@ -386,7 +386,7 @@ book's copy, with the hero's own button text and accessible name (`hero.primary`
   Buttondown shows its confirmation or its CAPTCHA; on submit the status says (`<list>.form.opened`) that Buttondown
   opened there. The site never claims a subscription it cannot see. One Buttondown newsletter holds both lists, told
   apart by their tag.
-- Without a username: each says the waitlist opens soon (`<list>.form.soon`). There is no email fallback and no
+- Without a username: each says the waitlist isn't open yet (`<list>.form.soon`). There is no email fallback and no
   `mailto` for joining.
 - The CSP allows `form-action` for `https://buttondown.com` and nothing else outside the origin. Every variant carries
   an accessible name (`<list>.form.region`).
@@ -416,7 +416,7 @@ square corners, round dots. `design/index.html` shows all of it.
   equal to what the sources render, the day in every time zone, a failing build leaving the pages untouched, `.nojekyll`
   and the font licences.
 - `life.test.mjs`: dates and precision, year spreading, lanes and crowding, the year rings of a galaxy, the star field (magnitudes, haloes, band, depth), the galaxies (one per period, in
-  order on the ring, apart, sized, the opening) and the memories inside them, the book and the AI in
+  order on the ring, apart, sized, the opening) and the memories inside them, the book and the clone in
   the opening, density, the clouds and the dust (counts, proportions, reach, centres, ahead share, seeded,
   the trail inside the galaxies), the stars and the shell the dots start from, a synthetic life of 250 memories with
   periods inside the dot budget and fast, playing the life, the rail scale and `todayYear`. `fixtures/archive.mjs` makes
@@ -427,6 +427,9 @@ square corners, round dots. `design/index.html` shows all of it.
 - `pages.test.mjs`: CSP, no inline script, local references exist, no third-party loads, `hreflang` reciprocity, anchors,
   EN/ES structure parity, one station per milestone with its date, period, threads and links, the controls (the sky
   first, the legend behind Filter) and the counts, the rail's structure and its play button, `lang.js` and `theme.js` in a sandbox, the two Buttondown forms and the sitemap.
+- `voice.test.mjs`: the voice rules that can be checked: the words banned for the offer (the list lives only there) in the
+  content, the sources, the documents and the built pages; no time promise and no exclamation in the copy; Spanish with no
+  *usted*, *ratón*, *Saluda* or *anillo vacío*, « » in Spanish and “ ” in English; the offer named *my clone* / *mi clon*.
 - `design.test.mjs`: the brand page against `brand.css` (twelve neutral tokens, true contrast ratios, no stray colour in
   any stylesheet), the stations table, the interface controls and the sky numbers and figure against the home page and the code, the
   proposal boards against the ROADMAP, the absence of a blog, and
@@ -439,7 +442,7 @@ square corners, round dots. `design/index.html` shows all of it.
   buttons, the whole-life names, hairlines to displaced tags, the ring names at three camera distances, the year rings,
   the edge markers and the arrows in the card, the minimap, labels never touching anything, the card and controls fitting
   four screens at every kind of node, the hero's calls to action in view at six sizes in both languages, Earlier and
-  Later pinned to the foot of a long card, the close button, the named rings that open the book and the AI, the
+  Later pinned to the foot of a long card, the close button, the named rings that open the book and the clone, the
   captioned filter row on one line in both languages, a phone's touch, resizing, each waitlist (Buttondown answered by a
   route, a new tab opens), the email field in view at ten sizes in both languages, no request outside the origin,
   storage, the Spanish controls, and a synthetic life of 250 memories with people and places explored.

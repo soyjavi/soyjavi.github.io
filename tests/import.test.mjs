@@ -123,7 +123,7 @@ const emptyLife = () => {
 };
 const exampleArchive = () => JSON.parse(readFileSync(`${root}tools/archive.example.json`, "utf8"));
 
-test("one archive file can define the whole life: periods, threads, where the book and the AI belong, people, places and memories", () => {
+test("one archive file can define the whole life: periods, threads, where the book and the clone belong, people, places and memories", () => {
   const { dir, url } = emptyLife();
   try {
     const report = importArchive(exampleArchive(), url);

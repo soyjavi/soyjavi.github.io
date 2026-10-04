@@ -222,7 +222,7 @@ test("the timeline rail indexes the whole life the same way in both languages", 
     const ticks = [...nav.matchAll(/<i data-weight="(\d)" style="--x:([\d.]+)%"><\/i>/g)];
     assert.deepEqual(ticks.map((tick) => +tick[1]), content.life.milestones.map((entry) => entry.weight), `${lang}: one tick per milestone`);
     assert.ok(ticks.every((tick, i) => i === 0 || +tick[2] > +ticks[i - 1][2]), "ticks run left to right");
-    assert.equal((nav.match(/class="rail-future"/g) ?? []).length, 2, "the book and the AI");
+    assert.equal((nav.match(/class="rail-future"/g) ?? []).length, 2, "the book and the clone");
     const decades = [...nav.matchAll(/<li style="--x:([\d.]+)%"><a href="#(m-[\w-]+)" data-go="m-[\w-]+" aria-label="([^"]+)">(\d{4})<\/a><\/li>/g)];
     assert.deepEqual(decades.map((decade) => decade[4]), ["1980", "1990", "2000", "2010", "2020"]);
     for (const [, , id] of decades) assert.ok(ids(read(homes[lang])).includes(id), `${id} is not a station`);
@@ -372,11 +372,11 @@ test("with a Buttondown account each list is its own accessible form posting onl
     assert.equal(forms[0].match(/name="tag" value="(\w+)"/)[1], forms[1].match(/name="tag" value="(\w+)"/)[1], "the hero joins the book's list");
     assert.notEqual(forms[1].match(/name="tag" value="(\w+)"/)[1], forms[2].match(/name="tag" value="(\w+)"/)[1]);
     const hero = html.match(/<section class="chapter hero"[\s\S]*?<\/section>/)[0];
-    assert.ok(hero.includes('id="waitlist-hero"') && hero.includes('data-go="clone"') && !hero.includes('class="button primary" href'), "the hero card holds the form and a link to the AI's card");
+    assert.ok(hero.includes('id="waitlist-hero"') && hero.includes('data-go="clone"') && !hero.includes('class="button primary" href'), "the hero card holds the form and a link to the clone's card");
   }
 });
 
-test("questions for the AI render in the AI's panel with their memories linked, and without questions nothing is drawn", () => {
+test("questions for the clone render in the clone's panel with their memories linked, and without questions nothing is drawn", () => {
   const withAsks = {
     ...content,
     life: { ...content.life, questions: [{ id: "q1", memories: ["born", "github"] }, { id: "q2", memories: ["github"] }, { id: "q3", memories: ["born"] }] },
@@ -441,6 +441,23 @@ test("the 404 page is noindexed and offers both languages", () => {
   assert.match(html, /<meta name="robots" content="noindex"/);
   assert.match(html, /<section lang="en">/);
   assert.match(html, /<section lang="es">/);
+});
+
+test("the name is Javi, the handle is only an alternate name, in the structured data and the author meta of both languages", () => {
+  for (const [file, lang] of [["index.html", "en"], ["es/index.html", "es"]]) {
+    const html = read(file);
+    const nodes = [...html.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/g)].map((m) => JSON.parse(m[1]));
+    for (const type of ["Person", "WebSite"]) {
+      const node = nodes.find((n) => n["@type"] === type);
+      assert.ok(node, `${file}: a ${type} node`);
+      assert.equal(node.name, "Javi");
+      assert.equal(node.alternateName, "soyjavi");
+    }
+    assert.equal(nodes.find((n) => n["@type"] === "WebSite").inLanguage, lang);
+    assert.match(html, /<meta name="author" content="Javi" \/>/);
+    assert.match(html, /<meta name="application-name" content="Javi" \/>/);
+    assert.match(html, /<meta property="og:site_name" content="Javi" \/>/);
+  }
 });
 
 test("the domain file still points GitHub Pages at www.soyjavi.com", () => {

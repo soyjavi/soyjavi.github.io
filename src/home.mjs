@@ -1,5 +1,5 @@
 import { esc, homePath, kicker, otherLang } from "./html.mjs";
-import { footer, head, masthead, personLd, tools } from "./layout.mjs";
+import { footer, head, masthead, personLd, tools, websiteLd } from "./layout.mjs";
 import { FACETS } from "../assets/js/life.js";
 import { explore, stats } from "./explore.mjs";
 import { rail } from "./rail.mjs";
@@ -94,7 +94,7 @@ export function home({ site, life, dict }, lang) {
   ];
   return `<!doctype html>
 <html lang="${lang}">
-  ${head({ site, dict: d, lang, title: d.meta.title, description: d.meta.description, path: base, alternates, extra: `\n    <link rel="stylesheet" href="/assets/site.css" />\n    ${personLd(site)}` })}
+  ${head({ site, dict: d, lang, title: d.meta.title, description: d.meta.description, path: base, alternates, extra: `\n    <link rel="stylesheet" href="/assets/site.css" />\n    ${personLd(site)}\n    ${websiteLd(site, lang)}` })}
   <body>
     ${masthead({ dict: d, lang, nav, switchHref: homePath(otherLang(lang)), brandHref: "#top", controls: explore({ life, dict: d, tools: tools({ dict: d, lang, switchHref: homePath(otherLang(lang)) }) }), inline: true })}
 
