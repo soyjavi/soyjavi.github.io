@@ -16,6 +16,7 @@ npm install
 npm run browsers      # once: Chromium for the browser tests and the share image
 npm run build         # content + src → pages, sitemap, assets/site.js
 npm run serve         # http://localhost:4173, or PORT=4391 npm run serve (it needs a server: the pages use absolute URLs)
+npm run dev           # http://localhost:4392, never cached, so a reload always shows the last npm run build
 npm test              # content, geometry, pages and a real browser
 npm run og            # regenerate og-image.png from the hero
 ```
@@ -28,10 +29,10 @@ fails when a generated file is stale.
 | To change… | Edit |
 | --- | --- |
 | Any sentence of the site | `content/en.json` and `content/es.json`, always both |
-| A memory | one file, `content/memories/<id>.json`, with its date, weight, kind, period, threads, people, places, links and its text in both languages (see below) |
+| A memory | one file, `content/memories/<id>.json`, with its date, weight, kind, threads, people, places, links and its text in both languages (see below); its galaxy is calculated from its date |
 | Many memories at once, from an archive | `npm run import -- archive.json`: only entries with `"public": true` enter, any day is cut to the month, nothing is written if one entry is wrong |
 | People and places | `content/people.json` and `content/places.json`: `{ "id": { "en": "Name", "es": "Nombre" } }`; they appear as chips on the memories and the finder offers them as filters |
-| Periods, threads and what waits ahead | `content/life.json`, with their names in `content/en.json` and `content/es.json` |
+| His birth, the ages that are galaxies, the threads and what waits ahead | `content/life.json` (`birth`, `ages`, `threads`, `ahead`), with the names of the ages in `ages` and of the threads in `content/en.json` and `content/es.json` |
 | Email, X, the book, the Buttondown account and its two tags | `content/site.json` |
 | The book's expected month (`book.date`, `YYYY-MM`, never a day) | `content/site.json`; it shows a countdown only when set |
 | Three to five questions for the clone, each on public memories | `content/questions.json`: `[{ "id", "memories": [ids], "en", "es" }]` |
@@ -47,7 +48,6 @@ A memory is a file named after its id (lowercase letters, digits, hyphens), whic
   "date": "2026-03",
   "kind": "personal",
   "weight": 2,
-  "period": "now",
   "threads": ["body"],
   "people": ["brother"],
   "links": ["running"],
@@ -57,9 +57,36 @@ A memory is a file named after its id (lowercase letters, digits, hyphens), whic
 ```
 
 `date` is `YYYY` or `YYYY-MM` (add `"approx": true` when it is roughly then), `kind` is personal, professional, product or
-education, `weight` 1 to 3, `period` and `threads` (one to three, the first one decides its lane) come from
-`content/life.json` (each period is a galaxy), and `order` breaks a tie between memories of the same date. `npm run
+education, `weight` 1 to 3, `threads` (one to three, the first one decides its lane) come from `content/life.json`, and
+`order` breaks a tie between memories of the same date. There is no `period`: a memory's age on its date decides its
+galaxy (see the seven ages below). `npm run
 build` stops with the file name and the reason when something is missing.
+
+### The seven ages
+
+A galaxy takes its shape from what it holds, never from chance: an age that lasts long and holds little is stretched into an ellipse, it has only the arms of the threads it holds, as wide as their share, and it winds more the more years it lasts.
+
+Every galaxy is an age of his life, cut by his age on the date of each memory, counted from his birth (`birth` in
+`content/life.json`, `1980-04`): the seven ages people have drawn for three thousand years. Only the ages he has lived
+and remembered are drawn, so today there are five galaxies and there will be at most seven.
+
+| Age | From | Name on the site (EN / ES) | Years for his birth |
+| --- | --- | --- | --- |
+| 1 | 0 | Early years / Primeros años | 1980 to 1987 |
+| 2 | 7 | School years / Años de escuela | 1987 to 1994 |
+| 3 | 14 | Youth / Juventud | 1994 to 2005 |
+| 4 | 25 | Building a life / Construir una vida | 2005 to 2020 |
+| 5 | 40 | Midlife / Mitad de la vida | 2020 to 2035 |
+| 6 | 55 | Elder years / Madurez | 2035 to 2050 |
+| 7 | 70 | Later life / Última etapa | 2050 on |
+
+The cuts are where the traditions that divide a life agree: 7 (Hippocrates, Isidore, Piaget, Erikson, human life
+history), 14 (Hippocrates, Ptolemy, Isidore, Confucius at 15, Rousseau, Ortega, the Mishnah), about 25 (Dante, the
+ashramas, Levinson, the maturing brain), 40 (Confucius, Jung, Erikson, Levinson, Ptolemy, the Mishnah), about 55 (the
+ashramas, Isidore, Ptolemy, Hippocrates) and 70 (Psalm 90, Ptolemy, Isidore, Solon, Confucius). To change a cut or add the
+name of an age, edit `ages` in `content/life.json` and its entry in `ages` in both dictionaries; `npm run build` then
+moves every memory to the galaxy of its age. After a change to the memories run `npm run figure` to redraw the sky of the
+brand page.
 
 The whole life can be one JSON file, imported with `npm run import -- archive.json`. [tools/archive.example.json](tools/archive.example.json)
 is a complete template (every block, with placeholders) and [tools/archive.schema.json](tools/archive.schema.json) is its
@@ -69,7 +96,6 @@ flag of your own) is ignored.
 
 ```
 {
-  "periods": [ { "id": "early", "en": { "kicker": "01 / Early years · 1980–1994", "title": "…", "intro": "…" }, "es": { … } } ],
   "threads": [ { "id": "family", "en": "Family", "es": "Familia" } ],
   "ahead": { "book": "family", "clone": "work" },
   "people": { "a-person": { "public": true, "en": "Name", "es": "Nombre" } },
@@ -79,19 +105,18 @@ flag of your own) is ignored.
       "id": "first-memory", "public": true,
       "date": "1984-03", "approx": false,
       "kind": "personal", "weight": 2,
-      "period": "early", "threads": ["family"],
+      "threads": ["family"],
       "people": ["a-person"], "places": ["a-place"], "links": ["second-memory"],
-      "en": { "title": "…", "body": "First person, one to three sentences, under 260 characters." },
-      "es": { "title": "…", "body": "En primera persona, de una a tres frases, menos de 260 caracteres." }
+      "en": { "title": "…", "body": "First person, a short paragraph of one to six sentences, under 600 characters." },
+      "es": { "title": "…", "body": "En primera persona, un párrafo corto de una a seis frases, menos de 600 caracteres." }
     }
   ]
 }
 ```
 
-- `periods` and `threads` (both optional) replace the ones in `content/life.json` and their copy in both dictionaries, in
-  the order given: a period is a galaxy and its `kicker` carries its number and years; the first thread of a memory
-  decides its lane; `ahead` says which thread the book and the clone belong to. The import stops if a period or thread that
-  memories already use would disappear.
+- `threads` (optional) replace the ones in `content/life.json` and their copy in both dictionaries, in the order given;
+  the first thread of a memory decides its lane; `ahead` says which thread the book and the clone belong to. The import
+  stops if a thread that memories already use would disappear. There are no periods in an archive: the date decides.
 - `kind` is personal, professional, product or education; `weight` is 1 (a moment), 2 (it mattered) or 3 (it changed
   everything); `date` is `YYYY` or `YYYY-MM` (`"approx": true` when it is roughly then); `order` breaks a tie between
   memories of the same date.

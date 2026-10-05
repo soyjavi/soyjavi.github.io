@@ -12,7 +12,9 @@
     "og": "node tools/og.mjs",
     "browsers": "playwright-core install chromium-headless-shell",
     "import": "node tools/import.mjs",
-    "brand": "node tools/wordmark.mjs && node tools/icons.mjs"
+    "brand": "node tools/wordmark.mjs && node tools/icons.mjs",
+    "figure": "node tools/skyfigure.mjs",
+    "dev": "node tools/dev.mjs"
   },
   "devDependencies": {
     "@resvg/resvg-js": "^2.6.2",

@@ -7,7 +7,7 @@ Present tense, edited in place. [AGENTS.md](AGENTS.md) holds the rules, [ROADMAP
 
 A static, bilingual personal site published by GitHub Pages at www.soyjavi.com. The home page is a WebGL space that
 holds a life from 1980 to today as soft clouds of dots, one per public memory, built for two or three hundred. It opens
-on a starry sky in which the dots gather, in the order the years happened, into one galaxy per period of the life. It is
+on a starry sky in which the dots gather, in the order the years happened, into one galaxy per age of the life (the seven ages of a person, cut at 7, 14, 25, 40, 55 and 70 from his birth). It is
 explored, not scrolled: the camera is free (drag, scroll or pinch, right drag), a click opens a memory in a card, and the
 memories are one sky, with no other view to choose. Threads, people and places are filters, found by name: a filter lights
 its memories and draws its jumps from galaxy to galaxy. A memory lights what it is related to and draws a line to each. A timeline rail that can
@@ -46,10 +46,10 @@ The home pages declare `rel=canonical`, `hreflang` for `en`, `es` and `x-default
   `tags`: one per waitlist, `book` and `clone`) and `book` (`title`, `null` until the creator gives it, and `date`, a month `YYYY-MM` or `null`, never a day).
 - `content/questions.json`: a list of three to five questions for the clone (none until the creator chooses them), each
   `{ id, memories: [memory ids], en, es }`; a question with an unknown memory or a missing language stops the build.
-- `content/life.json`: the periods in order (each is a galaxy of the sky), `threads` (an ordered list of ids) and
+- `content/life.json`: `birth` (`YYYY-MM`), `ages` (the seven ages of a person as `{ id, from }`, from 0, 7, 14, 25, 40, 55 and 70: each memory's age on its date decides its galaxy, so a memory file carries no `period`; `periods` is calculated, in order, from the ages that hold a memory), `threads` (an ordered list of ids) and
   `ahead` (the thread each of the book and the clone belongs to).
 - `content/memories/<id>.json`: one file per milestone, named after its id (lowercase letters, digits and hyphens), with
-  `date`, optional `approx`, `kind` (personal, professional, product, education), `weight` (1 to 3), `period`, `threads`
+  `date`, optional `approx`, `kind` (personal, professional, product, education), `weight` (1 to 3), `threads`
   (one to three, the first gives its lane and its constellation), optionally `people`, `places`, `links` (ids of related
   memories, declared once and read in both directions) and `order` (breaks a tie between memories of the same date), and
   `en` and `es`, each a `title` and a `body`. A date is `YYYY` or `YYYY-MM`: nothing more precise exists in the
@@ -60,15 +60,15 @@ The home pages declare `rel=canonical`, `hreflang` for `en`, `es` and `x-default
 - `content/people.json` and `content/places.json` (optional): `{ "<id>": { "en": name, "es": name } }`, in the order
   the facet lists them. When one has entries, `life.people` or `life.places` exists: the memories' cards list them as
   chips and the finder offers them as filters.
-- `content/<lang>.json`: every other sentence, keyed by section; period copy is `periods.<id>.{kicker, title, intro}`
-  and the kicker carries the number and the years (`01 / Origins · 1980–1994`); the names of the threads are
-  `threads.<id>`; the controls are `ui.explore.*` and the counts `ui.count.*`.
-- `npm run import -- <file>` (`tools/import.mjs`) merges an archive, `{ "periods": [...], "threads": [...], "ahead": {...},
+- `content/<lang>.json`: every other sentence, keyed by section; the copy of an age is `ages.<id>.{name, title, intro}`, from which `periods.<id>.{kicker, title, intro}` is built (the kicker numbers the age and gives the years of its first and last memory)
+  and the kicker carries the number and the years (`01 / Early years · 1980–1987`); the names of the threads are
+  `threads.<id>`; the controls are `ui.explore.*` and the counts `ui.count.*`. The hero counts memories, people and places, never threads; `life.json` may carry `totals` (`memories`, `people`, `places`) with everything he holds, open and closed, and the hero shows the larger of the total and what the site draws, while the sky draws open memories only.
+- `npm run import -- <file>` (`tools/import.mjs`) merges an archive, `{ "threads": [...], "ahead": {...},
   "memories": [...], "people": {...}, "places": {...} }` (every block optional; the schema is `tools/archive.schema.json` and a
-  template `tools/archive.example.json`) or a bare list of memories, into these files; `periods` and `threads` replace the
-  lists of `content/life.json` and their copy in both dictionaries, and the import refuses to drop one that memories use. Only entries with `"public": true` are written, a day
+  template `tools/archive.example.json`) or a bare list of memories, into these files; `threads` replace the
+  list of `content/life.json` and their copy in both dictionaries, and the import refuses to drop one that memories use (a memory's galaxy is its age, never written). Only entries with `"public": true` are written, a day
   is cut to its month, people and places must be public to be pointed at, and if any public entry is wrong (id, date,
-  kind, weight, period, threads, people, places, links, a language) nothing is written and every reason is printed.
+  kind, weight, threads, people, places, links, a language) nothing is written and every reason is printed.
 
 ## What is public
 
@@ -111,7 +111,7 @@ site in memory and compares it, and the bundle, with the disk.
   years apart of the same thread different sub-lanes out of five, 0.7 units apart (`SUB_STEP`; 3.2 when there are no
   threads), and `crowdScale` shrinks the cloud where many memories crowd one year. Weight
   sets the cloud's spread: 1.1, 1.6 or 2.2 units.
-- **The sky: galaxies.** `galaxies` makes one galaxy per period, sized by what it holds (4 units plus 3.2 per square
+- **The sky: galaxies.** A galaxy is shaped by what it holds (`SHAPE`, applied in `galaxies` and `skyOf`): a long, sparse age is stretched into an ellipse along an axis taken from its content (`axis`, up to a ratio of 1.45 at `stretch` 0.5, area preserved: `shapeBy`), it has only the arms of the threads it holds, as wide as their share (`arms`), and winds more the more years it lasts (`swirl`); nothing is random. `galaxies` makes one galaxy per period, sized by what it holds (4 units plus 3.2 per square
   root of its memories), from the first memory of the period to the first of the next (today for the last), and lays
   them on a path that turns clockwise from the top and outwards (`onPath`: an Archimedean spiral over 1.7 turns of
   half a circle, 1.6 times as far from its pole at the end as at the start), their diameters and a 12-unit gap each
@@ -177,15 +177,14 @@ clipped to 1×1 px: it stays the accessible tree and the source of every card.
 ### The card
 
 The card is the one real, interactive panel (`aside.card`, focusable, not hidden from assistive technology). It is
-filled by cloning the `[data-panel]` of the node in view, so copy stays in the document, and adds: the threads (and people
-and places) as filter chips, the related memories as buttons (explicit links in both directions first, then the
+filled by cloning the `[data-panel]` of the node in view, so copy stays in the document, and adds: people, places and threads as three short rows of underlined words (with, at, about) that filter the sky like the chips did, the related memories as buttons (explicit links in both directions first, then the
 neighbours in time inside each of its threads, people and places; at most eight are listed, while the scene lights and joins all of them), and Earlier and Later; a related list that scrolls fades at its foot and counts what is hidden ("5 more"), and hovering
-or focusing a row rings that memory in the scene, joins it to the open one with a brighter line and names it. A memory's card shows its three strongest relations and one row of chips, with the rest behind the expander of
+or focusing a row rings that memory in the scene, joins it to the open one with a brighter line and names it. A memory's card shows the memories he linked, the three strongest relations, with the rest behind the expander of
 "Relations" (the period's introduction stays in the document and the flat page, not in the card). The hero's card and those of the book and the clone each
 hold their own waitlist, moved there once and shown only at that station. Titles reveal word by word. At the hero it is the
-introduction with the counts, the book's waitlist form (its call to action: the field and the button) and two text links, "Travel through it" and the way to the clone's card, with the invitation to drag; it has no Later, because the link into the life is the way in. Every other card has a close button back to the whole life (the same target as the
+introduction with the counts, the book's waitlist form (its call to action: the field and the button) and two text links, "Travel through it" and the way to the clone's card, with its waitlist field without a visible label (it keeps an accessible one); it has no Later, because the link into the life is the way in. Every other card has a close button back to the whole life (the same target as the
 button at the left of the rail, which also carries a tooltip), and Earlier and Later stay pinned to its foot while a long
-text scrolls above them. A memory's card always has the same height, so Earlier and Later never move, and its related
+text scrolls above them. The cards of an age and of a memory always have the same height, so Earlier and Later never move; its related
 memories scroll inside it when they do not fit (on a phone the whole card scrolls). On a laptop the card sits on the
 left, between the top bar and the rail; on a phone at the bottom with at most 44% of the height. The hero and the contact card never hide a call to action behind a scroll: when
 their text does not fit, the engine drops the introduction, then the counts and the hint and shrinks the title and,
@@ -194,7 +193,7 @@ at level 3, hides the form's note, makes its label visually hidden and tightens 
 
 ### The backdrop
 
-Behind everything (`backdrop.js`): a deep field of real points spread in depth around the sky, fixed in the world so the camera sees parallax (the same star shader as the stars, so every star stays one crisp pixel at any resolution; nearer ones are brighter and larger), a dome at infinity that follows the camera and carries the far galaxies (a small seeded texture, smudges that are meant to be soft), a shader haze, and a soft glow sprite per galaxy sized by its radius and lit by its memory count (`glowOf`), which blooms only as that galaxy's dots form during the opening. Each layer has a strength; haze is off on the lowest quality tier and under reduced motion.
+Behind everything (`backdrop.js`): a deep field of real points spread in depth around the sky, fixed in the world so the camera sees parallax (the same star shader as the stars, so every star stays one crisp pixel at any resolution; nearer ones are brighter and larger), a dome at infinity that follows the camera and carries the far galaxies (a small seeded texture, smudges that are meant to be soft), a shader haze, and a soft glow sprite per galaxy sized by its radius and lit by its memory count (`glowOf`), which blooms only as that galaxy's dots form during the opening. The stars and the deep field brighten by up to 90% as the camera comes close to a galaxy (`STAR_ZOOM`), so a zoomed view keeps a sky behind it. Each layer has a strength; haze is off on the lowest quality tier and under reduced motion.
 
 ### The entrance
 
@@ -205,7 +204,7 @@ Two and a half seconds after the last touch, wherever it is (the hero, a memory,
 ### The invitation, the book's date and the clone's questions
 
 - After the visitor has opened three distinct memories (the idle tour does not count), a quiet line (`.nudge`, never on a memory marked `quiet` in its file, which is how a memory of loss is kept free of invitations: a link and a
-  close button) sits at the card's foot, beside it on a laptop and above it on a stacked layout, on a memory's card only. It
+  close button) sits inside the card, above Earlier and Later, on a memory's card only; it takes room from the text, never from the card's size. It
   links to the book's waitlist, or to the clone's once the visitor has seen the clone's station; closing it hides it for the rest
   of the visit and nothing is stored. It is not drawn in the flat page, which already holds both lists.
 
@@ -230,9 +229,9 @@ Two and a half seconds after the last touch, wherever it is (the hero, a memory,
   by the size of its cloud, so its neighbours stay in view) and follows it until the picture is moved by hand; it frames the memory's whole galaxy. The whole-life shots
   are far and a little below (the contact from above) and drift slowly while nothing is touched. The scene is offset
   so the target sits in the free area beside the card (above it on a phone).
-- **Opening.** A click or a tap on a cloud, a galaxy's label (it opens the first memory of the period), a related
+- **Opening.** A click or a tap on a cloud, a galaxy's label (it frames the galaxy, the age view; pressed again it returns to the whole-life view), a related
   memory, a result of the finder, a point on the rail, Surprise me,
-  a link with `data-go`, an address hash (`#book`, `#m-tapquo`, `#period-home`; a malformed one or one that names nothing is
+  a link with `data-go`, an address hash (`#book`, `#m-tapquo`, `#period-midlife`; a malformed one or one that names nothing is
   ignored), a focus on the real document, or Earlier and Later. The address follows the memory in view with
   `history.replaceState`. A `data-go` link to the book or the clone also puts the cursor in its waitlist field.
 - **Pointing.** The nearest cloud within its reach is named and the cursor changes. A drag never opens anything. The
@@ -249,10 +248,10 @@ Two and a half seconds after the last touch, wherever it is (the hero, a memory,
   shows its state by the waves or the slash of its icon, never by a fill.
 - **Relations.** The relations of a memory are its explicit links in both directions and its neighbours in time inside each of
   its threads, people and places (`related`). `strongest` ranks them (an explicit link first, then how many threads,
-  people and places they share, then nearness in time, then position) and the first three are the strong ones
-  (`STRONG`). At rest the scene draws, names and lights only those three; a button in the card, "All related (n)"
+  people and places they share, then nearness in time, then position); the ones named and joined are the memories he linked by hand, at most three (`declared`, `STRONG`), and the neighbours in time stay lit without a name or a line. At rest the scene draws and names only those; a button in the card, "All related (n)"
   (`.expander`, `aria-expanded`), shows all of them in the card's list, draws all the lines, names up to eight and lights
   them all, and "Fewer" puts it back. Any memory a card row or the finder points at is previewed on top of that.
+- **The age view.** Pressing an age (its label in the sky, the nav, a link to `#period-<id>`) opens no memory: the camera frames the galaxy, its year rings and constellation show, the other galaxies fall quiet, and only the age's headline and up to three other heavy memories are named, in italics (`periodNames`; pointing at another memory names that one alone). The card holds the age's number, title and introduction and one button, "Start with <first memory>", that opens the first memory; Earlier and Later are hidden. The address is `#period-<id>`; pressing the label again returns to the whole-life view. The card also says what the age holds (memories, people and places) and its button is solid; Earlier and Later step between ages. A book or clone card carries the lockup under its title, the clone's disclosure as a quiet note with a rule, and a memory text may be a paragraph of up to 600 characters. The contact card puts X on the address's line and has Earlier like the others; the clone's Later leads to it.
 - **Guide.** The ? button or the `?` key opens a panel of six marks drawn with the real glyphs (a cloud, a dotted
   circle, a line, a hollow ring, today, the dust) and the keys; Escape, a press on the sky, the finder or the thread
   legend closes it. It never covers the card (on a phone it is capped above it and scrolls).
@@ -315,8 +314,7 @@ Two and a half seconds after the last touch, wherever it is (the hero, a memory,
 
 ### Labels
 
-Each memory has a tag (date and title) beside its cloud. With a memory open only that memory, its three strongest
-relations (all of them, up to eight, once the card's list is expanded), the one pointed at and the one a card row or a
+Each memory has a tag (date and title) beside its cloud. With a memory open only that memory, the memories he linked to, at most three (all of its relations, up to eight, once the card's list is expanded), the one pointed at and the one a card row or a
 finder result is pointing at are named, so every other cloud names itself only when the pointer reaches it. With
 nothing open the priority is the members of a filter, then by weight, with more of them the closer the camera (only the
 heaviest, and only once the camera is in a galaxy). They are placed greedily
@@ -327,8 +325,8 @@ touches clouds. A tag that had to move out to a ring is joined to its cloud by a
 stops at the cloud's edge (`leaderOf`). At most 24 are shown (14 while the whole life is in view, 8 on a phone); the
 memory in view and the one pointed at are always named. In the whole-life view, with nothing open and no filter, one
 memory per galaxy is named in italics, without its date: the heaviest of its period and, among equals, the earliest
-(`headlines`); they give way to the usual tags as the camera comes into a galaxy and to nothing once a memory opens. A tag fades in over most of a second, rising a few pixels out of a blur, and the one in
-view or pointed at floats gently. Tags publish the screen position of their cloud as `--cx` and `--cy`.
+(`headlines`); they give way to the usual tags as the camera comes into a galaxy and to nothing once a memory opens or once the pointer has rested on another memory for a third of a second (they return 0.8 s after it leaves every cloud, so a sweep across clouds never makes them pulse). A tag fades in over most of a second, rising a few pixels out of a blur, and the one in
+view or pointed at floats gently. In the whole-life view, pointing at a memory keeps that view's style: the same italic name, without its date, at the same size and brighter. An age's name stands outside its galaxy with its near edge at the point, so it never sits on the clouds. Pointing at a memory is eased, never a jump: its cloud draws in about 10% and glows (`HOVER`, quicker in than out), its name comes up out of a soft blur over 1.6 s and glides from where it stood (a tag that has to change side glides there too, never jumps), and on release it lingers for 1.4 s; nothing is quick. Tags publish the screen position of their cloud as `--cx` and `--cy`.
 
 Every label speaks in one of three tiers. The open or pointed memory is serif at 22 px in full ink; the other tags and
 the edge markers are serif at 15 px in the soft ink (19 and 14 px on a phone); the anchors (a galaxy's name, the year
@@ -445,7 +443,7 @@ square corners, round dots. `design/index.html` shows all of it.
   proposal boards against the ROADMAP, the absence of a blog, the outlined brand files and the type scale (every size and
   tracking is a token, none below 12 px, no serif under 16 px). `pages.test.mjs` also checks that the header is the outlined
   wordmark, that the brand files and icons match what the tools generate, that the favicon keeps its ink at 16, 32 and 180 px in
-  both lights (rendered in Node with resvg) and that both cards end with the lockup.
+  both lights (rendered in Node with resvg) and that both cards carry the lockup under the title.
 - `browser/immersive.test.mjs`: Chromium with SwiftShader WebGL: the accessibility tree and the keyboard, the card, Earlier
   and Later, hashes (including malformed ones) and the address, the canvas drawing in both themes, night as the first
   look and the switch to paper remembered across pages, language redirects, the flat fallbacks and the size switch,

@@ -1,7 +1,7 @@
 import { esc, homePath } from "./html.mjs";
 import { footer, head, masthead } from "./layout.mjs";
 
-export function notFound({ site, dict }) {
+export function notFound({ site, life, dict }) {
   const d = dict.en;
   const sections = ["en", "es"]
     .map(
@@ -20,7 +20,7 @@ export function notFound({ site, dict }) {
     <main class="page" id="main">
 ${sections}
     </main>
-    ${footer({ site, dict: d, lang: "en" })}
+    ${footer({ site, dict: d, lang: "en", first: life.periods[0] })}
   </body>
 </html>
 `;

@@ -5,7 +5,7 @@ import { root } from "../src/content.mjs";
 
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png", ".jpg": "image/jpeg", ".woff2": "font/woff2", ".xml": "application/xml", ".txt": "text/plain" };
 
-export async function serveStatic() {
+export async function serveStatic({ port = 0, fresh = false } = {}) {
   const server = createServer(async (request, response) => {
     let pathname;
     try {
@@ -21,13 +21,13 @@ export async function serveStatic() {
     }
     try {
       const body = await readFile(file);
-      response.writeHead(200, { "content-type": TYPES[extname(file)] ?? "application/octet-stream" });
+      response.writeHead(200, { "content-type": TYPES[extname(file)] ?? "application/octet-stream", ...(fresh ? { "cache-control": "no-store" } : {}) });
       response.end(body);
     } catch {
       response.writeHead(404);
       response.end();
     }
   });
-  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  await new Promise((resolve) => server.listen(port, "127.0.0.1", resolve));
   return { base: `http://127.0.0.1:${server.address().port}`, close: () => server.close() };
 }

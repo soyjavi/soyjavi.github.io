@@ -42,7 +42,7 @@ export const TONES = {
   noteGap: 0.3,
   swellPeak: 0.022,
   travelPeak: 0.015,
-  arrival: 0.9,
+  arrival: 0.4,
   voices: 4,
   crowd: 0.5,
   fadeIn: 3.5,

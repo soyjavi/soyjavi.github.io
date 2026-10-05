@@ -203,3 +203,8 @@ test("type is a named scale: every size and tracking is a token, nothing structu
   assert.equal(px("fs-label"), 12);
   assert.ok(px("fs-tag") >= 17 && px("fs-tag-phone") >= 16 && px("fs-title") >= 17, "a serif is never drawn under 17 px (16 on a phone)");
 });
+
+test("the sky figure of the brand page is exactly what the layout draws today", async () => {
+  const { figure } = await import("../tools/skyfigure.mjs");
+  assert.ok(design.includes(figure()), "run node tools/skyfigure.mjs");
+});

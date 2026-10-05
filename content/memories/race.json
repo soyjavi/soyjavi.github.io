@@ -2,7 +2,6 @@
   "date": "2026-03",
   "kind": "personal",
   "weight": 1,
-  "period": "now",
   "threads": [
     "body"
   ],

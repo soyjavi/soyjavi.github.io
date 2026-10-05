@@ -1,6 +1,8 @@
+import { readFileSync } from "node:fs";
+import { ageAt, ageIdOf } from "../../assets/js/life.js";
 import { seeded } from "../../assets/js/util.js";
 
-const PERIODS = [["origins", 1980], ["craft", 2001], ["tapquo", 2011], ["remote", 2015], ["home", 2020], ["now", 2025]];
+const { birth, ages } = JSON.parse(readFileSync(new URL("../../content/life.json", import.meta.url), "utf8"));
 
 export function archive({ count = 300, people = 80, places = 12, threads = 6, threadIds = null, seed = 11 } = {}) {
   const random = seeded(seed);
@@ -19,12 +21,12 @@ export function archive({ count = 300, people = 80, places = 12, threads = 6, th
       date,
       kind: "personal",
       weight: random() < 0.12 ? 3 : random() < 0.4 ? 2 : 1,
-      period: PERIODS.findLast(([, from]) => +date.slice(0, 4) >= from)[0],
+      period: ageIdOf(ages, ageAt(birth, date)),
       threads: pick(facets.threads, 1 + Math.floor(random() * 2)),
       people: pick(facets.people, Math.floor(random() * 4)),
       places: pick(facets.places, 1),
       links: [],
     };
   });
-  return { entries, facets, periods: PERIODS.map(([id]) => id) };
+  return { entries, facets, periods: ages.map((age) => age.id).filter((id) => entries.some((entry) => entry.period === id)) };
 }

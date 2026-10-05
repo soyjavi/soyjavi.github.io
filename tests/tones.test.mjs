@@ -118,3 +118,10 @@ test("seeded noise and chances are repeatable, bounded and soft", () => {
   assert.deepEqual(noiseOf(4000, 1), noise);
   assert.ok(rough(noise, 0, 4000) < 0.2, "a dark, brown noise");
 });
+
+test("a note that follows the camera into another galaxy waits for it only briefly, and the opening's birth notes never count as a place the visitor came from", async () => {
+  assert.ok(TONES.arrival > 0 && TONES.arrival <= 0.5, "the note lands with the camera, not after it");
+  const { readFileSync } = await import("node:fs");
+  const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
+  assert.match(engine, /sound\.memory\(\{ \.\.\.marks\[first\], period: -1 \}\)/);
+});

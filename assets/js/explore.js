@@ -47,6 +47,20 @@ export function strongest(marks, index, limit = STRONG) {
   return [...links, ...near].sort((a, b) => score(b) - score(a) || a - b).slice(0, limit);
 }
 
+export function declared(marks, index, limit = STRONG) {
+  const { links } = related(marks, index);
+  return strongest(marks, index, Infinity).filter((i) => links.includes(i)).slice(0, limit);
+}
+
+export function periodNames(marks, period, limit = 4) {
+  return marks
+    .map((mark, i) => [mark, i])
+    .filter(([mark]) => mark.period === period)
+    .sort((a, b) => b[0].weight - a[0].weight || a[0].year - b[0].year || a[1] - b[1])
+    .slice(0, limit)
+    .map(([, i]) => i);
+}
+
 export function sequence(marks, index, filter = null) {
   if (!filter) return { previous: index > 0 ? index - 1 : null, next: index < marks.length - 1 ? index + 1 : null };
   const chain = matching(marks, filter);
@@ -117,7 +131,9 @@ export function tagSpots({ x, y, r }, { width, height }, windowWidth, margin = 1
   ];
 }
 
-export function pickSpot(spots, { free, clear, inside, forced = false }) {
+export function pickSpot(spots, { free, clear, inside, forced = false, keep = -1 }) {
+  const kept = keep >= 0 ? spots.find((spot) => spot.slot === keep) : undefined;
+  if (kept && free(kept) && clear(kept)) return kept;
   return spots.find((spot) => free(spot) && clear(spot)) ?? spots.find(free) ?? (forced ? spots.find((spot) => spot.far === false && inside(spot)) ?? spots[0] : null);
 }
 
@@ -173,7 +189,8 @@ export function edgeLabel(point, side, { width, height }, rect, offset = 8) {
 
 export function stackEdgeLabels(items, rect, gap = 4, avoid = []) {
   const placed = [...avoid];
-  const overlaps = (a, b) => a.left < b.right + gap && a.right + gap > b.left && a.top < b.bottom + gap && a.bottom + gap > b.top;
+  const slack = 0.5;
+  const overlaps = (a, b) => a.left < b.right + gap - slack && a.right + gap > b.left + slack && a.top < b.bottom + gap - slack && a.bottom + gap > b.top + slack;
   for (const item of items) {
     const along = item.side === "top" || item.side === "bottom" ? "top" : "left";
     const span = along === "top" ? item.box.bottom - item.box.top : item.box.right - item.box.left;

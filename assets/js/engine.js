@@ -1,6 +1,6 @@
 import * as THREE from "three";
-import { BUDGET, FACETS, FLOOR, RAIL, START, futures, layout, memories, playElapsed, monthsUntil, playYear, railPercent, skyOf, todayYear, untilText, yearRings } from "./life.js";
-import { askLevels, askPairs, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, jumps, leaderOf, levels as levelsOf, matching, perGalaxy, miniMap, miniVisible, QUALITY, averageMs, nextQuality, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, strongest, tagSpots, tourPlan, tourTick } from "./explore.js";
+import { BUDGET, FACETS, FLOOR, RAIL, START, shapeBy, futures, layout, memories, playElapsed, monthsUntil, playYear, railPercent, skyOf, todayYear, untilText, yearRings } from "./life.js";
+import { LEVEL, askLevels, askPairs, declared, periodNames, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, jumps, leaderOf, levels as levelsOf, matching, perGalaxy, miniMap, miniVisible, QUALITY, averageMs, nextQuality, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, strongest, tagSpots, tourPlan, tourTick } from "./explore.js";
 import { clamp } from "./orbit.js";
 import { createSound } from "./sound.js";
 import { OVERVIEW_PITCH, createScene } from "./scene.js";
@@ -18,6 +18,7 @@ const RING_UNITS = { today: 2.4, book: 1.2, clone: 1.2 };
 const YEAR_RING_MAX = 8;
 const EDGE_SAMPLES = 20;
 const EDGE_MARKS = 2;
+const EDGE_GRACE = 0.6;
 const MAX_LINKS_CUT = 40;
 const MINI = { width: 104, height: 100, top: 118 };
 const SVG_NS = "http://www.w3.org/2000/svg";
@@ -109,7 +110,7 @@ async function start() {
     ...Object.fromEntries(FACETS.map((facet) => [facet, csv(node.dataset[facet])])),
   }));
   const marks = layout(entries, facets, { periods, today });
-  const sky = skyOf(entries, marks.map((mark) => mark.year), { periods, today });
+  const sky = skyOf(entries, marks.map((mark) => mark.year), { periods, today, threads: facets.threads });
   const markOf = new Map(lived.map((station, i) => [station.t, i]));
   const asks = new Map([...story.querySelectorAll("li[data-ask]")].map((item) => [item.dataset.ask, new Set(csv(item.dataset.memories).map((id) => lived.findIndex((station) => station.element.dataset.milestone === id)).filter((i) => i >= 0))]));
   let asked = null;
@@ -243,12 +244,17 @@ async function start() {
       const [ox, oy] = [x + sky.pole[0], y + sky.pole[1]];
       const length = Math.hypot(ox, oy) || 1;
       const reach = galaxy.radius + 9;
+      const [sx, sy] = shapeBy(galaxy, (ox / length) * reach, (oy / length) * reach);
       const [name, span] = (first.querySelector(".kicker")?.textContent ?? periods[k]).split(" · ");
-      const node = addFixed("", vector([x + (ox / length) * reach, y + (oy / length) * reach, z]), "galaxy", 0.9, (galaxy.start + galaxy.end) / 2);
+      const node = addFixed("", vector([x + sx, y + sy, z]), "galaxy", 0.9, (galaxy.start + galaxy.end) / 2);
       node.append(element("span", "", name), ...(span ? [element("span", "galaxy-years", ` · ${span}`)] : []), element("b", "galaxy-count"));
       galaxyLabels[k] = fixed.at(-1);
+      galaxyLabels[k].centre = vector(galaxy.centre);
       node.dataset.go = `period-${periods[k]}`;
-      node.addEventListener("click", () => goTo(node.dataset.go));
+      node.addEventListener("click", (event) => {
+        event.stopImmediatePropagation();
+        goTo(periodView === k ? "top" : node.dataset.go);
+      });
   });
   const yearLabels = Array.from({ length: YEAR_RING_MAX }, () => {
     addFixed("", new THREE.Vector3(), "ring-year", 0.8, START);
@@ -296,8 +302,7 @@ async function start() {
   const nudgeClose = element("button", "", "✕");
   nudgeClose.type = "button";
   nudge.append(nudgeLink, nudgeClose);
-  card.after(nudge);
-  undo.push(() => nudge.remove());
+  cardSteps.before(nudge);
   const looseLinks = [...story.querySelectorAll("a, button, input, select, textarea")];
   looseLinks.forEach((node) => node.setAttribute("tabindex", "-1"));
   undo.push(() => looseLinks.forEach((node) => node.removeAttribute("tabindex")));
@@ -321,7 +326,8 @@ async function start() {
   };
   sky.list.forEach((galaxy) => {
     const [x, y] = miniFit.to(galaxy.centre);
-    drawn("circle", { cx: x.toFixed(1), cy: y.toFixed(1), r: (galaxy.radius * miniFit.scale).toFixed(1), class: "mini-galaxy" });
+    const ring = Array.from({ length: 48 }, (_, step) => miniFit.to(shapeBy(galaxy, Math.sin((Math.PI * 2 * step) / 48) * galaxy.radius, Math.cos((Math.PI * 2 * step) / 48) * galaxy.radius).map((value, axis) => galaxy.centre[axis] + value)));
+    drawn("polygon", { points: ring.map(([px, py]) => `${px.toFixed(1)},${py.toFixed(1)}`).join(" "), class: "mini-galaxy" });
   });
   const miniDots = marks.map((mark) => {
     const [x, y] = miniFit.to(mark.position);
@@ -357,11 +363,16 @@ async function start() {
     nudgebook: tools.dataset.nudgebook,
     nudgeclone: tools.dataset.nudgeclone,
     nudgeclose: tools.dataset.nudgeclose,
+    periodstart: tools.dataset.periodstart,
   };
 
   let current = 0;
+  let periodView = -1;
+  let periodSet = new Set();
+  const viewedMemory = () => (periodView >= 0 ? -1 : memoryOf(current));
   let filter = null;
   let hover = -1;
+  const headsQuiet = { on: false, over: 0, away: 0 };
   let neighbours = { links: [], near: [] };
   let chosen = [];
   let showAll = false;
@@ -379,31 +390,34 @@ async function start() {
       return { previous: previous !== null ? stationOf(previous) : !filter && memoryOf(index) === 0 ? 0 : null, next: next !== null ? stationOf(next) : !filter ? bookAt : null };
     }
     if (station.kind === "book") return { previous: lived.at(-1).t, next: cloneAt };
-    if (station.kind === "clone") return { previous: bookAt, next: null };
+    if (station.kind === "clone") return { previous: bookAt, next: contactAt };
+    if (station.kind === "contact") return { previous: cloneAt, next: null };
     return { previous: null, next: null };
   };
 
   const refreshScene = () => {
-    const memory = memoryOf(current);
+    const memory = viewedMemory();
     neighbours = memory >= 0 ? related(marks, memory) : { links: [], near: [] };
     const everyone = [...neighbours.links, ...neighbours.near];
-    chosen = memory < 0 ? [] : showAll ? everyone : strongest(marks, memory);
+    chosen = memory < 0 ? [] : showAll ? everyone : declared(marks, memory);
     const picked = new Set(chosen);
     const lit = asked ? asks.get(asked) : null;
-    const levelNow = lit ? askLevels(marks, lit) : levelsOf(marks, { selected: memory, near: picked, weak: new Set(everyone.filter((i) => !picked.has(i))), filter });
+    const levelNow = lit ? askLevels(marks, lit) : periodView >= 0 ? marks.map((mark) => (mark.period === periodView ? LEVEL.normal : LEVEL.quiet)) : levelsOf(marks, { selected: memory, near: picked, weak: new Set(everyone.filter((i) => !picked.has(i))), filter });
     scene.setLevels(levelNow);
     stage.dataset.levels = [...new Set(levelNow)].sort((a, b) => a - b).join(",");
     scene.setLinks(neighbours.links.filter((i) => picked.has(i)), neighbours.near.filter((i) => picked.has(i)));
     scene.setSelection(memory);
-    const rings = !gentle.on && memory >= 0 && marks[memory].period >= 0 ? yearRings(sky.list[marks[memory].period], YEAR_RING_MAX) : [];
-    const galaxy = memory >= 0 ? sky.list[marks[memory].period] : null;
-    scene.setYearRings(galaxy?.centre ?? null, rings);
+    const viewed = periodView >= 0 ? periodView : memory >= 0 ? marks[memory].period : -1;
+    const rings = (!gentle.on || periodView >= 0) && viewed >= 0 ? yearRings(sky.list[viewed], YEAR_RING_MAX) : [];
+    const galaxy = viewed >= 0 ? sky.list[viewed] : null;
+    scene.setYearRings(galaxy?.centre ?? null, rings, galaxy ?? {});
     yearLabels.forEach((item, n) => {
       const ring = rings[n];
       item.dim = ring ? 1 : 0;
       if (!ring) return;
       item.node.textContent = String(ring.year);
-      item.world.set(galaxy.centre[0] + ring.radius * Math.sin(YEAR_RING_ANGLE), galaxy.centre[1] + ring.radius * Math.cos(YEAR_RING_ANGLE), galaxy.centre[2]);
+      const [dx, dy] = shapeBy(galaxy, ring.radius * Math.sin(YEAR_RING_ANGLE), ring.radius * Math.cos(YEAR_RING_ANGLE));
+      item.world.set(galaxy.centre[0] + dx, galaxy.centre[1] + dy, galaxy.centre[2]);
       item.width = 0;
     });
     scene.setFocus(memory >= 0 ? marks[memory].year : null);
@@ -414,7 +428,7 @@ async function start() {
       const counts = perGalaxy(marks, chain, sky.list.length);
       galaxyLabels.forEach((item, k) => {
         if (!item) return;
-        item.dim = memory >= 0 && marks[memory].period !== k ? 0 : filter && !counts[k] ? 0.3 : 1;
+        item.dim = viewed >= 0 && viewed !== k ? 0 : filter && !counts[k] ? 0.3 : 1;
         item.node.querySelector(".galaxy-count").textContent = filter ? ` · ${counts[k]}` : "";
         item.width = 0;
       });
@@ -423,6 +437,11 @@ async function start() {
 
   const shotOf = (index) => {
     const station = stations[index];
+    if (periodView >= 0) {
+      const galaxy = sky.list[periodView];
+      scene.fly({ target: galaxy.centre, distance: clamp(galaxy.radius * 4.2 + 16, 40, 130), pitch: clamp(scene.goal.pitch, -0.45, 0.5) });
+      return scene.setIdle(false);
+    }
     if (station.kind === "milestone") {
       const mark = marks[memoryOf(index)];
       const galaxy = sky.list[mark.period];
@@ -497,7 +516,7 @@ async function start() {
 
   const renderRelated = () => {
     const body = cardBody.firstElementChild;
-    const memory = memoryOf(current);
+    const memory = viewedMemory();
     if (!body || memory < 0) return;
     body.querySelector(".related")?.remove();
     relatedIn(body, memory);
@@ -533,7 +552,47 @@ async function start() {
     card.classList.remove("measure");
   };
 
+  const renderPeriodCard = () => {
+    const station = stations[current];
+    const clone = station.panel.cloneNode(true);
+    ["data-station", "data-panel", "id"].forEach((name) => clone.removeAttribute(name));
+    clone.querySelectorAll("[id]").forEach((node) => node.removeAttribute("id"));
+    [...clone.children].forEach((child) => child.matches(".kicker, .period-head") || child.remove());
+    clone.querySelectorAll("h1, h2, h3").forEach(splitWords);
+    const start = element("button", "period-start", copy.periodstart.replace("{title}", () => station.element.querySelector("h3")?.textContent ?? ""));
+    start.type = "button";
+    start.dataset.go = station.id;
+    const held = marks.filter((mark) => mark.period === periodView);
+    const facts = [
+      [held.length, tools.dataset.countMemories],
+      [new Set(held.flatMap((mark) => mark.members.people ?? [])).size, tools.dataset.countPeople],
+      [new Set(held.flatMap((mark) => mark.members.places ?? [])).size, tools.dataset.countPlaces],
+    ].filter(([n, text]) => n > 0 && text).map(([n, text]) => text.replace("{n}", String(n)));
+    clone.append(element("p", "period-facts kicker", facts.join(" · ")), start);
+    setPreview(-1);
+    cardBody.replaceChildren(clone);
+    card.dataset.collapsed = "";
+    card.dataset.kind = "period";
+    forms.forEach((holder) => (holder.hidden = true));
+    const around = (k) => (k >= 0 && k < periods.length && marks.some((mark) => mark.period === k) ? k : null);
+    const place = (button, k, text) => {
+      button.hidden = k === null;
+      button.dataset.to = "";
+      button.dataset.periodTo = k ?? "";
+      button.textContent = text;
+    };
+    place(previousButton, around(periodView - 1), `← ${copy.earlier}`);
+    place(nextButton, around(periodView + 1), `${copy.later} →`);
+    cardSteps.hidden = previousButton.hidden && nextButton.hidden;
+    closeButton.hidden = false;
+    play.running = false;
+    play.year = null;
+    scene.setReveal(null);
+    showPlay();
+  };
+
   const renderCard = () => {
+    if (periodView >= 0) return renderPeriodCard();
     const station = stations[current];
     const clone = station.panel.cloneNode(true);
     clone.removeAttribute("data-station");
@@ -544,7 +603,7 @@ async function start() {
     clone.querySelectorAll("h1, h2, h3").forEach(splitWords);
     chipsIn(clone);
     asksIn(clone);
-    const memory = memoryOf(current);
+    const memory = viewedMemory();
     if (memory >= 0) relatedIn(clone, memory);
     if (station.kind === "milestone") clone.querySelector(".period-head")?.remove();
     setPreview(-1);
@@ -581,20 +640,9 @@ async function start() {
     return { book: RAIL.book, clone: RAIL.clone }[station.kind] ?? RAIL.end;
   };
 
-  const placeNudge = () => {
-    if (nudge.hidden) return;
-    const box = card.getBoundingClientRect();
-    const wide = !stackedQuery.matches;
-    const room = Math.max(160, innerWidth - 24 - (wide ? box.right + 12 : box.left));
-    nudge.style.maxWidth = `${Math.min(340, room)}px`;
-    const left = wide ? box.right + 12 : box.left;
-    nudge.style.left = `${Math.max(12, Math.min(left, innerWidth - nudge.offsetWidth - 12)).toFixed(1)}px`;
-    nudge.style.top = `${(wide ? box.bottom - nudge.offsetHeight : box.top - nudge.offsetHeight - 8).toFixed(1)}px`;
-  };
-
   const updateNudge = () => {
     const station = stations[current];
-    const want = !invite.closed && invite.opened.size >= 3 && station.kind === "milestone" && !station.element.dataset.quiet;
+    const want = !invite.closed && invite.opened.size >= 3 && station.kind === "milestone" && periodView < 0 && !station.element.dataset.quiet;
     nudge.hidden = !want;
     if (!want) return;
     const target = invite.sawClone ? "clone" : "book";
@@ -603,7 +651,6 @@ async function start() {
     nudgeLink.textContent = copy[target === "clone" ? "nudgeclone" : "nudgebook"];
     nudgeClose.setAttribute("aria-label", copy.nudgeclose);
     nudgeClose.setAttribute("title", copy.nudgeclose);
-    placeNudge();
   };
 
   nudgeClose.addEventListener("click", () => {
@@ -611,16 +658,8 @@ async function start() {
     updateNudge();
     card.focus({ preventScroll: true });
   });
-  nudge.addEventListener("click", (event) => {
-    const link = event.target.closest("[data-go]");
-    if (link) {
-      event.preventDefault();
-      goTo(link.dataset.go);
-    }
-  });
 
   const layoutInset = () => {
-    placeNudge();
     const box = card.getBoundingClientRect();
     const top = Math.max(KEEP_TOP, tools.getBoundingClientRect().bottom + 6);
     if (stackedQuery.matches) scene.setInset(0, (top + Math.max(top + 120, box.top)) / 2 - innerHeight / 2);
@@ -651,6 +690,9 @@ async function start() {
     quiet = hush;
     stopPlay();
     current = clamp(index, 0, END);
+    periodView = -1;
+    periodSet = new Set();
+    stage.dataset.period = "";
     asked = null;
     showAll = false;
     stage.dataset.asked = "";
@@ -681,6 +723,35 @@ async function start() {
     }
   };
 
+  const selectPeriod = (k, { push = true } = {}) => {
+    const first = marks.findIndex((mark) => mark.period === k);
+    if (first < 0) return;
+    quiet = false;
+    stopPlay();
+    current = stationOf(first);
+    periodView = k;
+    periodSet = new Set(periodNames(marks, k));
+    asked = null;
+    showAll = false;
+    stage.dataset.asked = "";
+    stage.dataset.period = periods[k];
+    document.documentElement.dataset.at = current;
+    hud.textContent = stations[current].element.querySelector(".kicker")?.textContent ?? "";
+    refreshScene();
+    shotOf(current);
+    renderCard();
+    updateNudge();
+    rail?.querySelector(".rail-cursor")?.style.setProperty("--x", `${railPercent(cursorYear()).toFixed(2)}%`);
+    sound.memory(marks[periodNames(marks, k, 1)[0]]);
+    if (push) {
+      try {
+        history.replaceState(null, "", `#period-${periods[k]}`);
+      } catch {
+        return;
+      }
+    }
+  };
+
   const setFilter = (next) => {
     filter = next;
     tools.querySelectorAll(".legend button").forEach((button) => {
@@ -697,7 +768,7 @@ async function start() {
       unfilter.setAttribute("aria-label", `${copy.unfilter}: ${names[filter.facet][facets[filter.facet][filter.item]] ?? ""}`);
     }
     refreshScene();
-    if (stations[current].kind === "milestone") renderCard();
+    if (stations[current].kind === "milestone" && periodView < 0) renderCard();
   };
   const unfilter = tools.querySelector("[data-unfilter]");
   unfilter.addEventListener("click", () => setFilter(null));
@@ -965,6 +1036,10 @@ async function start() {
       return card.focus({ preventScroll: true });
     }
     const step = event.target.closest(".step");
+    if (step && step.dataset.periodTo) {
+      selectPeriod(+step.dataset.periodTo);
+      return card.focus({ preventScroll: true });
+    }
     if (step && step.dataset.to !== "") {
       select(+step.dataset.to);
       return card.focus({ preventScroll: true });
@@ -977,12 +1052,14 @@ async function start() {
   });
 
   const anchors = new Map(stations.map((station) => [station.id, station.t]));
+  const periodAt = new Map(periods.map((id, k) => [`period-${id}`, k]));
   document.querySelectorAll("section.period").forEach((section) => {
     const first = section.querySelector("[data-station]");
     anchors.set(section.id, stations.findIndex((station) => station.element === first));
   });
   const goTo = (id) => {
     if (!anchors.has(id)) return;
+    if (periodAt.has(id)) return selectPeriod(periodAt.get(id));
     const index = anchors.get(id);
     select(index);
     if (stations[index].kind !== "hero") forms.get(stations[index].kind)?.querySelector("input, a, button")?.focus();
@@ -995,6 +1072,7 @@ async function start() {
       return;
     }
     if (!id) return select(0, { push: false });
+    if (periodAt.has(id)) return selectPeriod(periodAt.get(id), { push: false });
     if (anchors.has(id)) select(anchors.get(id), { push: false });
   };
   document.querySelectorAll("[data-go]").forEach((link) =>
@@ -1073,6 +1151,7 @@ async function start() {
   scene.on("hover", (index) => {
     if (index >= 0 && index !== hover) sound.tick();
     hover = index;
+    scene.setHover(index);
     canvas.style.cursor = index >= 0 ? "pointer" : "";
   });
   const aheadAt = (index) => (index === marks.length ? bookAt : index === marks.length + 1 ? cloneAt : -1);
@@ -1134,7 +1213,7 @@ async function start() {
   });
 
   const frameRects = () => {
-    const rects = [card, tools, hud, rail, nudge.hidden ? null : nudge].filter(Boolean).map((node) => node.getBoundingClientRect());
+    const rects = [card, tools, hud, rail].filter(Boolean).map((node) => node.getBoundingClientRect());
     const finderBox = finder.hidden ? null : finder.getBoundingClientRect();
     if (finderBox) rects.push(finderBox);
     return rects;
@@ -1153,7 +1232,7 @@ async function start() {
         if (born.has(k) || formed < galaxy.start) return;
         born.add(k);
         const first = marks.findIndex((mark) => mark.year >= galaxy.start - 0.01);
-        if (first >= 0) sound.memory(marks[first]);
+        if (first >= 0) sound.memory({ ...marks[first], period: -1 });
       });
       if (entered) finishEntering();
     }
@@ -1189,7 +1268,11 @@ async function start() {
         hud.textContent = stations[current].label;
       }
     }
-    const selected = memoryOf(current);
+    headsQuiet.over = hover >= 0 ? headsQuiet.over + dt : 0;
+    headsQuiet.away = hover >= 0 ? 0 : headsQuiet.away + dt;
+    if (headsQuiet.over > 0.35) headsQuiet.on = true;
+    else if (headsQuiet.away > 0.8) headsQuiet.on = false;
+    const selected = viewedMemory();
     const ratio = scene.view.distance / scene.homeDistance();
     const peers = new Set(chosen.slice(0, MAX_RELATED));
     const keepOut = frameRects().map((box) => ({ left: box.left - 12, right: box.right + 12, top: box.top - 12, bottom: box.bottom + 12 }));
@@ -1260,9 +1343,14 @@ async function start() {
       });
       stackEdgeLabels(shown, reach, 4, miniBox ? [{ left: miniBox.left, right: miniBox.right, top: miniBox.top, bottom: miniBox.bottom }] : []);
       edgeMarks.forEach((mark, k) => {
-        const item = shown[k];
-        mark.node.hidden = !item?.shown;
-        if (!item?.shown) return;
+        const found = shown[k];
+        if (found?.shown) mark.keep = EDGE_GRACE;
+        else if (!(mark.keep > 0 && mark.held && (!found || found.exit.j === mark.held.exit.j))) mark.held = null;
+        else mark.keep -= dt;
+        const item = found?.shown ? found : mark.held;
+        mark.held = item ?? null;
+        mark.node.hidden = !item;
+        if (!item) return;
         mark.node.style.transform = `translate3d(${item.box.left.toFixed(1)}px, ${item.box.top.toFixed(1)}px, 0)`;
         mark.node.dataset.memory = String(item.exit.j);
         mark.node.dataset.side = item.side;
@@ -1272,7 +1360,10 @@ async function start() {
         mark.arrow.style.cssText = `left: ${(item.exit.x - item.box.left).toFixed(1)}px; top: ${(item.exit.y - item.box.top).toFixed(1)}px; --a: ${item.exit.angle.toFixed(3)}rad`;
         keepOut.push({ left: item.box.left - 4, right: item.box.right + 4, top: item.box.top - 4, bottom: item.box.bottom + 4 });
       });
-    } else edgeMarks.forEach((mark) => (mark.node.hidden = true));
+    } else edgeMarks.forEach((mark) => {
+      mark.node.hidden = true;
+      mark.held = null;
+    });
     scene.setLinkReach(reaches);
     stage.dataset.edges = String(edgeMarks.filter((mark) => !mark.node.hidden).length || "");
     const nextKey = marked.join(",");
@@ -1283,6 +1374,7 @@ async function start() {
     }
 
     const point = { x: 0, y: 0, visible: false };
+    const middle = { x: 0, y: 0, visible: false };
     fixed.forEach((item) => {
       let opacity = item.base * (item.year <= formed ? 1 : 0);
       if (play.year !== null && item.year > play.year) opacity = 0;
@@ -1310,6 +1402,14 @@ async function start() {
             if (opacity > 0.2) keepOut.push({ left: box.left - 4, right: box.right + 4, top: box.top - 4, bottom: box.bottom + 4 });
           } else opacity = 0;
         } else {
+          if (item.centre) {
+            scene.project(item.centre, middle);
+            const [dx, dy] = [point.x - middle.x, point.y - middle.y];
+            const length = Math.hypot(dx, dy) || 1;
+            const reach = (Math.abs(dx) / length) * (item.width / 2) + (Math.abs(dy) / length) * (item.height / 2);
+            point.x += (dx / length) * reach;
+            point.y += (dy / length) * reach;
+          }
           point.x = clamp(point.x, item.width / 2 + 12, innerWidth - item.width / 2 - 12);
           item.node.style.transform = `translate3d(${point.x.toFixed(1)}px, ${point.y.toFixed(1)}px, 0)`;
           const pad = item.kind === "ring-year" || item.kind === "countdown-mark" ? 1 : 4;
@@ -1346,8 +1446,10 @@ async function start() {
       else if (mark.weight === 2 && ratio < 0.5) priority = 20;
       else if (ratio < 0.22) priority = 10;
       if (selected >= 0 && priority < 500) priority = 0;
+      if (headsQuiet.on && i !== hover && priority === 40) priority = 0;
       if (mark.year + 3 > formed && i !== selected) priority = 0;
       if (!begun && seen && i === firstMemory) priority = 900;
+      if (periodView >= 0) priority = i === hover ? 900 : periodSet.has(i) && hover < 0 ? 40 : 0;
       if (play.year !== null) priority = mark.year <= play.year && mark.year > play.year - 2.5 ? 800 + mark.weight : 0;
       if (priority > 0 && spot.on) candidates.push({ tag, spot, priority, i });
       else if (tag.on) {
@@ -1358,9 +1460,11 @@ async function start() {
     candidates.sort((a, b) => b.priority - a.priority || a.i - b.i);
     const accepted = [];
     for (const { tag, spot, priority, i } of candidates) {
-      const asName = priority === 40 ? "1" : "";
+      const asName = priority === 40 || (priority === 900 && i === hover && selected < 0 && periodView < 0 && ratio >= 0.6) ? "1" : "";
       const hot = i === selected || i === hover ? "1" : "";
       if (tag.node.dataset.name !== asName || tag.node.dataset.hot !== hot) {
+        tag.glide = tag.node.dataset.hot !== hot;
+        tag.node.dataset.cool = tag.node.dataset.hot === "1" && !hot ? "1" : "";
         tag.node.dataset.name = asName;
         tag.node.dataset.hot = hot;
         tag.width = tag.height = 0;
@@ -1368,6 +1472,7 @@ async function start() {
       tag.width ||= tag.node.offsetWidth;
       tag.height ||= tag.node.offsetHeight;
       const placements = tagSpots(spot, { width: tag.width, height: tag.height }, innerWidth);
+      placements.forEach((placement, slot) => (placement.slot = slot));
       if (priority >= 900) {
         const left = clamp(spot.x - tag.width / 2, 12, innerWidth - tag.width - 12);
         placements.splice(8, 0, { left, right: left + tag.width, top: spot.y - tag.height / 2, bottom: spot.y + tag.height / 2, far: false });
@@ -1375,15 +1480,22 @@ async function start() {
       const inside = (box) => box.left >= 12 && box.right <= innerWidth - 12;
       const free = (box) => inside(box) && !keepOut.some((other) => overlaps(box, other)) && !accepted.some((other) => overlaps(box, { left: other.left - 6, right: other.right + 6, top: other.top - 4, bottom: other.bottom + 4 }));
       const clear = (box) => !clouds.some((other) => other.j !== i && overlaps(box, other));
-      const box = pickSpot(placements, { free, clear, inside, forced: priority >= 900 });
+      const box = pickSpot(placements, { free, clear, inside, forced: priority >= 900, keep: tag.on ? tag.slot : -1 });
       if (box && accepted.length < limit) {
         accepted.push(box);
+        const moved = tag.on && tag.slot !== undefined && tag.slot !== box.slot;
+        tag.slot = box.slot;
         const away = box.far ? leaderOf(box, spot) : null;
         if (away) {
           Object.assign(tag.leader.style, { left: `${away.x.toFixed(1)}px`, top: `${away.y.toFixed(1)}px`, width: `${away.length.toFixed(1)}px`, transform: `rotate(${away.angle.toFixed(3)}rad)` });
           tag.node.dataset.leader = "1";
         } else tag.node.dataset.leader = "";
-        tag.node.style.transform = `translate3d(${box.left.toFixed(1)}px, ${box.top.toFixed(1)}px, 0)`;
+        if ((tag.glide || moved) && tag.on && tag.last) tag.slide = [tag.last.left - box.left, tag.last.top - box.top];
+        tag.glide = false;
+        tag.last = { left: box.left, top: box.top };
+        const decay = Math.exp(-3 * dt);
+        tag.slide = tag.slide ? tag.slide.map((value) => (Math.abs(value) < 0.3 ? 0 : value * decay)) : [0, 0];
+        tag.node.style.transform = `translate3d(${(box.left + tag.slide[0]).toFixed(1)}px, ${(box.top + tag.slide[1]).toFixed(1)}px, 0)`;
         tag.node.style.setProperty("--cx", spot.x.toFixed(1));
         tag.node.style.setProperty("--cy", spot.y.toFixed(1));
         if (!tag.on) {

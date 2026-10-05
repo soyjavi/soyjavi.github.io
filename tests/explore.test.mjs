@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { LEVEL, RING_CLEARANCE, STRONG, askLevels, askPairs, strongest, TAG_GAP, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, jumps, leaderOf, levels, matching, miniMap, MINI_ZOOM, miniVisible, QUALITY, averageMs, nextQuality, normalize, perGalaxy, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, tagSpots, tourPlan, tourTick } from "../assets/js/explore.js";
+import { LEVEL, RING_CLEARANCE, STRONG, askLevels, askPairs, declared, periodNames, strongest, TAG_GAP, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, jumps, leaderOf, levels, matching, miniMap, MINI_ZOOM, miniVisible, QUALITY, averageMs, nextQuality, normalize, perGalaxy, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, tagSpots, tourPlan, tourTick } from "../assets/js/explore.js";
 import { layout } from "../assets/js/life.js";
 import { ORBIT, approach, ease, eye, nearest, slide, turn, zoom } from "../assets/js/orbit.js";
 import { loadContent } from "../src/content.mjs";
@@ -161,6 +161,14 @@ test("a tag first tries beside its cloud, then the corners, then further out in 
   const reach = (spot) => Math.hypot((spot.left + spot.right) / 2 - 400, (spot.top + spot.bottom) / 2 - 300);
   const far = spots.slice(8);
   assert.ok(Math.min(...far.map(reach)) > Math.min(...spots.slice(0, 8).map(reach)), "the rings lie further out");
+});
+
+test("a tag stays where it was while that place is free, so a swaying camera never flips it from side to side", () => {
+  const spots = tagSpots({ x: 400, y: 300, r: 20 }, { width: 100, height: 16 }, 1000);
+  spots.forEach((spot, slot) => (spot.slot = slot));
+  assert.equal(pickSpot(spots, { ...policy([]), keep: 1 }), spots[1], "its old place is free, so it stays");
+  const taken = { left: spots[1].left - 2, right: spots[1].right + 2, top: spots[1].top, bottom: spots[1].bottom };
+  assert.equal(pickSpot(spots, { ...policy([taken]), keep: 1 }), spots[0], "when the old place is taken it goes back to the first free one");
 });
 
 test("a tag keeps off the other clouds when a free place exists nearby, and falls back to a crowded one only when none does", () => {
@@ -405,4 +413,50 @@ test("a relation is always at least 2.4 times brighter than a cloud that has not
   assert.ok([...top].every((i) => chosen[i] === LEVEL.related));
   assert.ok([...weak].every((i) => chosen[i] === LEVEL.weak));
   assert.ok(chosen.filter((_, i) => i !== selected && !all.includes(i)).every((level) => level === LEVEL.quiet));
+});
+
+test("only the links he declared are named when a memory is open, never a neighbour in time", () => {
+  const member = (threads) => ({ threads, people: [], places: [] });
+  const marks = [
+    { id: "p", year: 8, links: [], members: member([0]) },
+    { id: "a", year: 10, links: ["r", "q"], members: member([0]) },
+    { id: "q", year: 11, links: [], members: member([0]) },
+    { id: "r", year: 30, links: [], members: member([2]) },
+    { id: "s", year: 10.4, links: [], members: member([0]) },
+    { id: "alone", year: 50, links: [], members: member([5]) },
+  ];
+  const named = declared(marks, 1);
+  assert.deepEqual([...named].sort(), [2, 3], "the two he linked, and not p, who only shares a thread");
+  assert.ok(related(marks, 1).near.includes(0), "the neighbour is still related and lit");
+  assert.deepEqual(declared(marks, 5), [], "a memory with no links names nothing");
+  assert.deepEqual(declared(marks, 2), [1], "a link declared from the other side counts too");
+  const crowded = [{ id: "hub", year: 10, links: ["a", "b", "c", "d", "e"], members: member([0]) }, ...["a", "b", "c", "d", "e"].map((id, k) => ({ id, year: 11 + k, links: [], members: member([0]) }))];
+  assert.equal(declared(crowded, 0).length, STRONG, "at most three are named");
+});
+
+test("an age names its heaviest memory first and at most four, the earliest among equals", () => {
+  const marks = [
+    { period: 0, weight: 1, year: 1 },
+    { period: 0, weight: 3, year: 4 },
+    { period: 0, weight: 3, year: 2 },
+    { period: 1, weight: 3, year: 9 },
+    { period: 0, weight: 2, year: 3 },
+    { period: 0, weight: 2, year: 5 },
+    { period: 0, weight: 1, year: 6 },
+  ];
+  assert.deepEqual(periodNames(marks, 0), [2, 1, 4, 5]);
+  assert.equal(periodNames(marks, 0)[0], headlines(marks)[0], "the first one is the headline of the age");
+  assert.deepEqual(periodNames(marks, 1), [3]);
+  assert.deepEqual(periodNames(marks, 7), []);
+});
+
+test("edge labels that stack exactly one gap apart stay where they are when the numbers wobble by a hair", () => {
+  const rect = { left: 0, right: 1000, top: 70, bottom: 700 };
+  const box = (top) => ({ left: 300, right: 520, top, bottom: top + 26 });
+  for (const wobble of [-2e-5, -1e-5, 0, 1e-5, 2e-5]) {
+    const items = [{ side: "top", box: box(82) }, { side: "top", box: box(82 + wobble) }];
+    stackEdgeLabels(items, rect, 4);
+    assert.ok(items.every((item) => item.shown));
+    assert.equal(Math.round(items[1].box.top), 112, `the second label sits one step below the first (wobble ${wobble})`);
+  }
 });

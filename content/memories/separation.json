@@ -3,7 +3,6 @@
   "kind": "personal",
   "quiet": true,
   "weight": 2,
-  "period": "origins",
   "threads": [
     "family"
   ],

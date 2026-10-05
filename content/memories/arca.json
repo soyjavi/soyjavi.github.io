@@ -2,7 +2,6 @@
   "date": "2026",
   "kind": "product",
   "weight": 1,
-  "period": "now",
   "threads": [
     "ventures"
   ],

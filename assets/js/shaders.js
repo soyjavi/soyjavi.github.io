@@ -10,6 +10,7 @@ export const KIND_TINT = { strength: 0.12, night: ["#ecd2b0", "#b8cdea", "#b8cde
 
 export const CLOUD = { spin: 0.07, breath: 0.05, pace: 0.5, still: 0.92 };
 export const POINTER = { radius: 0.2, push: 0.04, rate: 6 };
+export const HOVER = { pull: 0.1, glow: 0.3, grow: 0.12, inRate: 2.2, outRate: 1.2 };
 
 export const igniteAt = (fraction) => DISCOVER.order * fraction + DISCOVER.arrive * DISCOVER.flight;
 
@@ -31,6 +32,9 @@ export const DUST_VERTEX = `
   #define ENTRANCE_FIRST ${ENTRANCE.first.toFixed(2)}
   #define POINTER_RADIUS ${POINTER.radius.toFixed(2)}
   #define POINTER_PUSH ${POINTER.push.toFixed(3)}
+  #define HOVER_PULL ${HOVER.pull.toFixed(3)}
+  #define HOVER_GLOW ${HOVER.glow.toFixed(2)}
+  #define HOVER_GROW ${HOVER.grow.toFixed(2)}
   attribute vec3 aFrom;
   attribute vec3 aCenter;
   attribute float aU;
@@ -48,6 +52,7 @@ export const DUST_VERTEX = `
   uniform vec3 uPivot[SPIN_SLOTS];
   uniform float uKeep;
   uniform vec3 uPointer;
+  uniform vec2 uHover;
   uniform float uSeed;
   uniform float uSeedOn;
   uniform float uKick;
@@ -99,6 +104,8 @@ export const DUST_VERTEX = `
     float calm = 1.0 - CLOUD_STILL * uFar;
     off.xy = mix(off.xy, vec2(c * off.x - s * off.y, s * off.x + c * off.y), calm);
     off *= 1.0 + calm * CLOUD_BREATH * aKind * sin(uTime * CLOUD_PACE + aSeed * 20.0);
+    float hovered = aKind > 0.5 ? (1.0 - step(0.5, abs(aMemory - uHover.x))) * uHover.y : 0.0;
+    off *= 1.0 - HOVER_PULL * hovered;
     float e = 1.0 - pow(1.0 - m, 3.0);
     vec3 target = centre + off;
     vec3 rel = aFrom - target;
@@ -127,7 +134,8 @@ export const DUST_VERTEX = `
     vAlpha = mix(uGain * (0.2 + 0.6 * aSeed * aSeed) * near, vAlpha, m) * (1.0 - smoothstep(uReveal - 0.2, uReveal + 0.4, aU));
     gl_PointSize = mix(1.1 + 1.6 * aSeed * aSeed, gl_PointSize, m);
     vAlpha = min(1.0, vAlpha * lit * smoothstep(0.0, 0.5, pulse) * (1.0 + 1.2 * flash)) * mix(1.0, uSeedOn, isSeed);
-    gl_PointSize *= 1.0 + 0.8 * flash;
+    gl_PointSize *= 1.0 + 0.8 * flash + HOVER_GROW * hovered;
+    vAlpha = min(1.0, vAlpha * (1.0 + HOVER_GLOW * hovered));
     if (aKind < 0.5 && uPointer.z > 0.001) {
       float ratio = projectionMatrix[1][1] / projectionMatrix[0][0];
       vec2 away = (gl_Position.xy / gl_Position.w - uPointer.xy) * vec2(ratio, 1.0);

@@ -57,7 +57,7 @@ const asks = (life, d) =>
 
 const facetLists = (d, life, entry) =>
   FACETS.filter((facet) => life[facet]?.length && entry[facet]?.length)
-    .map((facet) => `<ul class="facets" data-facet="${facet}" aria-label="${esc(d.ui.explore[facet])}">${entry[facet].map((id) => `<li data-item="${id}">${esc(d[facet][id])}</li>`).join("")}</ul>`)
+    .map((facet) => `<ul class="facets" data-facet="${facet}" data-label="${esc(d.ui.explore[{ people: "with", places: "at", threads: "about" }[facet]])}" aria-label="${esc(d.ui.explore[facet])}">${entry[facet].map((id) => `<li data-item="${id}">${esc(d[facet][id])}</li>`).join("")}</ul>`)
     .join("\n            ");
 
 const milestone = (d, life, entry, head) => {
@@ -116,7 +116,6 @@ export function home({ site, life, dict }, lang) {
               <a class="link" href="#period-${first}" data-go="period-${first}">${esc(d.hero.secondary)}</a>
               <a class="link" href="#clone" data-go="clone">${esc(d.hero.clone)}</a>
             </div>
-            <p class="cue kicker">${esc(d.ui.hint)}</p>
           </div>
           ${waitlist(site, d, "hero")}
         </div>
@@ -129,8 +128,8 @@ export function home({ site, life, dict }, lang) {
           <div data-panel="book">
             <p class="kicker">${kicker(d.book.kicker)}</p>
             <h2 class="h2">${d.book.title}</h2>
-            <p>${esc(d.book.body)}</p>${countdown(site, d)}
             ${lockup(d, "book")}
+            <p>${esc(d.book.body)}</p>${countdown(site, d)}
           </div>
           ${waitlist(site, d, "book")}
         </div>
@@ -141,9 +140,9 @@ export function home({ site, life, dict }, lang) {
           <div data-panel="clone">
             <p class="kicker">${kicker(d.clone.kicker)}</p>
             <h2 class="h2">${d.clone.title}</h2>
+            ${lockup(d, "clone")}
             <p>${esc(d.clone.body)}</p>${asks(life, d)}
             <p class="note">${esc(d.clone.disclosure)}</p>
-            ${lockup(d, "clone")}
           </div>
           ${waitlist(site, d, "clone")}
         </div>
@@ -154,17 +153,17 @@ export function home({ site, life, dict }, lang) {
           <p class="kicker">${kicker(d.contact.kicker)}</p>
           <h2 class="display">${d.contact.title}</h2>
           <p class="lede">${esc(d.contact.lede)}</p>
-          <div class="actions">
+          <div class="actions reach">
             <a class="button primary address" href="mailto:${site.email}">${site.email}</a>
+            <a class="link" href="${site.links.x}">${esc(d.contact.follow)} →</a>
           </div>
-          <p class="proof"><a href="${site.links.x}">${esc(d.contact.follow)}</a></p>
         </div>
       </section>
     </main>
 
     ${rail({ life, dict: d })}
 
-    ${footer({ site, dict: d, lang })}
+    ${footer({ site, dict: d, lang, first })}
     <p class="hud kicker" aria-hidden="true"></p>
 
     <script src="/assets/site.js" defer></script>

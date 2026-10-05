@@ -3,7 +3,6 @@
   "approx": true,
   "kind": "personal",
   "weight": 1,
-  "period": "origins",
   "threads": [
     "family",
     "home"

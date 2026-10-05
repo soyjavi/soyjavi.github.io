@@ -28,6 +28,16 @@ export const monthsUntil = (date, now = Date.now()) => {
 
 export const untilText = (months, locale) => (!Number.isFinite(months) || months < 0 ? "" : new Intl.RelativeTimeFormat(locale, { numeric: "auto" }).format(months, "month"));
 
+export const timeOfDate = (date) => +date.slice(0, 4) + (date.length === 7 ? (+date.slice(5, 7) - 0.5) / 12 : 0.5);
+
+export const ageAt = (birth, date) => timeOfDate(date) - timeOfDate(birth);
+
+export function ageIdOf(ages, age) {
+  let found = ages[0].id;
+  for (const stage of ages) if (age >= stage.from) found = stage.id;
+  return found;
+}
+
 export const unitsOf = (year) => year - START;
 
 export function years(entries) {
@@ -74,10 +84,15 @@ export function onPath(path, along, lift = 0) {
 
 export function galaxies(placed, periodOf, count, today) {
   const members = Array.from({ length: count }, () => []);
-  placed.forEach((year, i) => periodOf[i] >= 0 && members[periodOf[i]].push(year));
+  const held = Array.from({ length: count }, () => 0);
+  placed.forEach((year, i) => {
+    if (periodOf[i] < 0) return;
+    members[periodOf[i]].push(year);
+    held[periodOf[i]] += 1;
+  });
   const starts = [];
   members.forEach((list, k) => starts.push(list.length ? Math.min(...list) : (starts[k - 1] ?? START)));
-  const radius = members.map((list) => SKY.core + SKY.reach * Math.sqrt(list.length));
+  const radius = held.map((size) => SKY.core + SKY.reach * Math.sqrt(size));
   const length = radius.reduce((sum, r) => sum + 2 * r, 0) + SKY.gap * count + SKY.future;
   const inner = (2 * length) / (SKY.sweep * (1 + SKY.growth));
   const path = { inner, spin: (inner * (SKY.growth - 1)) / SKY.sweep, length, pole: [0, 0] };
@@ -93,7 +108,11 @@ export function galaxies(placed, periodOf, count, today) {
   const list = radius.map((r, k) => {
     const later = starts.slice(k + 1).find((start, j) => members[k + 1 + j].length && start > starts[k]);
     const end = Math.max(later ?? Math.max(today, ...members[k]), starts[k] + 1);
-    return { start: starts[k], end, count: members[k].length, radius: r, turn: k * SKY.twist, along: alongs[k], centre: onPath(path, alongs[k]) };
+    const count = members[k].length;
+    const span = members[k].length ? Math.max(...members[k]) - Math.min(...members[k]) + 1 : 1;
+    const spread = clamp01(span / 12) * (1 - 0.7 * clamp01(held[k] / 50));
+    const axis = { ratio: SHAPE.stretch ? 1 + SHAPE.stretch * 0.9 * spread : 1, angle: (k * SKY.twist + count * 0.37) % Math.PI };
+    return { start: starts[k], end, count, radius: r, turn: k * SKY.twist, along: alongs[k], centre: onPath(path, alongs[k]), axis };
   });
   return { ...path, ahead: along, list };
 }
@@ -125,18 +144,44 @@ export function yearOf(sky, order) {
 }
 
 export function galaxyPoint(galaxy, thread, threads, fraction, offset = 0, lift = 0) {
-  const angle = ((Math.PI * 2) / Math.max(1, threads)) * Math.max(0, thread) + galaxy.turn + SKY.swirl * fraction + offset;
+  const arm = galaxy.arms?.[Math.max(0, thread)];
+  const angle = (arm ? arm.centre : ((Math.PI * 2) / Math.max(1, threads)) * Math.max(0, thread)) + galaxy.turn + (galaxy.swirl ?? SKY.swirl) * fraction + offset;
   const reach = Math.max(0.4, galaxy.radius * (SKY.inner + (1 - SKY.inner) * fraction) + lift);
-  return [galaxy.centre[0] + reach * Math.sin(angle), galaxy.centre[1] + reach * Math.cos(angle), galaxy.centre[2] + SKY.depth * (fraction - 0.5)];
+  const [x, y] = shapeBy(galaxy, reach * Math.sin(angle), reach * Math.cos(angle));
+  return [galaxy.centre[0] + x, galaxy.centre[1] + y, galaxy.centre[2] + SKY.depth * (fraction - 0.5)];
 }
 
 export const aheadPoint = (sky, along, lift = 0) => onPath(sky, sky.ahead + along * SKY.future, lift);
 
-export function skyOf(entries, placed, { periods = [], today = START + SPAN } = {}) {
+function armsOf(galaxy, k, entries, periodOf, threads) {
+  const counts = threads.map(() => 0);
+  entries.forEach((entry, i) => {
+    const index = threads.indexOf(entry.threads?.[0]);
+    if (periodOf[i] === k && index >= 0) counts[index]++;
+  });
+  const present = counts.map((count, index) => [index, count]).filter(([, count]) => count > 0);
+  const total = present.reduce((sum, [, count]) => sum + count, 0) || 1;
+  const floor = (Math.PI * 2) / Math.max(1, present.length) / 4;
+  const raw = present.map(([, count]) => Math.max(floor, (Math.PI * 2 * count) / total));
+  const scale = (Math.PI * 2) / raw.reduce((sum, width) => sum + width, 0);
+  let at = 0;
+  galaxy.arms = {};
+  present.forEach(([index], n) => {
+    const width = raw[n] * scale;
+    galaxy.arms[index] = { centre: at + width / 2, width };
+    at += width;
+  });
+  const span = galaxy.end - galaxy.start;
+  galaxy.swirl = SKY.swirl * (0.7 + 0.8 * clamp01(span / 14));
+}
+
+export function skyOf(entries, placed, { periods = [], today = START + SPAN, threads = [] } = {}) {
   const periodOf = entries.map((entry) => (periods.length ? periods.indexOf(entry.period) : 0));
   const lost = entries.find((_, i) => periodOf[i] < 0);
   if (lost) throw new Error(`memory ${lost.id}: period "${lost.period}" is not one of ${periods.join(", ")}`);
-  return { ...galaxies(placed, periodOf, Math.max(1, periods.length), today), periodOf };
+  const sky = { ...galaxies(placed, periodOf, Math.max(1, periods.length), today), periodOf };
+  if (SHAPE.arms && threads.length) sky.list.forEach((galaxy, k) => armsOf(galaxy, k, entries, periodOf, threads));
+  return sky;
 }
 
 export function layout(entries, facets = {}, options = {}) {
@@ -145,7 +190,7 @@ export function layout(entries, facets = {}, options = {}) {
   const names = FACETS.filter((facet) => facets[facet]?.length);
   const members = entries.map((entry) => Object.fromEntries(names.map((facet) => [facet, (entry[facet] ?? []).map((id) => facets[facet].indexOf(id)).filter((index) => index >= 0)])));
   const threadCount = facets.threads?.length ?? 0;
-  const sky = skyOf(entries, placed, options);
+  const sky = skyOf(entries, placed, { ...options, threads: facets.threads ?? [] });
   const positions = [];
   const groups = new Map();
   entries.forEach((_, i) => {
@@ -153,14 +198,15 @@ export function layout(entries, facets = {}, options = {}) {
     groups.set(key, [...(groups.get(key) ?? []), i]);
   });
   const sector = (Math.PI * 2) / Math.max(1, threadCount);
-  groups.forEach((indices) => {
-    const galaxy = sky.list[sky.periodOf[indices[0]]];
+  groups.forEach((group) => {
+    const galaxy = sky.list[sky.periodOf[group[0]]];
     const perUnit = (galaxy.end - galaxy.start) / (galaxy.radius * (1 - SKY.inner));
-    lanes(indices.map((i) => placed[i]), SKY.room * perUnit).forEach((lane, k) => {
-      const i = indices[k];
+    lanes(group.map((i) => placed[i]), SKY.room * perUnit).forEach((lane, k) => {
+      const i = group[k];
       const fraction = fractionIn(galaxy, placed[i]);
       const reach = galaxy.radius * (SKY.inner + (1 - SKY.inner) * fraction);
-      const offset = Math.max(-0.45 * sector, Math.min(0.45 * sector, (lane * SKY.room) / Math.max(reach, 2)));
+      const width = galaxy.arms?.[members[i].threads?.[0] ?? 0]?.width ?? sector;
+      const offset = Math.max(-0.45 * width, Math.min(0.45 * width, (lane * SKY.room) / Math.max(reach, 2)));
       positions[i] = galaxyPoint(galaxy, members[i].threads?.[0] ?? 0, threadCount, fraction, offset);
     });
   });
@@ -254,6 +300,17 @@ export function starfield({ count = SPACE.stars, random }) {
     out.size[i] = 1 + 1.2 * bright;
   }
   return out;
+}
+
+export const SHAPE = { stretch: 0.5, arms: 1 };
+
+export function shapeBy(galaxy, x, y) {
+  const axis = galaxy.axis;
+  if (!axis || axis.ratio === 1) return [x, y];
+  const [c, s, scale] = [Math.cos(axis.angle), Math.sin(axis.angle), Math.sqrt(axis.ratio)];
+  const u = (x * c + y * s) * scale;
+  const v = (-x * s + y * c) / scale;
+  return [u * c - v * s, u * s + v * c];
 }
 
 export const KINDS = ["personal", "professional", "product", "education"];
@@ -364,7 +421,7 @@ export function memories({ marks, sky, today, random, base = BUDGET.base, cap = 
       const galaxy = sky.list[galaxyOf(sky, year)];
       const core = random() < 0.14;
       const fraction = core ? random() * 0.2 : fractionIn(galaxy, year);
-      at = galaxyPoint(galaxy, thread, threadCount, fraction, gaussian(random) * sector * (core ? 1.2 : 0.14), gaussian(random) * (0.5 + 0.9 * busy));
+      at = galaxyPoint(galaxy, thread, threadCount, fraction, gaussian(random) * (galaxy.arms?.[Math.max(0, thread)]?.width ?? sector) * (core ? 1.2 : 0.14), gaussian(random) * (0.5 + 0.9 * busy));
     }
     for (const facet of names) out.facet[facet][i] = facet === "threads" ? thread : ahead ? Math.floor(random() * facets[facet].length) : assign(profiles[facet], year, random);
     write(i, at, at, unitsOf(year), 0.05 + random() * 0.07, ahead ? 1 : 0, 0, -1, ahead ? 1 : orderOf(sky, year));

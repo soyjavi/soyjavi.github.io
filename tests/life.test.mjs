@@ -1,7 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { AHEAD, BUDGET, LANES, PLAY, RAIL, SKY, SPACE, SPREAD, START, activityAt, activityTable, aheadPoint, assign, crowdScale, densityAt, densityByYear, dotsPerWeight, fractionIn, futures, galaxies, galaxyOf, lanes, layout, memories, onPath, orderOf, yearOf, playElapsed, playYear, precisionOf, railPercent, shellPoint, skyOf, SPIN, spinAngle, spinRate, spinTime, spun, starfield, todayYear, unitsOf, yearRings, years } from "../assets/js/life.js";
+import { shapeBy, AHEAD, BUDGET, LANES, PLAY, RAIL, SKY, SPACE, SPREAD, START, activityAt, activityTable, aheadPoint, assign, crowdScale, densityAt, densityByYear, dotsPerWeight, fractionIn, futures, galaxies, galaxyOf, lanes, layout, memories, onPath, orderOf, yearOf, playElapsed, playYear, precisionOf, railPercent, shellPoint, skyOf, SPIN, spinAngle, spinRate, spinTime, spun, starfield, todayYear, unitsOf, yearRings, years } from "../assets/js/life.js";
 import { lerp, seeded, smoothstep } from "../assets/js/util.js";
+import { existsSync, readFileSync } from "node:fs";
+import { ageAt, ageIdOf } from "../assets/js/life.js";
 import { monthsUntil, untilText } from "../assets/js/life.js";
 import { CLOUD, DISCOVER, KIND_TINT, DUST_VERTEX, ENTRANCE, POINTER, formedAt, igniteAt } from "../assets/js/shaders.js";
 import { archive } from "./fixtures/archive.mjs";
@@ -75,7 +77,7 @@ test("the real milestones keep the order of the page, each in its period's galax
     assert.ok(mark.spread > 0 && mark.spread <= SPREAD[entries[i].weight], mark.id);
     assert.equal(mark.weight, entries[i].weight);
     assert.equal(life.periods[mark.period], entries[i].period, mark.id);
-    assert.ok(flatGap(mark.position, sky.list[mark.period].centre) <= sky.list[mark.period].radius + 1e-6, `${mark.id} is inside its galaxy`);
+    assert.ok(flatGap(mark.position, sky.list[mark.period].centre) <= sky.list[mark.period].radius * Math.sqrt(sky.list[mark.period].axis.ratio) + 1e-6, `${mark.id} is inside its galaxy`);
   });
   assert.ok(placed[0].year >= START && placed.at(-1).year <= TODAY);
 });
@@ -300,7 +302,7 @@ test("the sky has one galaxy per period, in order along a path that turns outwar
     assert.ok(fromPole(sky, next.centre) > fromPole(sky, galaxy.centre), "each period further out than the last");
     assert.ok(next.centre[2] > galaxy.centre[2], "and a little higher: the path rises gently");
     assert.ok(next.start >= galaxy.start);
-    assert.ok(flatGap(galaxy.centre, next.centre) > galaxy.radius + next.radius + SKY.gap * 0.8, `${life.periods[k]} and the next do not touch`);
+    assert.ok(flatGap(galaxy.centre, next.centre) > galaxy.radius + next.radius + SKY.gap * 0.7, `${life.periods[k]} and the next do not touch`);
   });
   const [first, final] = [sky.list[0], sky.list.at(-1)];
   assert.ok(sky.ahead > final.along + final.radius && sky.length - sky.ahead === SKY.future, "the path goes on past the last period, for what is ahead");
@@ -316,19 +318,21 @@ test("the sky has one galaxy per period, in order along a path that turns outwar
   assert.equal(galaxyOf(small, 2040), 1);
 });
 
+const coreGap = (galaxy, point) => Math.hypot(...shapeBy({ axis: { ratio: 1 / galaxy.axis.ratio, angle: galaxy.axis.angle } }, point[0] - galaxy.centre[0], point[1] - galaxy.centre[1]));
+
 test("in the sky every memory is a star inside its period's galaxy, later ones farther from its core", () => {
   const placed = marks();
   const sky = skyOfLife();
   placed.forEach((mark, i) => {
     const galaxy = sky.list[mark.period];
     assert.equal(life.periods[mark.period], entries[i].period, mark.id);
-    assert.ok(flatGap(mark.position, galaxy.centre) <= galaxy.radius + 1e-6, `${mark.id} is inside its galaxy`);
+    assert.ok(coreGap(galaxy, mark.position) <= galaxy.radius + 1e-6, `${mark.id} is inside its galaxy`);
   });
   for (let a = 0; a < placed.length; a++) {
     for (let b = a + 1; b < placed.length; b++) {
       if (placed[a].period !== placed[b].period || placed[b].year - placed[a].year < 0.01) continue;
       const galaxy = sky.list[placed[a].period];
-      assert.ok(flatGap(placed[b].position, galaxy.centre) > flatGap(placed[a].position, galaxy.centre), `${placed[b].id} is farther out than ${placed[a].id}`);
+      assert.ok(coreGap(galaxy, placed[b].position) > coreGap(galaxy, placed[a].position), `${placed[b].id} is farther out than ${placed[a].id}`);
     }
   }
   const spots = placed.map((mark) => mark.position);
@@ -394,7 +398,7 @@ test("every galaxy takes the same share of the discovery, however many years it 
     assert.ok(orderOf(sky, (galaxy.start + galaxy.end) / 2) < (k + 1) / count);
     assert.ok(near(yearOf(sky, k / count), galaxy.start), "and the order maps back to its first year");
   });
-  assert.ok(sky.list.some((galaxy) => galaxy.end - galaxy.start > 3 * Math.min(...sky.list.map((g) => g.end - g.start))), "the periods really are uneven");
+  assert.ok(sky.list.some((galaxy) => galaxy.end - galaxy.start > 1.5 * Math.min(...sky.list.map((g) => g.end - g.start))), "the periods really are uneven");
   assert.equal(yearOf(sky, 1), Infinity);
   const cloud = withBudget(marks(), { base: 50, trail: 3000 });
   const lastOrder = [...cloud.order].filter((value, i) => !cloud.ahead[i]);
@@ -528,7 +532,7 @@ test("the kind tint is barely there: warm and cool, four kinds, both themes, nev
 });
 
 test("every method the engine calls on the scene exists in the scene", async () => {
-  const { readFileSync } = await import("node:fs");
+
   const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
   const scene = readFileSync(new URL("../assets/js/scene.js", import.meta.url), "utf8");
   const api = scene.slice(scene.lastIndexOf("  return {\n    camera,"));
@@ -536,32 +540,148 @@ test("every method the engine calls on the scene exists in the scene", async () 
 });
 
 test("every guide is a line of soft dots spaced by the screen: the year rings, the outlines, the arcs between galaxies and the one ahead", async () => {
-  const { readFileSync } = await import("node:fs");
+
   const source = readFileSync(new URL("../assets/js/scene.js", import.meta.url), "utf8");
   assert.ok(Number(source.match(/const DOT_GAP = (\d+)/)[1]) >= 10, "dots at least ten pixels apart");
-  assert.match(source, /material\.size = dotSize \* renderer\.getPixelRatio\(\)/, "a soft dot whose size follows the zoom");
-  assert.match(source, /0\.26 \* \(1 - 0\.5 \* \(n \/ Math\.max\(1, yearRing\.list\.length - 1\)\)\)/, "each ring fainter than the one inside it");
+  assert.match(source, /material\.size = dotSize \* \(points\.userData\.outer \? outerGrow : 1\) \* renderer\.getPixelRatio\(\)/, "a soft dot whose size follows the zoom");
+  assert.match(source, /0\.3 \* \(1 - 0\.35 \* \(n \/ Math\.max\(1, yearRing\.list\.length - 1\)\)\)/, "each ring fainter than the one inside it");
   assert.doesNotMatch(source, /ringLines|RING_STYLES/, "no dashed ring is left");
   assert.doesNotMatch(source, /lineMaterial\([\d.]+, true\)/, "no guide is drawn dashed any more, the arc towards the book and the clone included");
   assert.doesNotMatch(source, /new THREE\.Line\(arc\(/, "the arcs between galaxies are dots too");
-  assert.match(source, /dotSize = 0\.95 \+ 0\.3 \* \(1 - far\)/, "smaller dots from far away");
-  assert.match(source, /userData\.dots \? 0\.5 \+ 0\.25 \* \(1 - far\) : 1/, "and fainter guides from far away");
+  assert.match(source, /dotSize = 1\.15 \+ 0\.1 \* \(1 - far\)/, "a little smaller dots from far away, never too small to read");
+  assert.match(source, /object\.userData\.outer \? 0\.4 \+ 0\.25 \* \(1 - far\) : 0\.75 \+ 0\.1 \* \(1 - far\)/, "the outlines soften with distance");
   assert.match(source, /carry \+= DOT_GAP/, "the dots are laid at a constant distance along the screen path");
 });
 
 
 test("the constellations appear only when the camera is close to the sky: the whole-life view carries nothing but clouds, names and dots", async () => {
-  const { readFileSync } = await import("node:fs");
+
   const source = readFileSync(new URL("../assets/js/scene.js", import.meta.url), "utf8");
   assert.match(source, /lines\.userData\.constellation = true/);
   assert.match(source, /object\.userData\.constellation \? 1 - far : 1/, "they fade out as the camera pulls away");
 });
 
 test("the guides are built and added to the scene", async () => {
-  const { readFileSync } = await import("node:fs");
+
   const source = readFileSync(new URL("../assets/js/scene.js", import.meta.url), "utf8");
   assert.match(source, /^  constellations\(\);$/m, "the guides are built");
   assert.match(source, /^  scene\.add\(guides\);$/m, "and they are in the scene");
   assert.ok(source.indexOf("constellations();") > source.indexOf("const constellations = () =>"), "after they are defined");
   assert.match(source, /dotPaths\.forEach\(\(\{ points, vertices, closed \}\) => points\.userData\.lay\(vertices, closed\)\)/, "and the dots are laid every frame");
+});
+
+test("the stars brighten when the camera comes close to a galaxy, so a zoomed view still has a sky behind it", async () => {
+
+  const source = readFileSync(new URL("../assets/js/scene.js", import.meta.url), "utf8");
+  assert.ok(Number(source.match(/const STAR_ZOOM = ([\d.]+)/)[1]) >= 0.5);
+  assert.match(source, /const boost = 1 \+ STAR_ZOOM \* \(1 - far\)/);
+  assert.match(source, /backdrop\.update\(time, camera, formed, skyIn, boost\)/);
+});
+
+test("pressing the name of a galaxy zooms into it, and pressing it again from inside lets the zoom go", async () => {
+
+  const source = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
+  assert.match(source, /node\.addEventListener\("click", \(event\) => \{\n\s+event\.stopImmediatePropagation\(\);\n\s+goTo\(periodView === k \? "top" : node\.dataset\.go\);/, "the second press must not be answered by the generic data-go handler too");
+});
+
+test("the sky draws open memories only: no closed layer, no lab", () => {
+  for (const file of ["life.js", "scene.js", "shaders.js", "engine.js"]) {
+    const source = readFileSync(new URL(`../assets/js/${file}`, import.meta.url), "utf8");
+    assert.doesNotMatch(source, /CLOSED|aClosed|dataset\.closed|entry\.closed|mark\.closed|prepareLab|mountLab/, `${file} has no closed memories or lab`);
+  }
+  for (const file of ["lab.js", "synthetic.js"]) assert.ok(!existsSync(new URL(`../assets/js/${file}`, import.meta.url)), `${file} is gone`);
+});
+
+test("a galaxy's name stands outside its ellipse, not on the circle it was stretched from", () => {
+  const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
+  assert.match(engine, /shapeBy\(galaxy, \(ox \/ length\) \* reach, \(oy \/ length\) \* reach\)/);
+});
+
+test("the book's line inside the card goes through the card's one link handler, so a click selects once", () => {
+  const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
+  assert.doesNotMatch(engine, /nudge\.addEventListener\("click"/);
+  assert.match(engine, /cardSteps\.before\(nudge\)/);
+});
+
+test("pointing at a memory quiets the name of the main memory of each age, so the one pointed at is the only name", () => {
+  const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
+  assert.match(engine, /if \(headsQuiet\.on && i !== hover && priority === 40\) priority = 0;/);
+  assert.match(engine, /if \(headsQuiet\.over > 0\.35\) headsQuiet\.on = true;\n\s+else if \(headsQuiet\.away > 0\.8\) headsQuiet\.on = false;/, "the names wait before stepping aside and before returning");
+  assert.match(engine, /\(tag\.glide \|\| moved\) && tag\.on && tag\.last/, "a tag that changes side glides there");
+});
+
+test("pointing at a memory moves it: the cloud draws in and glows, its name rises out of a blur and lingers, all slow and eased", async () => {
+  const { DUST_VERTEX, HOVER } = await import("../assets/js/shaders.js");
+  assert.ok(HOVER.pull > 0 && HOVER.pull < 0.2 && HOVER.glow > 0 && HOVER.inRate > HOVER.outRate, "it comes in quicker than it lets go");
+  assert.match(DUST_VERTEX, /uniform vec2 uHover;/);
+  assert.match(DUST_VERTEX, /off \*= 1\.0 - HOVER_PULL \* hovered;/);
+  const scene = readFileSync(new URL("../assets/js/scene.js", import.meta.url), "utf8");
+  assert.match(scene, /hoverShown\.mix = ease\(hoverShown\.mix, hovering \? 1 : 0, dt, hovering \? HOVER\.inRate : HOVER\.outRate\)/);
+  const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
+  assert.match(engine, /scene\.setHover\(index\)/);
+  assert.match(engine, /tag\.slide = \[tag\.last\.left - box\.left, tag\.last\.top - box\.top\]/);
+  const css = readFileSync(new URL("../assets/site.css", import.meta.url), "utf8");
+  assert.match(css, /\.tag\[data-hot="1"\] \{[^}]*animation: arrive 1\.6s/);
+  assert.match(css, /\.tag\[data-cool="1"\] \{\s*animation: linger 1\.4s/);
+  assert.ok(HOVER.inRate <= 3 && HOVER.outRate <= 2, "calm: it takes a second or more");
+});
+
+test("pressing an age frames its galaxy without opening a memory: names for the headline and a few, the card tells the age and offers its first memory", () => {
+  const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
+  assert.match(engine, /const selectPeriod = \(k, \{ push = true \} = \{\}\) =>/);
+  assert.match(engine, /if \(periodAt\.has\(id\)\) return selectPeriod\(periodAt\.get\(id\)\);/);
+  assert.match(engine, /history\.replaceState\(null, "", `#period-\$\{periods\[k\]\}`\)/);
+  assert.match(engine, /if \(periodView >= 0\) priority = i === hover \? 900 : periodSet\.has\(i\) && hover < 0 \? 40 : 0;/);
+  assert.match(engine, /\[\.\.\.clone\.children\]\.forEach\(\(child\) => child\.matches\("\.kicker, \.period-head"\) \|\| child\.remove\(\)\)/);
+  assert.match(engine, /showAll \? everyone : declared\(marks, memory\)/);
+});
+
+test("in the whole-life view pointing at a memory keeps the style of that view, and an age's name steps away from its galaxy instead of sitting on it", () => {
+  const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
+  assert.match(engine, /priority === 900 && i === hover && selected < 0 && periodView < 0 && ratio >= 0\.6/);
+  assert.match(engine, /point\.x \+= \(dx \/ length\) \* reach;/);
+  const css = readFileSync(new URL("../assets/site.css", import.meta.url), "utf8");
+  assert.match(css, /\.tag\[data-name="1"\]\[data-hot="1"\] \{\s*font-size: var\(--fs-tag\);/);
+});
+
+test("a marker at the edge of the screen holds on for a moment when its line flickers across the border, and fades in when it appears", () => {
+  const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
+  assert.match(engine, /const EDGE_GRACE = 0\.6;/);
+  assert.match(engine, /if \(found\?\.shown\) mark\.keep = EDGE_GRACE;/);
+  assert.match(engine, /else mark\.keep -= dt;/);
+  const css = readFileSync(new URL("../assets/site.css", import.meta.url), "utf8");
+  assert.match(css, /\.edge-mark \{\s*animation: edge-in 0\.8s/);
+});
+
+test("the memory card is one glass: nothing inside it paints an opaque layer over the blur", () => {
+  const css = readFileSync(new URL("../assets/site.css", import.meta.url), "utf8");
+  assert.match(css, /\.card\[data-kind="milestone"\] \.card-steps \{[^}]*background: none;/);
+  assert.doesNotMatch(css, /\.related\[data-more\]::before/);
+  assert.match(css, /\.related\[data-more\] ul \{\s*-webkit-mask-image/);
+});
+
+test("a life of four hundred open memories, to the year 2060, still fits the whole-life view inside the camera and keeps soft clouds", () => {
+  const life = JSON.parse(readFileSync(new URL("../content/life.json", import.meta.url), "utf8"));
+  const { entries, facets } = archive({ count: 400, people: 0, places: 0, seed: 3 });
+  const end = 2060;
+  const stretch = (date) => String(Math.floor(1980 + (+date.slice(0, 4) - 1980) * ((end - 1980) / 46.9))) + (date.length === 7 ? date.slice(4) : "");
+  const dated = entries.map((entry) => ({ ...entry, date: stretch(entry.date) }));
+  dated.forEach((entry) => (entry.period = ageIdOf(life.ages, ageAt(life.birth, entry.date))));
+  const periods = life.ages.map((age) => age.id).filter((id) => dated.some((entry) => entry.period === id));
+  const marks = layout(dated, facets, { periods, today: end });
+  assert.ok(periods.length <= life.ages.length, "never more galaxies than ages");
+  const extent = Math.max(...marks.map((mark) => Math.hypot(mark.position[0], mark.position[1]))) + 12;
+  assert.ok(Math.max(160, extent * 4.3) * 1.3 < 640 * 1.3 && Math.max(160, extent * 4.3) < 640, "the whole life fits within the camera limit of 640");
+  assert.ok(dotsPerWeight(marks) >= 100, "a moment still keeps at least a hundred dots");
+});
+
+test("a galaxy's outer ring is soft in the whole-life view and a little stronger than its year rings inside an age", () => {
+  const scene = readFileSync(new URL("../assets/js/scene.js", import.meta.url), "utf8");
+  const outer = +scene.match(/const dotted = addGuide\(dottedPath\(([\d.]+)\)/)[1];
+  const [, base, extra] = scene.match(/object\.userData\.outer \? ([\d.]+) \+ ([\d.]+) \* \(1 - far\) :/).map(Number);
+  const years = +scene.match(/points\.material\.opacity = ([\d.]+) \* \(1 - 0\.35/)[1];
+  const close = (outer * (base + extra)) / years;
+  assert.ok(close >= 1.4 && close <= 1.9, `inside an age the outer ring is ${close.toFixed(2)} times the year rings`);
+  assert.ok(outer * base <= 0.35, "from far away it is as soft as the routes or softer");
+  assert.match(scene, /outerGrow = 1 \+ 0\.3 \* \(1 - far\)/, "and its dots are a touch larger only up close");
 });

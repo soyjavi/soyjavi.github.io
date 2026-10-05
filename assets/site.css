@@ -128,10 +128,6 @@ button.ask-q[aria-pressed="true"] {
   gap: 4px 24px;
 }
 
-.cue {
-  display: none;
-}
-
 .period {
   min-height: 0;
   padding: 0;
@@ -558,9 +554,7 @@ ul.facets {
 }
 
 .card[data-fit="2"] .stats,
-.card[data-fit="2"] .cue,
-.card[data-fit="3"] .stats,
-.card[data-fit="3"] .cue {
+.card[data-fit="3"] .stats {
   display: none;
 }
 
@@ -698,12 +692,55 @@ ul.facets {
   font-size: var(--fs-heading-sm);
 }
 
+.period-start {
+  justify-self: start;
+  margin: 8px 0 0;
+  padding: 12px 22px;
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--bg);
+  background: var(--fg);
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.period-start:hover {
+  background: var(--soft);
+}
+
+.card .period-facts {
+  color: var(--muted);
+}
+
 .card .stats {
   color: var(--muted);
 }
 
-.card .cue {
-  display: block;
+.card .waitlist label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.card-body > div > p.note,
+[data-panel="clone"] > p.note {
+  padding-left: 12px;
+  font-size: var(--fs-small);
+  color: var(--soft);
+  border-left: 2px solid var(--fg);
+}
+
+.reach {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 24px;
 }
 
 .card .proof {
@@ -735,13 +772,61 @@ ul.facets {
 }
 
 .card .facets {
-  margin-top: 2px;
-  gap: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  margin-top: -8px;
+  gap: 2px 14px;
 }
 
-.chip {
-  border: 1px solid var(--line);
-  padding: 6px 10px;
+.card .facets::before {
+  content: attr(data-label);
+  flex: none;
+  min-width: 54px;
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.card .facets[data-facet="people"] {
+  order: 1;
+}
+
+.card .facets[data-facet="places"] {
+  order: 2;
+}
+
+.card .facets[data-facet="threads"] {
+  order: 3;
+}
+
+.card .related {
+  order: 4;
+}
+
+.card .chip {
+  padding: 4px 0;
+  font-family: var(--sans);
+  font-size: var(--fs-small);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--soft);
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 5px;
+}
+
+.card .chip:hover {
+  text-decoration-color: var(--fg);
+}
+
+.card .chip[aria-pressed="true"] {
+  color: var(--fg);
+  background: none;
+  text-decoration-color: var(--fg);
+  text-decoration-thickness: 2px;
 }
 
 .related {
@@ -877,10 +962,6 @@ ul.facets {
   color: var(--fg);
 }
 
-.card[data-collapsed="1"] .facets ~ .facets {
-  display: none;
-}
-
 .expander {
   align-self: flex-start;
   margin-top: 8px;
@@ -907,6 +988,16 @@ ul.facets {
 
 .expander[aria-expanded="true"]::after {
   content: " ▴";
+}
+
+.edge-mark {
+  animation: edge-in 0.8s var(--ease);
+}
+
+@keyframes edge-in {
+  from {
+    opacity: 0;
+  }
 }
 
 .edge-mark[hidden] {
@@ -941,11 +1032,23 @@ ul.facets {
   display: none;
 }
 
-.immersive .card[data-kind="milestone"] {
+.immersive .card[data-kind="milestone"],
+.immersive .card[data-kind="period"] {
   display: flex;
   flex-direction: column;
   height: calc(100vh - 206px);
   overflow: hidden;
+}
+
+.card[data-kind="period"] .card-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.card[data-kind="period"] .card-steps {
+  position: static;
+  margin-top: auto;
 }
 
 .card[data-kind="milestone"] .card-body {
@@ -963,26 +1066,22 @@ ul.facets {
   min-height: 0;
 }
 
+.card[data-kind="milestone"] .card-body > li > * {
+  flex-shrink: 0;
+}
+
 .card[data-kind="milestone"] .related {
   display: flex;
-  flex: 1;
   flex-direction: column;
-  min-height: 140px;
 }
 
 .card[data-kind="milestone"] .related {
   position: relative;
 }
 
-.related[data-more]::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 44px;
-  background: linear-gradient(to top, var(--bg) 20%, transparent);
-  pointer-events: none;
+.related[data-more] ul {
+  -webkit-mask-image: linear-gradient(to bottom, var(--fg) calc(100% - 44px), transparent);
+  mask-image: linear-gradient(to bottom, var(--fg) calc(100% - 44px), transparent);
 }
 
 .related[data-more]::after {
@@ -999,8 +1098,7 @@ ul.facets {
 }
 
 .card[data-kind="milestone"] .related ul {
-  flex: 1;
-  min-height: 0;
+  max-height: 190px;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -1008,6 +1106,7 @@ ul.facets {
 .card[data-kind="milestone"] .card-steps {
   position: static;
   margin-top: auto;
+  background: none;
 }
 
 .step {
@@ -1100,10 +1199,32 @@ ul.facets {
   font-style: italic;
 }
 
+.tag[data-name="1"][data-hot="1"] {
+  font-size: var(--fs-tag);
+}
+
 .tag[data-hot="1"] {
   font-size: var(--fs-hot);
   color: var(--fg);
-  animation: drift 7s ease-in-out infinite;
+  animation: arrive 1.6s var(--ease), drift 7s ease-in-out infinite;
+}
+
+.tag[data-cool="1"] {
+  animation: linger 1.4s var(--ease);
+}
+
+@keyframes arrive {
+  from {
+    opacity: 0.25;
+    filter: blur(3px);
+  }
+}
+
+@keyframes linger {
+  from {
+    opacity: 0.45;
+    filter: blur(2px);
+  }
 }
 
 @keyframes drift {
@@ -1588,10 +1709,6 @@ html:not(.immersive) .masthead {
     font-size: var(--fs-text);
   }
 
-  .card .cue {
-    display: none;
-  }
-
   .tag {
     font-size: var(--fs-tag-phone);
   }
@@ -1958,19 +2075,17 @@ html[data-focus="1"] .edge-mark {
 }
 
 .nudge {
-  position: fixed;
-  z-index: 26;
+  flex: none;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 4px;
-  padding: 0 0 0 12px;
+  margin: 12px 0 0;
   font-family: var(--mono);
   font-size: var(--fs-label);
   letter-spacing: var(--track-label);
   text-transform: uppercase;
   color: var(--soft);
-  background: color-mix(in srgb, var(--bg) 90%, transparent);
-  border: 1px solid var(--line);
 }
 
 .nudge[hidden] {
@@ -1978,7 +2093,7 @@ html[data-focus="1"] .edge-mark {
 }
 
 .nudge a {
-  padding: 10px 0;
+  padding: 8px 0;
   color: inherit;
   text-underline-offset: 4px;
 }
@@ -2006,7 +2121,7 @@ html[data-focus="1"] .nudge {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 22px 0 0;
+  margin: 0;
   color: var(--soft);
 }
 
@@ -2059,8 +2174,7 @@ html[data-entering="out"] body > :not(.stage):not(.seed):not(script) {
 @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
   .immersive .card,
   .immersive .explore .guide,
-  .finder,
-  .nudge {
+  .finder {
     background: color-mix(in srgb, var(--bg) 62%, transparent);
     -webkit-backdrop-filter: blur(22px);
     backdrop-filter: blur(22px);

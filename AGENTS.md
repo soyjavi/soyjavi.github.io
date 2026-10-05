@@ -1,7 +1,7 @@
 # soyjavi.com — agent instructions
 
 The personal site of Javi (@soyjavi): one immersive three.js space where a life from 1980 to today is a cloud of dots per
-memory, gathered into a galaxy per period of the life and explored freely, with two rings ahead for a book for his
+memory, gathered into a galaxy per age of the life and explored freely, with two rings ahead for a book for his
 children and his clone, each with its own waitlist. It is not a portfolio and has no blog: it
 shows a life and sells those two things. English and Spanish, light and dark, static, no tracking. These are the rules for working on it. Personal rules of the creator live in
 `~/.claude/CLAUDE.md` and apply on top.
@@ -66,7 +66,7 @@ Rules of the loop:
 - Copy lives in `content/`, never in templates or the engine. A new key goes into `en.json` and `es.json` in the same
   change; a memory is one file in `content/memories/` with both languages. Archives are imported with `npm run import`, which only writes entries marked public.
 - Generated files are never edited by hand: `index.html`, `es/`, `404.html`, `sitemap.xml`, `robots.txt`,
-  `assets/site.js`, `assets/brand/*.svg`, `favicon.svg` and the two PNG icons (`npm run brand` rewrites them from the font). The sources are `content/`, `src/`, `assets/js/` and `tools/build.mjs`; `npm run build` rewrites
+  `assets/site.js`, `assets/brand/*.svg`, `favicon.svg`, the two PNG icons (`npm run brand` rewrites them from the font) and the sky figure of the brand page (`npm run figure`). The sources are `content/`, `src/`, `assets/js/` and `tools/build.mjs`; `npm run build` rewrites
   `es/` entirely.
 - The page is HTML first. Every station is a real element with `data-station` and every panel a `data-panel`; the
   engine reads them (with the threads, people, places and links of each memory) and clones the panel into the card, so
@@ -111,7 +111,7 @@ no ROADMAP entry or is malformed.
 ## Product decisions (non-negotiable)
 
 - The site is a life, not a résumé, and it is explored, not scrolled: a soft cloud of dots for each memory (not a sharp
-  point) from 1980 to today, a free camera, one galaxy per period of the life, threads, people and places as filters,
+  point) from 1980 to today, a free camera, one galaxy per age of the life, threads, people and places as filters,
   and what a memory is related to lit when it is open. Two hollow rings
   ahead are the book and the clone. The form is clear and the memories are diffuse; the name is never spelled with dots.
   Nothing is only reachable in order: clicking, the rail, the finder, Surprise me, related memories and the keyboard
@@ -125,12 +125,19 @@ no ROADMAP entry or is malformed.
   stays in English. A choice made with the language switch is remembered and wins; a direct link to `/es/` or to any
   other page is never redirected.
 - Static hosting on GitHub Pages at www.soyjavi.com (`CNAME`). No server code, no build step on the host.
-- This repository is public. A life milestone enters it only after the creator has approved it as public, written as
-  public text with only the date precision he allows: here a year or a month, never a day. Everything he has not
-  approved stays in his own archive and never enters the repository, its history, a test, a fixture or a doc, and no
-  document here names what is held back. People, his children included, appear by their own names, as in his archive:
-  names are not private. No person carries a day or a photo unless he decides otherwise, and the clone is named publicly
-  only as he says. Who took part in a public memory may come from his archive; nothing else private does.
+- This repository is public and everything in it can be read: there is one zone, not two. Only open memories enter, after the creator has approved each as public, written as public text with only the date
+  precision he allows (a year or a month, never a day). A memory he keeps private is not in the repository in any form,
+  not even as a stub, and no test, fixture or document names what is held back; at most a count of how many are closed
+  per age may be public, if he decides to show it. The sky draws open memories only. A family-only edition is another project outside this
+  repository, never a zone inside it. People, his children included, appear by their own names in open memories, as in
+  his archive: names are not private. No person carries a day or a photo unless he decides otherwise, and the clone is
+  named publicly only as he says.
+- A galaxy is an age of his life, never a tag: the seven ages of a person (Hippocrates, Ptolemy and Shakespeare's seven;
+  the cuts every tradition shares), cut at 7, 14, 25, 40, 55 and 70 from his birth (`birth` and `ages` in
+  `content/life.json`). A memory file has no `period`: its age on its date decides its galaxy, and only the ages he has
+  lived and remembered are drawn. The names and intros of the ages are copy in both dictionaries (`ages`). The reasons,
+  the cuts and the names are in README ("The seven ages") and on the brand page; change them there and in
+  `content/life.json` together, then run `npm run build` and `npm run figure`.
 - The site is not a portfolio and has no blog, writing section or feed. It shows a life and sells two things: the book
   and the clone. Contact is the email address and X, nothing else (no GitHub, no companies).
 - The book and the clone are announced and each has its own waitlist, but the repository carries no title, blurb, cover or

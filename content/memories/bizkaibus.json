@@ -3,7 +3,6 @@
   "approx": true,
   "kind": "product",
   "weight": 1,
-  "period": "craft",
   "threads": [
     "craft",
     "ventures"

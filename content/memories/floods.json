@@ -3,7 +3,6 @@
   "kind": "personal",
   "quiet": true,
   "weight": 1,
-  "period": "home",
   "threads": [
     "home",
     "family"

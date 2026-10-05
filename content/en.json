@@ -8,7 +8,6 @@
   "ui": {
     "skip": "Skip to content",
     "lockup": { "book": "by", "clone": "with" },
-    "hint": "Drag to explore · scroll or pinch to zoom",
     "switchLabel": "Español",
     "navLabel": "Sections",
     "nav": {
@@ -63,11 +62,14 @@
       "nudgebook": "Hear about the book →",
       "nudgeclone": "Hear about my clone →",
       "nudgeclose": "Close",
+      "periodstart": "Start with {title}",
+      "with": "With",
+      "at": "At",
+      "about": "About",
       "menu": "More"
     },
     "count": {
       "memories": "{n} memories",
-      "threads": "{n} threads",
       "people": "{n} people",
       "places": "{n} places"
     },
@@ -75,7 +77,7 @@
       "title": "How to read this sky",
       "button": "How to read this sky",
       "cloud": "A cloud is a memory; the bigger it is, the more it changed",
-      "galaxy": "A dotted circle is a period of my life; time runs from its core to its rim",
+      "galaxy": "A dotted circle is one age of my life, cut at {ages}; time runs from its core to its rim",
       "line": "A line joins related memories",
       "ring": "A hollow ring is still ahead: the book and my clone",
       "today": "Today",
@@ -96,42 +98,47 @@
   "hero": {
     "kicker": "javi · 1980 – today",
     "title": "A life, <em>in milestones.</em>",
-    "lede": "I'm Javi. This is my life from 1980 to today: a cloud of dots per memory, a galaxy per stage. Explore it as you like. Ahead: a book for my children, and my clone, for those who want to keep talking with me.",
+    "lede": "I'm Javi. This is my life from 1980 to today: a cloud of dots per memory, a galaxy per age. Explore it as you like. Ahead: a book for my children, and my clone, for those who want to keep talking with me.",
     "primary": "Join the book's waitlist",
     "secondary": "Travel through it",
     "clone": "About my clone →",
     "region": "Join the book's waitlist"
   },
-  "periods": {
-    "origins": {
-      "kicker": "01 / Origins · 1980–1994",
-      "title": "A Basque <em>childhood.</em>",
-      "intro": "A farmhouse, a flat, the mountains at weekends and camping in summer."
+  "ages": {
+    "early": {
+      "name": "Early years",
+      "title": "Early <em>years.</em>",
+      "intro": "From birth to the day I turned seven."
     },
-    "craft": {
-      "kicker": "02 / The craft · 2001–2011",
-      "title": "Learning <em>the trade.</em>",
-      "intro": "Corporate teams first, then the web, then open source."
+    "school": {
+      "name": "School years",
+      "title": "School <em>years.</em>",
+      "intro": "From seven to fourteen."
     },
-    "tapquo": {
-      "kicker": "03 / TapQuo · 2011–2015",
-      "title": "A startup, a classroom <em>and a plane.</em>",
-      "intro": "I found a company, teach, write a book and leave Spain."
+    "youth": {
+      "name": "Youth",
+      "title": "<em>Youth.</em>",
+      "intro": "From fourteen to twenty-five."
     },
-    "remote": {
-      "kicker": "04 / Remote · 2015–2019",
-      "title": "Working from <em>anywhere.</em>",
-      "intro": "Remote before it was fashionable: teams, books, blockchain and a new habit."
+    "building": {
+      "name": "Building a life",
+      "title": "Building <em>a life.</em>",
+      "intro": "From twenty-five to forty."
     },
-    "home": {
-      "kicker": "05 / Home · 2020–2024",
-      "title": "A company, <em>a family, a house.</em>",
-      "intro": "Satoshi, two children and a house I built."
+    "midlife": {
+      "name": "Midlife",
+      "title": "<em>Midlife.</em>",
+      "intro": "From forty to fifty-five."
     },
-    "now": {
-      "kicker": "06 / Now · 2025–2026",
-      "title": "Where <em>I am.</em>",
-      "intro": "Still working out what I want to teach."
+    "elder": {
+      "name": "Elder years",
+      "title": "Elder <em>years.</em>",
+      "intro": "From fifty-five to seventy."
+    },
+    "later": {
+      "name": "Later life",
+      "title": "Later <em>life.</em>",
+      "intro": "From seventy on."
     }
   },
   "book": {

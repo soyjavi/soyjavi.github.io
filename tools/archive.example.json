@@ -1,26 +1,33 @@
 {
-  "periods": [
+  "threads": [
     {
-      "id": "early",
-      "en": { "kicker": "01 / Early years · 1980–1994", "title": "A title for the first stage.", "intro": "One or two sentences that introduce the stage, in the first person." },
-      "es": { "kicker": "01 / Primeros años · 1980–1994", "title": "Un título para la primera etapa.", "intro": "Una o dos frases que presentan la etapa, en primera persona." }
+      "id": "family",
+      "en": "Family",
+      "es": "Familia"
     },
     {
-      "id": "later",
-      "en": { "kicker": "02 / Later · 1995–today", "title": "A title for the second stage.", "intro": "One or two sentences that introduce the stage." },
-      "es": { "kicker": "02 / Después · 1995–hoy", "title": "Un título para la segunda etapa.", "intro": "Una o dos frases que presentan la etapa." }
+      "id": "work",
+      "en": "Work",
+      "es": "Trabajo"
     }
   ],
-  "threads": [
-    { "id": "family", "en": "Family", "es": "Familia" },
-    { "id": "work", "en": "Work", "es": "Trabajo" }
-  ],
-  "ahead": { "book": "family", "clone": "work" },
+  "ahead": {
+    "book": "family",
+    "clone": "work"
+  },
   "people": {
-    "a-person": { "public": true, "en": "Name", "es": "Nombre" }
+    "a-person": {
+      "public": true,
+      "en": "Name",
+      "es": "Nombre"
+    }
   },
   "places": {
-    "a-place": { "public": true, "en": "Place", "es": "Lugar" }
+    "a-place": {
+      "public": true,
+      "en": "Place",
+      "es": "Lugar"
+    }
   },
   "memories": [
     {
@@ -30,13 +37,26 @@
       "approx": false,
       "kind": "personal",
       "weight": 2,
-      "period": "early",
-      "threads": ["family"],
-      "people": ["a-person"],
-      "places": ["a-place"],
-      "links": ["second-memory"],
-      "en": { "title": "Title of the first memory", "body": "First person, one to three sentences, under 260 characters." },
-      "es": { "title": "Título del primer recuerdo", "body": "En primera persona, de una a tres frases, menos de 260 caracteres." }
+      "threads": [
+        "family"
+      ],
+      "people": [
+        "a-person"
+      ],
+      "places": [
+        "a-place"
+      ],
+      "links": [
+        "second-memory"
+      ],
+      "en": {
+        "title": "Title of the first memory",
+        "body": "First person, a short paragraph of one to six sentences, under 600 characters."
+      },
+      "es": {
+        "title": "Título del primer recuerdo",
+        "body": "En primera persona, un párrafo corto de una a seis frases, menos de 600 caracteres."
+      }
     },
     {
       "id": "second-memory",
@@ -45,11 +65,21 @@
       "approx": true,
       "kind": "professional",
       "weight": 3,
-      "period": "later",
-      "threads": ["work", "family"],
-      "links": ["first-memory"],
-      "en": { "title": "Title of the second memory", "body": "A year is enough when the month is unknown." },
-      "es": { "title": "Título del segundo recuerdo", "body": "Basta con el año cuando no se sabe el mes." }
+      "threads": [
+        "work",
+        "family"
+      ],
+      "links": [
+        "first-memory"
+      ],
+      "en": {
+        "title": "Title of the second memory",
+        "body": "A year is enough when the month is unknown."
+      },
+      "es": {
+        "title": "Título del segundo recuerdo",
+        "body": "Basta con el año cuando no se sabe el mes."
+      }
     },
     {
       "id": "kept-private",
@@ -57,11 +87,18 @@
       "date": "1999-05",
       "kind": "personal",
       "weight": 1,
-      "period": "early",
-      "threads": ["family"],
+      "threads": [
+        "family"
+      ],
       "note": "Anything without \"public\": true is left out of the site, and any extra key like this one is ignored.",
-      "en": { "title": "Never written to the repository", "body": "Only entries marked public are imported." },
-      "es": { "title": "Nunca se escribe en el repositorio", "body": "Solo se importan las entradas marcadas como públicas." }
+      "en": {
+        "title": "Never written to the repository",
+        "body": "Only entries marked public are imported."
+      },
+      "es": {
+        "title": "Nunca se escribe en el repositorio",
+        "body": "Solo se importan las entradas marcadas como públicas."
+      }
     }
   ]
 }

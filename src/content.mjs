@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { precisionOf, years } from "../assets/js/life.js";
+import { ageAt, ageIdOf, precisionOf, timeOfDate, years } from "../assets/js/life.js";
 
 export const LANGS = ["en", "es"];
 export const KINDS = ["personal", "professional", "product", "education"];
@@ -40,12 +40,36 @@ export function loadContent(dir = CONTENT) {
     if (!question.id || !question.memories?.length || question.memories.some((id) => !known.has(id))) throw new Error(`content/questions.json: "${question.id}" needs memories that exist`);
     for (const lang of LANGS) if (!question[lang]) throw new Error(`content/questions.json: "${question.id}" needs "${lang}"`);
   }
-  const life = { ...json("life.json"), milestones: memories.map(({ en, es, order, ...entry }) => entry), questions: questions.map(({ id, memories: ids }) => ({ id, memories: ids })) };
+  const base = json("life.json");
+  if (!precisionOf(String(base.birth))) throw new Error(`content/life.json: birth "${base.birth}" must be YYYY or YYYY-MM`);
+  if (base.totals !== undefined && (typeof base.totals !== "object" || base.totals === null || Array.isArray(base.totals))) throw new Error("content/life.json: totals must be an object");
+  for (const [key, n] of Object.entries(base.totals ?? {})) if (!["memories", "people", "places"].includes(key) || !Number.isInteger(n) || n < 0) throw new Error(`content/life.json: totals.${key} must be one of memories, people, places and a whole number`);
+  if (!Array.isArray(base.ages) || base.ages[0]?.from !== 0 || base.ages.some((stage, i) => !/^[a-z0-9-]+$/.test(stage.id ?? "") || !Number.isFinite(stage.from) || (i && stage.from <= base.ages[i - 1].from))) throw new Error("content/life.json: ages must start at 0, rise, and have slug ids");
+  for (const memory of memories) {
+    const age = ageAt(base.birth, String(memory.date));
+    if (age < 0) throw new Error(`content/memories/${memory.id}.json: dated before his birth`);
+    memory.period = ageIdOf(base.ages, age);
+  }
+  const periodIds = base.ages.map((stage) => stage.id).filter((id) => memories.some((memory) => memory.period === id));
+  const life = { ...base, periods: periodIds, milestones: memories.map(({ en, es, order, ...entry }) => entry), questions: questions.map(({ id, memories: ids }) => ({ id, memories: ids })) };
   for (const [facet, table] of Object.entries(facets)) if (Object.keys(table).length) life[facet] = Object.keys(table);
   const dict = Object.fromEntries(
     LANGS.map((lang) => {
       const words = { ...json(`${lang}.json`), life: Object.fromEntries(memories.map((memory) => [memory.id, memory[lang]])), asks: Object.fromEntries(questions.map((question) => [question.id, question[lang]])) };
       for (const [facet, table] of Object.entries(facets)) if (Object.keys(table).length) words[facet] = namesIn(table, lang);
+      words.periods = Object.fromEntries(
+        periodIds.map((id, k) => {
+          const copy = words.ages?.[id];
+          if (!copy?.name || !copy.title || !copy.intro) throw new Error(`content/${lang}.json: ages.${id} needs a name, a title and an intro`);
+          const span = memories.filter((memory) => memory.period === id).map((memory) => Math.floor(timeOfDate(String(memory.date))));
+          return [id, { kicker: `${String(k + 1).padStart(2, "0")} / ${copy.name} · ${Math.min(...span)}–${Math.max(...span)}`, title: copy.title, intro: copy.intro }];
+        }),
+      );
+      ["book", "clone", "contact"].forEach((key, i) => {
+        if (words[key]?.kicker) words[key].kicker = words[key].kicker.replace(/^\d\d/, String(periodIds.length + 1 + i).padStart(2, "0"));
+      });
+      const cuts = new Intl.ListFormat(lang === "en" ? "en-GB" : lang, { style: "long", type: "conjunction" }).format(base.ages.slice(1).map((stage) => String(stage.from)));
+      if (words.ui?.guide?.galaxy) words.ui.guide.galaxy = words.ui.guide.galaxy.replace("{ages}", cuts);
       return [lang, words];
     }),
   );

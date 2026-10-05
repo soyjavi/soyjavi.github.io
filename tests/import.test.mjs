@@ -20,7 +20,6 @@ const memory = (overrides = {}) => ({
   date: "2026-03",
   kind: "personal",
   weight: 2,
-  period: "now",
   threads: ["body"],
   en: { title: "My first race", body: "I run my first race." },
   es: { title: "Mi primera carrera", body: "Corro mi primera carrera." },
@@ -87,7 +86,7 @@ test("the importer writes only what is public, cuts any day down to the month an
       },
       url,
     );
-    assert.deepEqual(report, { added: 1, updated: 0, private: 2, people: 1, places: 0, periods: 0, threads: 0 });
+    assert.deepEqual(report, { added: 1, updated: 0, private: 2, people: 1, places: 0, threads: 0 });
     const written = JSON.parse(readFileSync(join(dir, "memories", "first-race.json"), "utf8"));
     assert.equal(written.date, "2026-03");
     assert.ok(!("public" in written) && !("id" in written));
@@ -95,7 +94,7 @@ test("the importer writes only what is public, cuts any day down to the month an
     const people = Object.keys(JSON.parse(readFileSync(join(dir, "people.json"), "utf8")));
     assert.ok(people.includes("brother") && !people.includes("secret"));
     assert.equal(loadContent(url).dict.en.people.brother, "My brother");
-    assert.deepEqual(importArchive({ memories: [memory({ weight: 3 })] }, url), { added: 0, updated: 1, private: 0, people: 0, places: 0, periods: 0, threads: 0 });
+    assert.deepEqual(importArchive({ memories: [memory({ weight: 3 })] }, url), { added: 0, updated: 1, private: 0, people: 0, places: 0, threads: 0 });
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -106,8 +105,8 @@ test("the importer writes nothing when any public memory is wrong, and says why"
   try {
     const before = readdirSync(join(dir, "memories")).length;
     assert.throws(
-      () => importArchive({ memories: [memory({ id: "good-one" }), memory({ id: "Bad Id", period: "nowhere", threads: ["sailing"], people: ["stranger"], links: ["nothing"], es: undefined })] }, url),
-      (error) => ["id must be", "period must be one of", "threads must be", 'people "stranger"', 'link "nothing"', 'needs "es"'].every((part) => error.message.includes(part)),
+      () => importArchive({ memories: [memory({ id: "good-one" }), memory({ id: "Bad Id", threads: ["sailing"], people: ["stranger"], links: ["nothing"], es: undefined })] }, url),
+      (error) => ["id must be", "threads must be", 'people "stranger"', 'link "nothing"', 'needs "es"'].every((part) => error.message.includes(part)),
     );
     assert.equal(readdirSync(join(dir, "memories")).length, before);
   } finally {
@@ -123,27 +122,23 @@ const emptyLife = () => {
 };
 const exampleArchive = () => JSON.parse(readFileSync(`${root}tools/archive.example.json`, "utf8"));
 
-test("one archive file can define the whole life: periods, threads, where the book and the clone belong, people, places and memories", () => {
+test("one archive file can define the whole life: threads, where the book and the clone belong, people, places and memories, with the age of each memory deciding its galaxy", () => {
   const { dir, url } = emptyLife();
   try {
     const report = importArchive(exampleArchive(), url);
-    assert.equal(report.periods, 2);
     assert.equal(report.threads, 2);
     assert.equal(report.added, 2);
     assert.equal(report.private, 1);
     const content = loadContent(url);
-    assert.deepEqual(content.life.periods, ["early", "later"]);
     assert.deepEqual(content.life.threads, ["family", "work"]);
     assert.deepEqual(content.life.ahead, { book: "family", clone: "work" });
-    assert.equal(content.dict.en.periods.early.kicker, "01 / Early years · 1980–1994");
-    assert.equal(content.dict.es.periods.later.title, "Un título para la segunda etapa.");
     assert.equal(content.dict.es.threads.work, "Trabajo");
-    assert.deepEqual(Object.keys(content.dict.en.periods), ["early", "later"], "in the order of the archive");
+    assert.ok(content.life.periods.length >= 1 && content.life.milestones.every((entry) => content.life.periods.includes(entry.period)), "every memory has the galaxy of its age");
     assert.deepEqual(content.life.milestones.map((entry) => entry.id), ["first-memory", "second-memory"]);
     assert.ok(!existsSync(join(dir, "memories", "kept-private.json")));
+    assert.ok(readdirSync(join(dir, "memories")).every((file) => !("period" in JSON.parse(readFileSync(join(dir, "memories", file), "utf8")))), "no memory file carries a period: the age decides");
     const home = renderSite(content).get("index.html");
     assert.match(home, /id="m-second-memory"/);
-    assert.match(home, /A title for the second stage\./);
     const again = importArchive(exampleArchive(), url);
     assert.equal(again.updated, 2, "importing it again updates and does not duplicate");
   } finally {
@@ -151,22 +146,17 @@ test("one archive file can define the whole life: periods, threads, where the bo
   }
 });
 
-test("a periods or threads block that is wrong, or that would strand a memory already on disk, writes nothing and says why", () => {
+test("a threads block that is wrong, or that would strand a memory already on disk, writes nothing and says why", () => {
   const { dir, url } = emptyLife();
   try {
     importArchive(exampleArchive(), url);
     const before = readFileSync(join(dir, "life.json"), "utf8");
     const bad = exampleArchive();
-    bad.periods[0].id = "Not A Slug";
-    bad.periods[1].es.intro = "";
     bad.threads.push({ id: "family", en: "Again", es: "Otra vez" });
     bad.ahead = { book: "nowhere", clone: "work" };
-    assert.throws(() => importArchive(bad, url), (error) => /periods\[0\] Not A Slug: id must be/.test(error.message) && /periods\[1\] later \(es\): needs a intro/.test(error.message) && /threads\[2\] family: id is repeated/.test(error.message) && /ahead\.book: must be one of the threads/.test(error.message));
-    const stranded = { periods: [exampleArchive().periods[1]] };
-    assert.throws(() => importArchive(stranded, url), /memory first-memory: its period "early" is no longer one of later/);
+    assert.throws(() => importArchive(bad, url), (error) => /threads\[2\] family: id is repeated/.test(error.message) && /ahead\.book: must be one of the threads/.test(error.message));
     const fewer = { threads: [exampleArchive().threads[1]], ahead: { book: "work", clone: "work" } };
     assert.throws(() => importArchive(fewer, url), /memory first-memory: its thread "family" is no longer one of work/);
-    assert.throws(() => importArchive({ periods: [] }, url), /periods: must be a non-empty list/);
     assert.throws(() => importArchive({ threads: [{ id: "only", en: "Only" }] }, url), /threads\[0\] only \(es\): needs a name/);
     assert.equal(readFileSync(join(dir, "life.json"), "utf8"), before, "nothing was written");
     assert.equal(loadContent(url).life.milestones.length, 2);
@@ -178,15 +168,25 @@ test("a periods or threads block that is wrong, or that would strand a memory al
 test("the schema and the example describe exactly what the importer reads", () => {
   const schema = JSON.parse(readFileSync(`${root}tools/archive.schema.json`, "utf8"));
   const example = exampleArchive();
-  assert.deepEqual(Object.keys(schema.properties).sort(), ["ahead", "memories", "people", "periods", "places", "threads"]);
+  assert.deepEqual(Object.keys(schema.properties).sort(), ["ahead", "memories", "people", "places", "threads"]);
   assert.deepEqual(Object.keys(example).sort(), Object.keys(schema.properties).sort(), "the example uses every block");
   const memory = schema.$defs.memory;
-  const read = ["id", "public", "date", "approx", "kind", "weight", "period", "threads", "people", "places", "links", "order", "quiet", "en", "es"];
+  const read = ["id", "public", "date", "approx", "kind", "weight", "threads", "people", "places", "links", "order", "quiet", "en", "es"];
   assert.deepEqual(Object.keys(memory.properties).sort(), [...read].sort(), "every field the importer keeps, and no other");
-  assert.deepEqual(memory.required, ["id", "public", "date", "kind", "weight", "period", "threads", "en", "es"]);
+  assert.deepEqual(memory.required, ["id", "public", "date", "kind", "weight", "threads", "en", "es"]);
   assert.deepEqual(memory.properties.kind.enum, ["personal", "professional", "product", "education"]);
-  assert.equal(schema.$defs.memoryCopy.properties.body.maxLength, 260);
-  assert.deepEqual(schema.$defs.periodCopy.required, ["kicker", "title", "intro"]);
+  assert.equal(schema.$defs.memoryCopy.properties.body.maxLength, 600);
   for (const entry of example.memories) for (const key of Object.keys(entry)) assert.ok(read.includes(key) || key === "note", `${entry.id}: ${key} is not a field`);
   assert.doesNotMatch(JSON.stringify(example), /\b\d{4}-\d{2}-\d{2}\b/, "no day in the example");
+});
+
+test("a memory dated before his birth stops the import and writes nothing, instead of leaving a site that cannot build", () => {
+  const { dir, url } = copyOfContent();
+  try {
+    const before = readdirSync(join(dir, "memories")).length;
+    assert.throws(() => importArchive({ memories: [memory({ id: "too-early", date: "1970-05" })] }, url), /too-early.*before his birth/);
+    assert.equal(readdirSync(join(dir, "memories")).length, before);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });

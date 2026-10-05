@@ -172,13 +172,14 @@ test("the theme and the language stay on the flat page, and nothing else of the 
   assert.match(css, /html:not\(\.immersive\) \.explore \{\s*display: contents;/);
 });
 
-test("the hero counts what the life holds and invites the visitor to drag, not to scroll", () => {
-  const tail = (lang) => FACETS.filter((facet) => content.life[facet]?.length).map((facet) => content.dict[lang].ui.count[facet].replace("{n}", content.life[facet].length));
-  const counts = { en: [`${content.life.milestones.length} memories`, ...tail("en")].join(" · "), es: [`${content.life.milestones.length} recuerdos`, ...tail("es")].join(" · ") };
+test("the hero counts what the life holds and carries no instruction to drag", () => {
+  const total = (key) => Math.max(content.life.totals?.[key] ?? 0, key === "memories" ? content.life.milestones.length : content.life[key].length);
+  const line = (lang) => ["memories", "people", "places"].map((key) => content.dict[lang].ui.count[key].replace("{n}", total(key))).join(" · ");
+  const counts = { en: line("en"), es: line("es") };
   for (const lang of ["en", "es"]) {
     const html = read(homes[lang]);
     assert.match(html, new RegExp(`<p class="stats kicker">${counts[lang]}</p>`), lang);
-    assert.match(html, new RegExp(`<p class="cue kicker">${content.dict[lang].ui.hint}</p>`), lang);
+    assert.doesNotMatch(html, /class="cue/, lang);
     assert.doesNotMatch(html, /class="track"/);
   }
 });
@@ -504,13 +505,13 @@ test("the favicon is a bold j that still reads at 16, 32 and 180 px in both ligh
   assert.equal(readFileSync(`${root}apple-touch-icon.png`).readUInt32BE(16), 180, "the touch icon is 180 px wide");
 });
 
-test("the book's card and the clone's card end with the same lockup, and the clone says it is not him", () => {
+test("the book's card and the clone's card carry the same lockup under the title, and the clone says it is not him", () => {
   for (const [file, lang, prepositions] of [["index.html", "en", ["by", "with"]], ["es/index.html", "es", ["de", "con"]]]) {
     const html = read(file);
     const panels = ["book", "clone"].map((kind) => html.match(new RegExp(`<div data-panel="${kind}">([\\s\\S]*?)\\n          </div>`))[1]);
     panels.forEach((panel, k) => {
-      const lockup = panel.match(/<p class="lockup"><span class="prep">([^<]+)<\/span><span class="brand-mark"><svg [\s\S]*?<\/svg><span class="visually-hidden">javi<\/span><\/span><\/p>\s*$/);
-      assert.ok(lockup, `${file}: the lockup closes the ${["book", "clone"][k]} panel`);
+      const lockup = panel.match(/<\/h2>\s*<p class="lockup"><span class="prep">([^<]+)<\/span><span class="brand-mark"><svg [\s\S]*?<\/svg><span class="visually-hidden">javi<\/span><\/span><\/p>/);
+      assert.ok(lockup, `${file}: the lockup follows the title of the ${["book", "clone"][k]} panel`);
       assert.equal(lockup[1], prepositions[k]);
     });
     assert.match(panels[1], new RegExp(`<p class="note">${lang === "en" ? "It is a program built from what I wrote; it is not me\\." : "Es un programa hecho a partir de lo que escribí; no soy yo\\."}</p>`));

@@ -56,8 +56,8 @@ _None._
   `content · creator · high`
   accept: the creator hands over the remaining two or three hundred memories in batches, in the archive format of the
   README (`npm run import -- archive.json`), each with a date (a year or a month), a weight, the people and places he
-  wants public and what it relates to; an agent task imports them (the archive can also define the periods, the threads and where the book and the clone
-  belong: see `tools/archive.example.json` and `tools/archive.schema.json`). The people and places filters grow by themselves with those lists. Names of
+  wants public and what it relates to; an agent task imports them (the archive can also define the threads and where the book and the clone
+  belong, and has no periods, the date decides the age: see `tools/archive.example.json` and `tools/archive.schema.json`). The people and places filters grow by themselves with those lists. Names of
   people enter the repository only as he approves them, his children included under their own names.
 - **THREADS-REVIEW** — Check the threads, the links and the end of the path
   `content · creator · normal`
@@ -106,6 +106,11 @@ _None._
 - **DEC-PHONE** — Publish a phone number?
   `decision · creator · low`
   The previous page listed one; the new site shows only `hello@soyjavi.com` and X.
+
+- **AGES-COPY** — Write the intro of each age in his own words
+  `content · creator · normal`
+  Each age of the sky carries a title and a one-line intro (`ages` in `content/en.json` and `es.json`); today they say only the ages ("From seven to fourteen."). The creator or his biographer writes them as public text in his voice, in both languages, and decides which ages deserve a poetic title (Shakespeare's seven, from the infant to second childhood, are a source). No memory is moved by hand: its age decides.
+  accept: every age has a title and an intro of his in both languages; the voice rules and `npm test` hold.
 
 ### Checks on real services and devices
 
@@ -157,6 +162,9 @@ Ordered by what must be decided or applied first; each group names what it waits
 
 ### 2. Review
 
+- **MEMORY-LENGTH** — How long a memory text may be
+  `decision · creator · high`
+  Memory texts are capped at 600 characters in one paragraph. The creator wants one or two paragraphs. Choose the limit (900 or 1,200 characters) and then an agent task makes the card, the flat page and the finder print one `<p>` per paragraph, moves the limit in the schema, the README, the example and the test, and tells the biographer to write a paragraph or two.
 - **ART-REVIEW** — An art review by an expert subagent, with screenshots of every screen
   `chore · agent · normal`
   A read-only subagent with an art and interface direction brief goes through the site screen by screen (the opening, the whole-life view, a galaxy, a memory open, the finder, the guide, the book and the clone cards, the contact, the flat page, the light theme, 1280×640 and 390×844 and a large screen) and returns ranked, evidence-backed findings on composition, hierarchy, motion, type, colour, the dots and the glass. It needs screenshots, so it launches a browser: the creator has asked that no browser is started without his word, so this task waits for his explicit go-ahead and for the screenshots to be kept in the scratchpad, never in the repository.
@@ -167,22 +175,14 @@ Ordered by what must be decided or applied first; each group names what it waits
 - **MILESTONE-MEDIA** — A photo or a sound at a milestone
   board: MILESTONE-MEDIA
   Optional media for a milestone, shown in its card, only where the creator has approved it.
-- **DEPTH-LOCKED** — Show how much more there is than what is public
-  board: DEPTH-LOCKED
-  Fine, unnamed dots for the memories the creator keeps for the book and the clone, with a count he chooses to publish, so
-  a visitor feels the depth behind the named ones; pressing one says it is in the book. Nothing about what a locked
-  memory holds is ever in the repository.
+- **CLOSED-MEMORIES** — Say how much more there is, with a number
+  `decision · creator · high`
+  board: CLOSED-MEMORIES
+  The sky draws only open memories and nothing private is in the repository, not even as a stub. What the site can add is a number: how many memories are closed in each age and in total, shown in the label of each galaxy and in the hero, so the visitor feels the depth of the book and the clone. The hero already reads `totals` from `life.json` (memories, people, places, open and closed together); until he gives the figures it shows only what the site draws. The creator gives those figures and decides whether each galaxy label also carries its count per age; agent work follows: the field and its test, the labels, the hero and the flat page.
 - **BOOK-CHAPTERS** — The book as nodes
   board: BOOK-CHAPTERS
   Chapters of the book as hollow rings that open a card with their blurb and the memories they draw on.
-- **PRIVATE-EDITION** — A family-only edition from the private archive
-  board: PRIVATE-EDITION
-  The book's chapters and the sky for the creator's children, built from the same archive with the private milestones
-  included, outside the public repository.
 - **DREAM-ARCS** — What was wished for, done and let go
   board: DREAM-ARCS
   An arc from the memory where something was wished for to the one where it came true; what is still pending is a hollow
   ring ahead, like the book and the clone. Needs the dreams the creator is willing to make public.
-- **RELATIONS-VIEW** — A view of who and what was connected
-  board: RELATIONS-VIEW
-  A network view that draws the links themselves, once there are hundreds of them.

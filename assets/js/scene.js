@@ -1,9 +1,9 @@
 import * as THREE from "three";
-import { AHEAD, FLOOR, KINDS, SPIN, START, onPath, spinAngle, starfield, unitsOf, yearOf } from "./life.js";
+import { AHEAD, FLOOR, KINDS, SPIN, START, shapeBy, onPath, spinAngle, starfield, unitsOf, yearOf } from "./life.js";
 import { createBackdrop } from "./backdrop.js";
 import { QUALITY } from "./explore.js";
 import { approach, clamp, ease, eye, slide, turn, zoom } from "./orbit.js";
-import { DIRECT, ENTRANCE, DUST_FRAGMENT, DUST_VERTEX, formedAt, KIND_TINT, MARK_FRAGMENT, MARK_VERTEX, POINTER, STAR_FRAGMENT, STAR_VERTEX } from "./shaders.js";
+import { DIRECT, ENTRANCE, DUST_FRAGMENT, DUST_VERTEX, formedAt, KIND_TINT, MARK_FRAGMENT, MARK_VERTEX, HOVER, POINTER, STAR_FRAGMENT, STAR_VERTEX } from "./shaders.js";
 import { lerp, reducedMotion, seeded, smoothstep } from "./util.js";
 
 export const HOME_PITCH = -0.27;
@@ -15,6 +15,7 @@ const DRAG_PIXELS = 6;
 const RING_SPREAD = 0.5;
 const RATE = 4.2;
 const DOT_MAX = 900;
+const STAR_ZOOM = 0.9;
 const DOT_GAP = 10;
 const DRIFT = { rate: 0.11, yaw: 0.14, pitch: 0.02, rest: 2.5 };
 
@@ -92,6 +93,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
     uSeedOn: { value: 0 },
     uKick: { value: 0 },
     uPointer: { value: new THREE.Vector3(0, 0, 0) },
+    uHover: { value: new THREE.Vector2(-1, 0) },
     uInk: ink,
   };
   const dustMaterial = new THREE.ShaderMaterial({ uniforms: dustUniforms, vertexShader: DUST_VERTEX, fragmentShader: DUST_FRAGMENT, transparent: true, depthTest: false, depthWrite: false });
@@ -160,6 +162,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
     return new THREE.CanvasTexture(canvas);
   })();
   let dotSize = 1.6;
+  let outerGrow = 1.5;
   const dotScratch = new THREE.Vector3();
   const dotScreen = new Float32Array(3 * 1024);
   const dottedPath = (opacity) => {
@@ -209,7 +212,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
       }
       geometry.setDrawRange(0, out);
       attribute.needsUpdate = true;
-      material.size = dotSize * renderer.getPixelRatio();
+      material.size = dotSize * (points.userData.outer ? outerGrow : 1) * renderer.getPixelRatio();
     };
     return points;
   };
@@ -226,19 +229,21 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
   const constellations = () => {
     const threadOf = (mark) => mark.members.threads?.[0] ?? 0;
     const last = new Map();
-    const figures = sky.list.map(() => []);
+    const figures = sky.list.map(() => ({ open: [], shadow: [] }));
     marks.forEach((mark) => {
       const key = `${mark.period}:${threadOf(mark)}`;
-      if (last.has(key)) figures[mark.period].push(...last.get(key), ...mark.position);
+      if (last.has(key)) figures[mark.period].open.push(...last.get(key), ...mark.position);
       last.set(key, mark.position);
     });
     figures.forEach((figure, k) => {
-      if (!figure.length) return;
       const centre = sky.list[k].centre;
-      const lines = addGuide(new THREE.LineSegments(geometryOf(figure.map((value, n) => value - centre[n % 3])), lineMaterial(0.34)), 0.34, sky.list[k].end);
-      lines.position.set(...centre);
-      lines.userData.constellation = true;
-      turning.push({ lines, k });
+      for (const [name, strength] of [["open", 0.34], ["shadow", 0.13]]) {
+        if (!figure[name].length) continue;
+        const lines = addGuide(new THREE.LineSegments(geometryOf(figure[name].map((value, n) => value - centre[n % 3])), lineMaterial(strength)), strength, sky.list[k].end);
+        lines.position.set(...centre);
+        lines.userData.constellation = true;
+        turning.push({ lines, k });
+      }
     });
     const arc = (from, to) => {
       const vertices = [];
@@ -250,21 +255,22 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
       const outline = [];
       for (let step = 0; step < 120; step++) {
         const angle = (Math.PI * 2 * step) / 120;
-        const point = dotScratch.set(Math.sin(angle), Math.cos(angle), 0).multiplyScalar(galaxy.radius + 1.6);
-        outline.push(galaxy.centre[0] + point.x, galaxy.centre[1] + point.y, galaxy.centre[2] + point.z);
+        const [ox, oy] = shapeBy(galaxy, Math.sin(angle) * (galaxy.radius + 1.6), Math.cos(angle) * (galaxy.radius + 1.6));
+        outline.push(galaxy.centre[0] + ox, galaxy.centre[1] + oy, galaxy.centre[2]);
       }
-      const dotted = addGuide(dottedPath(0.42), 0.42, galaxy.start);
+      const dotted = addGuide(dottedPath(0.8), 0.8, galaxy.start);
       dotted.userData.dots = true;
+      dotted.userData.outer = true;
       dotPaths.push({ points: dotted, vertices: outline, closed: true });
       const next = sky.list[k + 1];
       if (next) {
-        const between = addGuide(dottedPath(0.5), 0.5, next.start);
+        const between = addGuide(dottedPath(0.7), 0.7, next.start);
         between.userData.dots = true;
         dotPaths.push({ points: between, vertices: arc(galaxy.along + galaxy.radius + 1.6, next.along - next.radius - 1.6), closed: false });
       }
     });
     const final = sky.list.at(-1);
-    const ahead = addGuide(dottedPath(0.55), 0.55, today);
+    const ahead = addGuide(dottedPath(0.7), 0.7, today);
     ahead.userData.dots = true;
     dotPaths.push({ points: ahead, vertices: arc(final.along + final.radius + 1.6, sky.length), closed: false });
   };
@@ -278,7 +284,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
     return points;
   });
   const ringVertices = new Float32Array(96 * 3);
-  const yearRing = { list: [], centre: [0, 0, 0], want: 0, fade: 0 };
+  const yearRing = { list: [], centre: [0, 0, 0], want: 0, fade: 0, galaxy: {} };
 
   const linkBuffer = (opacity) => {
     const positions = new Float32Array(MAX_LINKS * LINK_SEGMENTS * 6);
@@ -376,6 +382,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
   resize();
 
   const pointers = new Map();
+  const hoverShown = { index: -1, mix: 0 };
   const brush = { x: 0, y: 0, on: false, fine: matchMedia("(pointer: fine)").matches && !reducedMotion(), strength: 0 };
   const gesture = { moved: false, pinch: 0, button: 0 };
   const callbacks = { hover: () => {}, click: () => {}, frame: () => {}, touch: () => {}, error: (error) => console.error(error) };
@@ -529,6 +536,13 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
     if (canvas.dataset.spin !== spinTag) canvas.dataset.spin = spinTag;
     brush.strength = ease(brush.strength, brush.on ? 1 : 0, dt, POINTER.rate);
     dustUniforms.uPointer.value.set(brush.x, brush.y, brush.strength);
+    const hovering = state.hover >= 0 && state.hover < marks.length;
+    if (hovering && hoverShown.index !== state.hover) {
+      hoverShown.mix *= 0.4;
+      hoverShown.index = state.hover;
+    }
+    hoverShown.mix = ease(hoverShown.mix, hovering ? 1 : 0, dt, hovering ? HOVER.inRate : HOVER.outRate);
+    dustUniforms.uHover.value.set(hoverShown.index, hoverShown.mix);
     const pushTag = brush.strength.toFixed(2);
     if (canvas.dataset.pointer !== pushTag) canvas.dataset.pointer = pushTag;
     const seedOn = origin === null ? smoothstep(entrance.seed, entrance.seed + 1.6, time - loaded) : 1;
@@ -597,7 +611,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
     const form = smoothstep(0.25, 0.9, intro);
     const drawn = Math.min(formed, state.reveal ?? Infinity);
     guides.visible = form > 0.01;
-    guides.children.forEach((object) => (object.material.opacity = object.userData.opacity * form * (object.userData.constellation ? 1 - far : 1) * (object.userData.dots ? 0.5 + 0.25 * (1 - far) : 1) * Math.min(1, Math.max(0, (drawn - object.userData.year) / 2))));
+    guides.children.forEach((object) => (object.material.opacity = object.userData.opacity * form * (object.userData.constellation ? 1 - far : 1) * (object.userData.dots ? (object.userData.outer ? 0.4 + 0.25 * (1 - far) : 0.75 + 0.1 * (1 - far)) : 1) * Math.min(1, Math.max(0, (drawn - object.userData.year) / 2))));
     previewLine.indices = state.preview >= 0 && state.selection >= 0 && state.preview !== state.selection ? [state.preview] : [];
     for (const links of [strong, soft, previewLine]) {
       const want = links.indices.length ? 1 : 0;
@@ -617,7 +631,8 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
     }
 
     yearRing.fade += (yearRing.want - yearRing.fade) * (1 - Math.exp(-5 * dt));
-    dotSize = 0.95 + 0.3 * (1 - far);
+    dotSize = 1.15 + 0.1 * (1 - far);
+    outerGrow = 1 + 0.3 * (1 - far);
     dotPaths.forEach(({ points, vertices, closed }) => points.userData.lay(vertices, closed));
     ringDots.forEach((points, n) => {
       const ring = yearRing.list[n];
@@ -626,14 +641,14 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
       if (!shown) return;
       for (let step = 0; step < 96; step++) {
         const angle = (Math.PI * 2 * step) / 96;
-        const point = dotScratch.set(Math.sin(angle), Math.cos(angle), 0).multiplyScalar(ring.radius);
-        ringVertices[step * 3] = yearRing.centre[0] + point.x;
-        ringVertices[step * 3 + 1] = yearRing.centre[1] + point.y;
-        ringVertices[step * 3 + 2] = yearRing.centre[2] + point.z;
+        const [rx, ry] = shapeBy(yearRing.galaxy, Math.sin(angle) * ring.radius, Math.cos(angle) * ring.radius);
+        ringVertices[step * 3] = yearRing.centre[0] + rx;
+        ringVertices[step * 3 + 1] = yearRing.centre[1] + ry;
+        ringVertices[step * 3 + 2] = yearRing.centre[2];
       }
       points.userData.lay(ringVertices, true);
       points.material.color.copy(ink.value);
-      points.material.opacity = 0.26 * (1 - 0.5 * (n / Math.max(1, yearRing.list.length - 1))) * yearRing.fade * form;
+      points.material.opacity = 0.3 * (1 - 0.35 * (n / Math.max(1, yearRing.list.length - 1))) * yearRing.fade * form;
     });
     const ringsTag = yearRing.want && yearRing.fade > 0.5 ? String(yearRing.list.length) : "";
     if (canvas.dataset.rings !== ringsTag) canvas.dataset.rings = ringsTag;
@@ -654,8 +669,9 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
     jumpLines.visible = jumpLines.material.opacity > 0.01;
     canvas.dataset.jumps = jumpLines.visible ? String(hops) : "";
 
-    starUniforms.uGain.value = starBase * skyIn;
-    backdrop.update(time, camera, formed, skyIn);
+    const boost = 1 + STAR_ZOOM * (1 - far);
+    starUniforms.uGain.value = starBase * skyIn * boost;
+    backdrop.update(time, camera, formed, skyIn, boost);
     renderer.render(scene, camera);
 
     projected.forEach((spot, i) => {
@@ -718,6 +734,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
       if (year !== null) dustUniforms.uFocusU.value = unitsOf(year);
     },
     setSelection: (index) => (state.selection = index),
+    setHover: (index) => (state.hover = index),
     setPreview: (index) => (state.preview = index),
     setJumps: (pairs) => (hop.pairs = pairs),
     slotOf: (name) => ({ today: marks.length, book: marks.length + 2, clone: marks.length + 3 })[name],
@@ -750,8 +767,8 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
       arcAt.set(lerp(arcFrom.x, arcTo.x, t), lerp(arcFrom.y, arcTo.y, t), lerp(arcFrom.z, arcTo.z, t) + 4 * t * (1 - t) * arcFrom.distanceTo(arcTo) * 0.22);
       return project(arcAt, out);
     },
-    setYearRings: (centre, list) => {
-      if (list.length) Object.assign(yearRing, { list, centre, want: 1 });
+    setYearRings: (centre, list, galaxy = {}) => {
+      if (list.length) Object.assign(yearRing, { list, centre, galaxy, want: 1 });
       else yearRing.want = 0;
     },
   };

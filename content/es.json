@@ -8,7 +8,6 @@
   "ui": {
     "skip": "Saltar al contenido",
     "lockup": { "book": "de", "clone": "con" },
-    "hint": "Arrastra para explorar · rueda o pellizco para acercar",
     "switchLabel": "English",
     "navLabel": "Secciones",
     "nav": {
@@ -63,11 +62,14 @@
       "nudgebook": "Entérate del libro →",
       "nudgeclone": "Entérate de mi clon →",
       "nudgeclose": "Cerrar",
+      "periodstart": "Empieza por {title}",
+      "with": "Con",
+      "at": "En",
+      "about": "Sobre",
       "menu": "Más"
     },
     "count": {
       "memories": "{n} recuerdos",
-      "threads": "{n} hilos",
       "people": "{n} personas",
       "places": "{n} lugares"
     },
@@ -75,7 +77,7 @@
       "title": "Cómo leer este cielo",
       "button": "Cómo leer este cielo",
       "cloud": "Una nube es un recuerdo; cuanto más grande, más cambió",
-      "galaxy": "Un círculo de puntos es una etapa de mi vida; el tiempo va del núcleo al borde",
+      "galaxy": "Un círculo de puntos es una edad de mi vida, cortada a los {ages} años; el tiempo va del núcleo al borde",
       "line": "Una línea une recuerdos relacionados",
       "ring": "Un anillo hueco está por llegar: el libro y mi clon",
       "today": "Hoy",
@@ -96,42 +98,47 @@
   "hero": {
     "kicker": "javi · 1980 – hoy",
     "title": "Una vida, <em>en hitos.</em>",
-    "lede": "Soy Javi. Esta es mi vida de 1980 a hoy: una nube de puntos por cada recuerdo y una galaxia por cada etapa. Recórrela como quieras. Lo que viene: un libro para mis hijos y mi clon, para quien quiera seguir hablando conmigo.",
+    "lede": "Soy Javi. Esta es mi vida de 1980 a hoy: una nube de puntos por cada recuerdo y una galaxia por cada edad. Recórrela como quieras. Lo que viene: un libro para mis hijos y mi clon, para quien quiera seguir hablando conmigo.",
     "primary": "Apúntate a la lista del libro",
     "secondary": "Recórrelo",
     "clone": "Sobre mi clon →",
     "region": "Apúntate a la lista del libro"
   },
-  "periods": {
-    "origins": {
-      "kicker": "01 / Orígenes · 1980–1994",
-      "title": "Una infancia <em>vasca.</em>",
-      "intro": "Un caserío, un piso, el monte los fines de semana y el camping en verano."
+  "ages": {
+    "early": {
+      "name": "Primeros años",
+      "title": "Primeros <em>años.</em>",
+      "intro": "Desde que nací hasta que cumplí siete años."
     },
-    "craft": {
-      "kicker": "02 / El oficio · 2001–2011",
-      "title": "Aprender <em>el oficio.</em>",
-      "intro": "Primero equipos corporativos, luego la web y luego el open source."
+    "school": {
+      "name": "Años de escuela",
+      "title": "Años <em>de escuela.</em>",
+      "intro": "De los siete a los catorce."
     },
-    "tapquo": {
-      "kicker": "03 / TapQuo · 2011–2015",
-      "title": "Una startup, un aula <em>y un avión.</em>",
-      "intro": "Fundo una empresa, doy clases, escribo un libro y dejo España."
+    "youth": {
+      "name": "Juventud",
+      "title": "<em>Juventud.</em>",
+      "intro": "De los catorce a los veinticinco."
     },
-    "remote": {
-      "kicker": "04 / En remoto · 2015–2019",
-      "title": "Trabajar desde <em>cualquier sitio.</em>",
-      "intro": "En remoto antes de que estuviera de moda: equipos, libros, blockchain y un hábito nuevo."
+    "building": {
+      "name": "Construir una vida",
+      "title": "Construir <em>una vida.</em>",
+      "intro": "De los veinticinco a los cuarenta."
     },
-    "home": {
-      "kicker": "05 / Hogar · 2020–2024",
-      "title": "Una empresa, <em>una familia, una casa.</em>",
-      "intro": "Satoshi, dos hijos y una casa que construí."
+    "midlife": {
+      "name": "Mitad de la vida",
+      "title": "Mitad <em>de la vida.</em>",
+      "intro": "De los cuarenta a los cincuenta y cinco."
     },
-    "now": {
-      "kicker": "06 / Ahora · 2025–2026",
-      "title": "Dónde <em>estoy.</em>",
-      "intro": "Todavía pensando qué quiero enseñar."
+    "elder": {
+      "name": "Madurez",
+      "title": "<em>Madurez.</em>",
+      "intro": "De los cincuenta y cinco a los setenta."
+    },
+    "later": {
+      "name": "Última etapa",
+      "title": "Última <em>etapa.</em>",
+      "intro": "A partir de los setenta."
     }
   },
   "book": {

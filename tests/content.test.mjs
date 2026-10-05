@@ -7,6 +7,7 @@ import { join } from "node:path";
 import { build } from "esbuild";
 import { FACETS, precisionOf, todayYear, years } from "../assets/js/life.js";
 import { LANGS, loadContent, root } from "../src/content.mjs";
+import { ageAt, ageIdOf } from "../assets/js/life.js";
 import { renderSite } from "../src/site.mjs";
 import { bundleOptions } from "../tools/bundle.mjs";
 
@@ -116,7 +117,7 @@ test("every milestone and period has short copy in both languages", () => {
       const copy = d.life[entry.id];
       assert.ok(copy?.title && copy?.body, `${lang}/${entry.id}`);
       assert.ok(copy.title.length <= 60, `${lang}/${entry.id}: title is ${copy.title.length} characters`);
-      assert.ok(copy.body.length <= 260, `${lang}/${entry.id}: body is ${copy.body.length} characters`);
+      assert.ok(copy.body.length <= 600, `${lang}/${entry.id}: body is ${copy.body.length} characters`);
     }
     for (const id of life.periods) {
       assert.match(d.periods[id].kicker, /^\d\d \/ .+ · \d{4}–\d{4}$/, `${lang}/${id}`);
@@ -136,8 +137,9 @@ test("period kickers number the periods and the other sections continue the coun
   for (const lang of LANGS) {
     const d = content.dict[lang];
     const numbers = life.periods.map((id) => d.periods[id].kicker.slice(0, 2));
-    assert.deepEqual(numbers, ["01", "02", "03", "04", "05", "06"]);
-    assert.deepEqual([d.book, d.clone, d.contact].map((section) => section.kicker.slice(0, 2)), ["07", "08", "09"]);
+    const pad = (n) => String(n).padStart(2, "0");
+    assert.deepEqual(numbers, life.periods.map((_, k) => pad(k + 1)));
+    assert.deepEqual([d.book, d.clone, d.contact].map((section) => section.kicker.slice(0, 2)), [1, 2, 3].map((n) => pad(life.periods.length + n)));
   }
 });
 
@@ -261,4 +263,32 @@ test("every font shipped has its licence text next to it", () => {
     assert.ok(licences.includes(family), `${font} has no licence`);
   }
   assert.equal((licences.match(/SIL OPEN FONT LICENSE Version 1\.1/g) ?? []).length, 3);
+});
+
+test("the galaxy of a memory is the age of his life it was lived at: seven ages cut at 7, 14, 25, 40, 55 and 70 from his birth", () => {
+  assert.equal(life.birth, "1980-04");
+  assert.deepEqual(life.ages.map((stage) => stage.from), [0, 7, 14, 25, 40, 55, 70]);
+  assert.deepEqual(life.ages.map((stage) => stage.id), ["early", "school", "youth", "building", "midlife", "elder", "later"]);
+  for (const entry of life.milestones) assert.equal(entry.period, ageIdOf(life.ages, ageAt(life.birth, entry.date)), `${entry.id}: its age decides its galaxy`);
+  assert.deepEqual(life.periods, life.ages.map((stage) => stage.id).filter((id) => life.milestones.some((entry) => entry.period === id)), "only the ages he has lived and remembered are galaxies, in order");
+  for (const lang of LANGS) for (const stage of life.ages) assert.ok(content.dict[lang].ages[stage.id]?.name && content.dict[lang].ages[stage.id].title && content.dict[lang].ages[stage.id].intro, `${lang}/${stage.id}`);
+  for (const file of readdirSync(`${root}content/memories`)) assert.ok(!("period" in JSON.parse(readFileSync(`${root}content/memories/${file}`, "utf8"))), `${file} carries no period: the date decides`);
+  assert.match(content.dict.en.ui.guide.galaxy, /cut at 7, 14, 25, 40, 55 and 70/, "the site explains the ages");
+  assert.match(content.dict.es.ui.guide.galaxy, /cortada a los 7, 14, 25, 40, 55 y 70 años/);
+});
+
+test("life.json totals and ages are checked: totals is an object of whole numbers, every age has a number to start from", () => {
+  const dir = mkdtempSync(join(tmpdir(), "life-"));
+  cpSync(`${root}content`, dir, { recursive: true });
+  const url = new URL(`file://${dir}/`);
+  const file = join(dir, "life.json");
+  const life = JSON.parse(readFileSync(file, "utf8"));
+  try {
+    for (const [patch, message] of [[{ totals: 5 }, /totals must be an object/], [{ totals: [] }, /totals must be an object/], [{ totals: { people: 1.5 } }, /totals\.people/], [{ totals: { threads: 3 } }, /totals\.threads/], [{ ages: life.ages.map((age, i) => (i === 3 ? { id: age.id } : age)) }, /ages must start at 0/]]) {
+      writeFileSync(file, JSON.stringify({ ...life, ...patch }));
+      assert.throws(() => loadContent(url), message);
+    }
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });

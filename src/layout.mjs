@@ -71,12 +71,12 @@ export function masthead({ dict, lang, nav, switchHref, brandHref, controls = ""
     </header>`;
 }
 
-export function footer({ site, dict, lang }) {
+export function footer({ site, dict, lang, first }) {
   const f = dict.ui.footer;
   return `<footer class="site-footer">
       <div>
         <h4>${esc(f.site)}</h4>
-        <p><a href="${homePath(lang)}#period-origins" data-go="period-origins">${esc(dict.ui.nav.life)}</a><br /><a href="${homePath(lang)}#book" data-go="book">${esc(dict.ui.nav.book)}</a><br /><a href="${homePath(lang)}#clone" data-go="clone">${esc(dict.ui.nav.clone)}</a></p>
+        <p><a href="${homePath(lang)}#period-${first}" data-go="period-${first}">${esc(dict.ui.nav.life)}</a><br /><a href="${homePath(lang)}#book" data-go="book">${esc(dict.ui.nav.book)}</a><br /><a href="${homePath(lang)}#clone" data-go="clone">${esc(dict.ui.nav.clone)}</a></p>
       </div>
       <div>
         <h4>${esc(f.elsewhere)}</h4>
