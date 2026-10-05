@@ -1,0 +1,24 @@
+{
+  "date": "1997",
+  "approx": true,
+  "kind": "education",
+  "weight": 1,
+  "threads": [
+    "learning"
+  ],
+  "people": [
+    "ibon",
+    "villarcalo"
+  ],
+  "links": [
+    "la-egb"
+  ],
+  "en": {
+    "title": "I had to change systems halfway",
+    "body": "I went through the old school up to the eighth year and reached secondary school when the system was changing. I had to start the new baccalaureate, the two-year one, and not out of choice: I failed the third year, and instead of repeating it I moved into the first year of the system that came in that same year.\n\nI spent the year of the failure contemplative and bored; physics was the only thing I cared about. So my adolescence ended up dated by two reforms at once, the years of the old school on one side and the short baccalaureate on the other."
+  },
+  "es": {
+    "title": "Me tocó cambiar de sistema a mitad de camino",
+    "body": "Estudié la escuela antigua hasta octavo y llegué al instituto cuando el sistema estaba cambiando. Me tocó empezar el bachillerato nuevo, el de dos años, y no por gusto: suspendí tercero y, en lugar de repetir aquel curso, pasé al primero del sistema que entraba ese mismo año.\n\nEl año de la repetición lo pasé contemplativo y aburrido; solo me interesaba la física. Así que mi adolescencia quedó fechada por dos reformas a la vez, los cursos de la escuela vieja por un lado y el bachillerato corto por otro."
+  }
+}

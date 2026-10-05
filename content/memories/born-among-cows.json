@@ -1,0 +1,21 @@
+{
+  "date": "1980",
+  "approx": true,
+  "kind": "personal",
+  "weight": 2,
+  "threads": [
+    "home",
+    "family"
+  ],
+  "places": [
+    "caserio-iturriagas"
+  ],
+  "en": {
+    "title": "I was born in a house with cows around it",
+    "body": "I spent my first two or three years in my father's family farmhouse, not in a city. It was a big house shared with several generations, up to a great-great-grandfather, and there were cows around it.\n\nMy parents were very young and still had no money to buy a home of their own, so we started there, in a humble family, lower-middle class, as I call it myself. I do not remember those years in detail, but I know that was my starting point: a borrowed country house, with old people inside and animals outside."
+  },
+  "es": {
+    "title": "Nací en una casa con vacas alrededor",
+    "body": "Mis primeros dos o tres años los pasé en el caserío de la familia de mi padre, no en una ciudad. Era una casa grande compartida con varias generaciones, hasta un tatarabuelo, y alrededor había vacas.\n\nMis padres eran muy jóvenes y todavía no tenían dinero para comprar una casa propia, así que empezamos allí, en una familia humilde, de clase baja-media, como yo mismo la llamo. No recuerdo aquellos años con detalle, pero sé que ese fue mi punto de partida: una casa de campo prestada, con gente mayor dentro y animales fuera."
+  }
+}

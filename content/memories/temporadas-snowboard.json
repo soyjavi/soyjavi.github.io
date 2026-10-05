@@ -1,0 +1,30 @@
+{
+  "date": "2007",
+  "approx": true,
+  "kind": "personal",
+  "weight": 2,
+  "threads": [
+    "body",
+    "love"
+  ],
+  "people": [
+    "catalina-oyaneder",
+    "leire-maguregi",
+    "vanessa",
+    "villarcalo"
+  ],
+  "places": [
+    "pirineo-frances"
+  ],
+  "links": [
+    "childhood-taekwondo"
+  ],
+  "en": {
+    "title": "Snow as a second life",
+    "body": "For more than five winters the mountain was my second life. I was working as a software engineer by then, and I spent every holiday and every weekend on snow, from late November until April or May. We had a small flat on the other side of the border and I ended up a regular at two or three resorts: I knew the slopes like my own house. I fell for it down to the bone. I spent most of that time with the partner I had then. Out of that obsession came a brand of shirts for the snowpark that began as a game: at one point I had more than fifty orders a week. It was the first thing I built for the people of a place I belonged to."
+  },
+  "es": {
+    "title": "La nieve como segunda vida",
+    "body": "Durante más de cinco inviernos la montaña fue mi segunda vida. Ya trabajaba de informático, y gasté en nieve todas mis vacaciones y todos los fines de semana, desde finales de noviembre hasta abril o mayo. Teníamos un apartamento pequeño al otro lado de la frontera y acabé siendo local de dos o tres estaciones: me sabía las pistas como mi casa. Me aficioné hasta los huesos. Casi toda esa época la pasé con la pareja que tenía entonces. De aquella afición salió una marca de camisetas para el snowpark que empezó como un juego: llegué a tener más de cincuenta pedidos a la semana. Fue lo primero que construí para la gente de un sitio al que pertenecía."
+  }
+}

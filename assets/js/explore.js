@@ -240,6 +240,18 @@ export const miniVisible = (ratio, width, minimum = 520, room = true) => ratio <
 
 export const QUALITY = { tiers: [{ keep: 1, ratio: Infinity }, { keep: 0.65, ratio: 1.5 }, { keep: 0.4, ratio: 1 }], slow: 1000 / 30, window: 90, windows: 3 };
 
+export const CADENCE = { fps: 24, hidden: 1 };
+
+export const pace = (clock, now, fps = CADENCE.fps) => {
+  const period = 1000 / fps;
+  const elapsed = now - clock.last;
+  if (elapsed < period - 1) return false;
+  clock.last = now - Math.min(Math.max(elapsed - period, 0), period / 2);
+  return true;
+};
+
+export const worked = (frameMs, fps = CADENCE.fps) => Math.max(0, frameMs - 1000 / fps) + 1000 / 60;
+
 export const averageMs = (samples) => (samples.length ? samples.reduce((sum, value) => sum + value, 0) / samples.length : 0);
 
 export const nextQuality = (tier, frameMs) => (frameMs > QUALITY.slow && tier < QUALITY.tiers.length - 1 ? tier + 1 : tier);

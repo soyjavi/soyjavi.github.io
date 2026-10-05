@@ -1,19 +1,17 @@
 {
   "date": "2026",
+  "approx": true,
   "kind": "product",
   "weight": 1,
   "threads": [
     "ventures"
   ],
-  "links": [
-    "satoshi"
-  ],
   "en": {
-    "title": "Arca, the latest",
-    "body": "Arca is the newest product I have launched under Satoshi Ltd. For now I call it the last one."
+    "title": "The last one I have put out",
+    "body": "It is the newest of the products I have published under my own company: in September 2026 I call it the last one. I made it myself and put it out myself, like everything that comes from there, with no partners and no payroll.\n\nWhat it holds inside and how long it will last I have not told anywhere yet. It came after the others and that is what I call it when I talk about it; the detail will come when it comes."
   },
   "es": {
-    "title": "Arca, el último",
-    "body": "Arca es el producto más reciente que he lanzado con Satoshi Ltd. Por ahora lo llamo el último."
+    "title": "El último que he sacado",
+    "body": "Es el más nuevo de los productos que he publicado bajo mi propia empresa: en septiembre de 2026 lo llamo el último. Lo hice yo y lo saqué yo, como todo lo que sale de ahí, sin socios y sin plantilla.\n\nQué lleva dentro y cuánto va a durar todavía no lo he contado en ninguna parte. Llegó después de los otros y así lo llamo cuando hablo de él; el detalle lo diré cuando toque."
   }
 }

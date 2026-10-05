@@ -1,0 +1,27 @@
+{
+  "date": "2006",
+  "approx": true,
+  "kind": "product",
+  "weight": 2,
+  "threads": [
+    "ventures",
+    "body"
+  ],
+  "people": [
+    "vanessa"
+  ],
+  "places": [
+    "pirineo-frances"
+  ],
+  "links": [
+    "alpi"
+  ],
+  "en": {
+    "title": "The t-shirt brand that came out of the snow",
+    "body": "In the years when I was up on the mountain every weekend, I came up with the idea of making t-shirts for the people in the snowpark. It started as an experiment, and at some point I found myself with more than fifty orders a week: a small but real business, born out of the sport and not out of a plan.\n\nIt was the first thing I built on my own, before any company. When the snow years ended, the brand was left behind. I never put it on my CV."
+  },
+  "es": {
+    "title": "La marca de camisetas que salió de la nieve",
+    "body": "En los años en que subía a la montaña todos los fines de semana se me ocurrió hacer camisetas para la gente del snowpark. Empecé a modo de experimento y llegó un momento en que tenía más de cincuenta pedidos a la semana: un negocio pequeño de verdad, nacido de la afición y no de un plan.\n\nFue lo primero que monté por mi cuenta, antes de cualquier empresa. Cuando se acabó la época de la nieve, la marca se quedó por el camino. Nunca la puse en el currículum."
+  }
+}

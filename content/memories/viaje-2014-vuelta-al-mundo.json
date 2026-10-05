@@ -1,0 +1,24 @@
+{
+  "date": "2014",
+  "kind": "personal",
+  "weight": 3,
+  "threads": [
+    "home",
+    "ventures"
+  ],
+  "people": [
+    "catalina-oyaneder",
+    "david-pascual"
+  ],
+  "places": [
+    "bali"
+  ],
+  "en": {
+    "title": "One backpack and a trip around the world",
+    "body": "In 2014 I needed to travel. I read a book about how little a person needs in a backpack, and the same thing happened to me that always happens: I have never wanted anything other than to be out of context. So I built a plan: go around the world with my company, carrying our principles to the places where the future was being invented. Four of us left and all of us ended up apart, at the second stop. One of those cities was meant to be a one-month stop, and I stayed there eleven years. My relationship ended on that trip too. In September, weeks before leaving, the majority of my company had already passed into other hands. Nobody travels with only one story."
+  },
+  "es": {
+    "title": "Una mochila y la vuelta al mundo",
+    "body": "En 2014 necesitaba viajar. Leí un libro que hablaba de lo poco que alguien necesita en su mochila, y me pasó lo de siempre: yo no he querido nunca otra cosa que estar fuera de contexto. Así que monté un plan: dar la vuelta al mundo con mi empresa, llevando nuestros principios a los sitios donde se estaba inventando el futuro. Salimos cuatro y acabamos separados todos, en la segunda parada. Una de esas ciudades era una escala de un mes, y me quedé allí once años. Mi relación también terminó en aquel viaje. En septiembre, semanas antes de salir, la mayoría de mi empresa había pasado ya a otras manos. Nadie viaja con un solo relato."
+  }
+}

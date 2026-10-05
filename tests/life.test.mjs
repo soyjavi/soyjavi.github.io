@@ -123,7 +123,7 @@ test("density by year counts the weights of each year and covers every year sinc
   assert.equal(bars.length, Math.floor(TODAY) - START + 1);
   assert.deepEqual(bars.map((bar) => bar.year), Array.from({ length: bars.length }, (_, k) => START + k));
   assert.equal(Math.max(...bars.map((bar) => bar.value)), 1);
-  assert.equal(bars.find((bar) => bar.year === 1997).value, 0);
+  assert.equal(bars.find((bar) => bar.year === 1999).value, 0);
   assert.ok(bars.find((bar) => bar.year === 2020).value > bars.find((bar) => bar.year === 2013).value);
 });
 
@@ -133,13 +133,13 @@ test("a thread is active around its own memories and quiet elsewhere, and dust f
   const family = life.threads.indexOf("family");
   const craft = life.threads.indexOf("craft");
   assert.ok(activityAt(profile, 2020.5, family) > 0.6, "the children make 2020 a family year");
-  assert.ok(activityAt(profile, 2008, family) < 0.05);
+  assert.ok(activityAt(profile, 2001.5, family) < 0.05);
   assert.ok(activityAt(profile, 2001.5, craft) > 0.5);
   const random = seeded(3);
   const draws = Array.from({ length: 4000 }, () => assign(profile, 2022.2, random));
   const share = (item) => draws.filter((drawn) => drawn === item).length / draws.length;
-  assert.ok(share(family) > share(craft), "a family year draws more family dust");
-  assert.ok(share(life.threads.indexOf("body")) > 0.01, "every thread keeps a trace of dust");
+  assert.ok(share(craft) > share(life.threads.indexOf("learning")), "a craft year draws more craft dust");
+  assert.ok(share(life.threads.indexOf("learning")) > 0.01, "every thread keeps a trace of dust");
 });
 
 test("the memories are clouds around each milestone plus a trail of days, each dot with its centre", () => {

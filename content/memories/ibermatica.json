@@ -3,14 +3,21 @@
   "kind": "professional",
   "weight": 2,
   "threads": [
-    "craft"
+    "craft",
+    "family"
+  ],
+  "people": [
+    "aitor-trayectoria-profesional"
+  ],
+  "links": [
+    "four-years-dated-by-doing"
   ],
   "en": {
-    "title": "Ibermática",
-    "body": "I join as Senior Developer: C#, Java, C++, WPF and Oracle, until 2011."
+    "title": "The same house my brother had passed through",
+    "body": "On 19 June 2006 I joined a consultancy. The coincidence with my brother came later: he had also passed through there, as head of innovation, and that is the first point where our two careers crossed.\n\nWe had never looked for it. Each of us had trained on his own and gone off down different roads, and still we ended up in the same house, in different years. Of everything I have done with my trade, that coincidence is the one that has made me look back the most."
   },
   "es": {
-    "title": "Ibermática",
-    "body": "Entro como Senior Developer: C#, Java, C++, WPF y Oracle, hasta 2011."
+    "title": "La misma casa por la que había pasado mi hermano",
+    "body": "El 19 de junio de 2006 entré a trabajar en una consultora. La coincidencia con mi hermano llegó después: él también había pasado por allí, como responsable de innovación, y es el primer punto en que se cruzaron las carreras de los dos.\n\nNunca lo habíamos buscado. Cada uno se había formado por su lado y había tirado por caminos distintos, y aun así acabamos en la misma casa, en años diferentes. De todo lo que he hecho con mi oficio, esa casualidad es la que más me ha hecho mirar atrás."
   }
 }

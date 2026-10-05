@@ -1,0 +1,29 @@
+{
+  "date": "1988",
+  "kind": "personal",
+  "weight": 2,
+  "threads": [
+    "family",
+    "home"
+  ],
+  "people": [
+    "abuela-maria-luz",
+    "aitor",
+    "francisco-javier",
+    "laura-toribio",
+    "merche"
+  ],
+  "places": [
+    "colegio-herrieztegui",
+    "galdacano",
+    "galicia"
+  ],
+  "en": {
+    "title": "The Basques in their grandparents' house",
+    "body": "It happened right after the carnival. My mother took my brother and me to her parents' house, far from everything we knew, and we stayed three or four months. I never set foot in a school in all that time: she taught us at home with exercise books.\n\nWe were the Basques, and it showed. My grandparents had an accent of their own, but out there everyone spoke a language we did not. I made my first communion in that village, in a borrowed suit, a little off the record. I remember the phone calls with my father. I do not look back on those months badly."
+  },
+  "es": {
+    "title": "Los vascos en casa de los abuelos",
+    "body": "Fue justo después de los carnavales. Mi madre nos llevó a mi hermano y a mí a casa de sus padres, lejos de todo lo nuestro, y allí estuvimos tres o cuatro meses. No pisé la escuela en todo ese tiempo: mi madre nos ponía cuadernillos y nos enseñaba en casa.\n\nÉramos los vascos, y se notaba. Los abuelos tenían su acento, pero allí todo el mundo hablaba en su lengua y nosotros no. Hice la primera comunión en aquel pueblo, con un traje prestado y un poco de tapadillo. Recuerdo las llamadas con mi padre. No guardo un mal recuerdo de aquellos meses."
+  }
+}

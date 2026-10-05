@@ -1,0 +1,23 @@
+{
+  "date": "2026-08",
+  "kind": "personal",
+  "weight": 1,
+  "threads": [
+    "home"
+  ],
+  "places": [
+    "bali"
+  ],
+  "links": [
+    "road-trip-kanchanaburi-ayutthaya-2026",
+    "viaje-2014-vuelta-al-mundo"
+  ],
+  "en": {
+    "title": "The country before the tourists",
+    "body": "What I loved about that country was its naivety: that seeing a foreigner outside the tourist areas was still something rare. On one of my first trips I was walking with no destination through a town of ruins when two teenage girls came up to me, amazed that my arms and legs were covered in hair. To me it was the most ordinary thing in the world; to them, a discovery.\n\nThat astonishment in both directions was the charm, and it is exactly what tourism keeps erasing. I have gone back to places that in my memory were towns of backpackers and are now an amusement park. I do not miss the country: I miss that way of looking."
+  },
+  "es": {
+    "title": "El país que había antes de los turistas",
+    "body": "Lo que me enamoró de aquel país fue su ingenuidad: que ver a un extranjero fuera de las zonas turísticas siguiera siendo algo raro. En uno de mis primeros viajes paseaba sin rumbo por un pueblo de ruinas cuando se me acercaron dos quinceañeras, asombradas de que tuviera los brazos y las piernas llenos de pelo. Para mí era lo más normal del mundo; para ellas, un hallazgo.\n\nAquel asombro de ida y vuelta era el encanto, y es justo lo que el turismo va borrando. He vuelto a sitios que en mi memoria eran pueblos de mochileros y ahora son un parque de atracciones. No echo de menos el país: echo de menos esa mirada."
+  }
+}

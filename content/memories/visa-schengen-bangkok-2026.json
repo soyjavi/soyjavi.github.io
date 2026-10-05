@@ -1,0 +1,25 @@
+{
+  "date": "2026-09",
+  "kind": "personal",
+  "weight": 3,
+  "threads": [
+    "home",
+    "family"
+  ],
+  "people": [
+    "benji",
+    "eki",
+    "yuri"
+  ],
+  "links": [
+    "relocation-hua-hin"
+  ],
+  "en": {
+    "title": "The papers to go back",
+    "body": "On 18 September we went to the capital with my wife to get her visa. That day the idea I had been turning over for months stopped being a possibility and became a decision: go back to my own country in December, for a whole month, to look for the place. It is not the move yet, it is a month of research. What I want written down, because it is what really moves me, is this: I want something in the mountains, far from the noise and from social media, back to my origins, to retire with a vegetable garden and a family to look after, and to try to teach everything I have learned. It is not a change of house for work. It is the last stage, and we decided it together."
+  },
+  "es": {
+    "title": "Los papeles para volver",
+    "body": "El 18 de septiembre fuimos a la capital con mi mujer a sacar su visado. Ese día la idea que llevaba meses dándome vueltas dejó de ser una posibilidad y se convirtió en una decisión: volver a mi país en diciembre, un mes entero, a buscar el sitio. Todavía no es la mudanza, es un mes de investigación. Lo que quiero dejar escrito, porque es lo que de verdad me mueve, es esto: quiero algo en la montaña, lejos del ruido y de las redes sociales, volver a los orígenes, retirarme con un huerto y una familia que cuidar, e intentar enseñar todo lo que he aprendido. No es un cambio de casa por trabajo. Es la última etapa, y la decidimos juntos."
+  }
+}

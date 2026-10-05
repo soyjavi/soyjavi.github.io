@@ -1,25 +1,20 @@
 {
   "date": "2025-02",
   "kind": "personal",
-  "quiet": true,
-  "weight": 2,
+  "weight": 3,
   "threads": [
     "family"
   ],
   "people": [
-    "jose",
-    "lucy",
-    "merche"
+    "abuelo-jose"
   ],
-  "places": [
-    "galicia"
-  ],
+  "quiet": true,
   "en": {
-    "title": "My grandfather José dies",
-    "body": "My mother's father, a Galician merchant seaman from Cangas do Morrazo."
+    "title": "The grandfather who came back from the sea",
+    "body": "My grandfather on my mother's side was a Galician merchant sailor. He had come north with my grandmother when they were young, to build a life, and there they raised four daughters; the eldest was my mother. In my memory his figure is a coming and going: long absences and long returns.\n\nWhat I keep is the moustache, the hoarse voice and the smile. I do not remember ever seeing him in a bad mood. He died on 22 February 2025."
   },
   "es": {
-    "title": "Muere mi abuelo José",
-    "body": "El padre de mi madre, marino mercante gallego de Cangas do Morrazo."
+    "title": "El abuelo que volvía de la mar",
+    "body": "Mi abuelo materno era marino mercante y gallego. Se había venido al norte con la abuela, muy joven, a hacer una vida, y allí criaron a cuatro hijas; la mayor era mi madre. En mi memoria su figura es un ir y venir: largas ausencias y regresos, largos también.\n\nLo que guardo es el bigote, la voz ronca y la sonrisa. No recuerdo haberle visto nunca de mal humor. Murió el 22 de febrero de 2025."
   }
 }

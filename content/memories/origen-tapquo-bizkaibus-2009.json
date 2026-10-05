@@ -1,0 +1,23 @@
+{
+  "date": "2009",
+  "approx": true,
+  "kind": "professional",
+  "weight": 3,
+  "threads": [
+    "ventures",
+    "craft"
+  ],
+  "people": [
+    "aitor-trayectoria-profesional",
+    "aitor",
+    "iker-perez-de-albeniz"
+  ],
+  "en": {
+    "title": "An API, a front end and a message",
+    "body": "It started with a chance find: someone had built, on his own, an API and an app to check the bus timetables of the province. I had a different phone, so his app was no use to me, but his service was. I built my own front end on top of it with a framework of my own, in HTML5, and wrote to him to show him.\n\nEverything came from there. I brought the idea, open-source multiplatform software, and the product. I told my brother afterwards, and he ended up sitting down with us: he handled the money, which is what he was studying. In October 2011 the three of us founded the company with equal shares. No market study, no business plan: an API, a front end built at home and a message."
+  },
+  "es": {
+    "title": "Una API, un frontal y un mensaje",
+    "body": "Todo empezó con un hallazgo casual: alguien había montado por su cuenta una API y una aplicación para consultar los horarios de los autobuses de la provincia. Yo tenía otro teléfono, así que su app no me servía, pero su servicio sí. Me construí mi propio frontal con un framework casero, en HTML5, y le escribí para enseñárselo.\n\nDe ahí salió todo. Yo puse la idea, software libre y multiplataforma, y el producto. A mi hermano se lo conté después, y acabó sentándose con nosotros: él llevaba las finanzas, que era lo que estudiaba. En octubre de 2011 constituimos la sociedad los tres a partes iguales. Sin estudio de mercado ni plan de negocio: una API, un frontal hecho en casa y un mensaje."
+  }
+}

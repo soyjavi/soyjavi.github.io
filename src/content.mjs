@@ -4,6 +4,9 @@ import { ageAt, ageIdOf, precisionOf, timeOfDate, years } from "../assets/js/lif
 
 export const LANGS = ["en", "es"];
 export const KINDS = ["personal", "professional", "product", "education"];
+export const BODY = { max: 900, paragraphs: 2 };
+export const paragraphsOf = (text) => String(text).split(/\n\s*\n/).map((part) => part.trim()).filter(Boolean);
+export const bodyProblem = (text) => (String(text).length > BODY.max ? `body is ${String(text).length} characters, the limit is ${BODY.max}` : paragraphsOf(text).length > BODY.paragraphs ? `body has ${paragraphsOf(text).length} paragraphs, the limit is ${BODY.paragraphs}` : null);
 export const root = fileURLToPath(new URL("..", import.meta.url));
 export const CONTENT = new URL("../content/", import.meta.url);
 
@@ -18,6 +21,7 @@ export function readMemories(dir = CONTENT) {
       const memory = { id, ...JSON.parse(readFileSync(new URL(file, folder), "utf8")) };
       if (!precisionOf(String(memory.date))) throw new Error(`content/memories/${file}: date "${memory.date}" must be YYYY or YYYY-MM`);
       for (const lang of LANGS) if (!memory[lang]?.title || !memory[lang]?.body) throw new Error(`content/memories/${file}: needs "${lang}" with a title and a body`);
+      for (const lang of LANGS) if (bodyProblem(memory[lang].body)) throw new Error(`content/memories/${file} (${lang}): ${bodyProblem(memory[lang].body)}`);
       return memory;
     })
     .sort((a, b) => dateKey(a.date) - dateKey(b.date) || (a.order ?? 0) - (b.order ?? 0) || a.id.localeCompare(b.id));

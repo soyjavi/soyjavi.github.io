@@ -3,14 +3,15 @@
   "kind": "personal",
   "weight": 1,
   "threads": [
-    "body"
+    "body",
+    "craft"
   ],
   "en": {
-    "title": "My fight with bedtime",
-    "body": "I struggle to go to bed early and always find a reason to keep working at the computer."
+    "title": "I always find an excuse to keep working",
+    "body": "For a few months now I have been fighting with my sleep schedule. I find it hard to go to bed early and I always find an excuse to stay at the computer, even when I know I pay for it the next day.\n\nIt is one of those things that do not get fixed at once: there is a lot of work, I like what I do, and there is always one more thing to finish. I am writing it here without dressing it up, as an open account with myself."
   },
   "es": {
-    "title": "Mi pelea con el sueño",
-    "body": "Me cuesta acostarme temprano y siempre encuentro una excusa para seguir trabajando en el ordenador."
+    "title": "Siempre encuentro una excusa para seguir trabajando",
+    "body": "Llevo unos meses peleando con mi horario de sueño. Me cuesta acostarme temprano y siempre encuentro una excusa para seguir delante del ordenador, aunque sepa que al día siguiente lo pago.\n\nEs una de esas cosas que no se arreglan de golpe: hay mucho trabajo, me gusta lo que hago, y siempre queda una cosa más por terminar. Lo dejo aquí sin adornos, como una cuenta pendiente conmigo mismo."
   }
 }

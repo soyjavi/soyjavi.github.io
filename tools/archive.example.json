@@ -51,11 +51,11 @@
       ],
       "en": {
         "title": "Title of the first memory",
-        "body": "First person, a short paragraph of one to six sentences, under 600 characters."
+        "body": "First person. One paragraph, or two separated by a blank line.\n\nThe whole text stays under 900 characters."
       },
       "es": {
         "title": "Título del primer recuerdo",
-        "body": "En primera persona, un párrafo corto de una a seis frases, menos de 600 caracteres."
+        "body": "En primera persona. Un párrafo, o dos separados por una línea en blanco.\n\nEl texto entero queda por debajo de 900 caracteres."
       }
     },
     {

@@ -4,8 +4,8 @@ import { chromium } from "playwright-core";
 import { loadContent } from "../../src/content.mjs";
 import { renderSite } from "../../src/site.mjs";
 import { serveStatic } from "../../tools/static.mjs";
-import { layout, years } from "../../assets/js/life.js";
-import { related, strongest, STRONG } from "../../assets/js/explore.js";
+import { layout, skyOf, todayYear, yearRings, years } from "../../assets/js/life.js";
+import { declared, related, strongest, STRONG } from "../../assets/js/explore.js";
 import { archive } from "../fixtures/archive.mjs";
 
 const content = loadContent();
@@ -143,18 +143,38 @@ const touch = async (page, steps) => {
   for (const [type, points] of steps) await client.send("Input.dispatchTouchEvent", { type, touchPoints: points.map(([x, y], id) => ({ x, y, id })) });
 };
 
-const BORN = "01 / Early years · Born in Bilbao";
-const BOOK = "06 / The book";
-const CLONE = "07 / My clone";
+const milestones = content.life.milestones;
+const memory = (id) => milestones.find((entry) => entry.id === id);
+const indexOfMemory = (id) => milestones.findIndex((entry) => entry.id === id);
+const titleOf = (id, lang = "en") => content.dict[lang].life[id].title;
+const hudOf = (id, lang = "en") => `${content.dict[lang].periods[memory(id).period].kicker.split(" · ")[0]} · ${titleOf(id, lang)}`;
+const whenOf = (id) => {
+  const { date, approx } = memory(id);
+  const [year, month] = date.split("-");
+  const text = month ? new Intl.DateTimeFormat("en", { month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(+year, +month - 1, 1))) : year;
+  return approx ? `~${text}` : text;
+};
+const firstOf = (period) => milestones.find((entry) => entry.period === period).id;
+const ringsOf = (id) => {
+  const sky = skyOf(milestones, years(milestones), { periods: content.life.periods, today: todayYear(), threads: content.life.threads });
+  return yearRings(sky.list[content.life.periods.indexOf(memory(id).period)], 8).map((ring) => String(ring.year));
+};
+const FAR = { from: "aprendizaje-continuo-hasta-la-ia", to: "primer-portatil-1996" };
+const COMPANION = memory("tapquo").links[0];
+const BORN = hudOf("born");
+const BOOK = content.dict.en.book.kicker;
+const CLONE = content.dict.en.clone.kicker;
+const HELLO = content.dict.en.contact.kicker;
 const LISTS = [["book", BOOK], ["clone", CLONE]];
-const TAPQUO = "04 / Building a life · TapQuo";
+const TAPQUO = hudOf("tapquo");
+const TAPQUO_TITLE = titleOf("tapquo");
 const PHONE = { hasTouch: true, isMobile: true, viewport: { width: 390, height: 844 } };
 
 test("screen readers and keyboards reach every chapter in immersive mode", async () => {
   const { page, errors, close } = await open();
   await immersive(page);
   const outline = await page.locator("main").ariaSnapshot();
-  for (const text of ["A life, in milestones", "Born in Bilbao", "First job", "Life, not craft", "A book for my children", "A place to keep talking", "Write to me"]) assert.match(outline, new RegExp(text), text);
+  for (const text of ["A life, in milestones", titleOf("born"), titleOf("firstjob"), titleOf("el-trabajo-no-me-define"), "A book for my children", "A place to keep talking", "Write to me"]) assert.ok(outline.includes(text), text);
   assert.match(outline, /link "hello@soyjavi\.com"/);
   assert.deepEqual(await page.locator("main .contact a[href^='http']").evaluateAll((nodes) => nodes.map((node) => node.href)), ["https://twitter.com/soyjavi"], "the contact offers X and nothing else outside the site");
   assert.deepEqual(await page.locator("footer a[href^='http']").evaluateAll((nodes) => nodes.map((node) => node.href)), ["https://twitter.com/soyjavi"], "the footer's Elsewhere is X only");
@@ -168,7 +188,7 @@ test("screen readers and keyboards reach every chapter in immersive mode", async
   assert.equal(await page.locator("#scene").getAttribute("aria-hidden"), "true");
   assert.equal(await page.locator(".card").getAttribute("aria-hidden"), null, "the card is real, focusable content");
   await page.locator("main a[href='mailto:hello@soyjavi.com'].address").focus();
-  await hud(page, "08 / Say hello");
+  await hud(page, HELLO);
   assert.deepEqual(errors, []);
   await close();
 });
@@ -177,7 +197,7 @@ test("the card shows the memory in view, its threads as filters and its related 
   const { page, close } = await open(`/#m-tapquo`);
   await hud(page, TAPQUO);
   assert.equal(await page.locator(".card").getAttribute("data-kind"), "milestone");
-  assert.equal(await page.locator(".card h3").innerText(), "TapQuo");
+  assert.equal(await page.locator(".card h3").innerText(), TAPQUO_TITLE);
   const tapquo = content.life.milestones.find((entry) => entry.id === "tapquo");
   const chips = [...tapquo.threads.map((id) => content.dict.en.threads[id]), ...tapquo.people.map((id) => content.dict.en.people[id])];
   assert.deepEqual(await page.locator(".card .chip").allTextContents(), chips);
@@ -189,10 +209,10 @@ test("the card shows the memory in view, its threads as filters and its related 
   const strong = await page.locator(".card .peer").allTextContents();
   assert.equal(strong.length, Math.min(STRONG, total), "the card lists only the strongest relations");
   assert.equal(strong.length, strongest(marks, at).length);
-  assert.equal(await page.locator("#scene").getAttribute("data-links"), String(strong.length), "a line is drawn to each listed memory");
+  assert.equal(await page.locator("#scene").getAttribute("data-links"), String(declared(marks, at).length), "a line is drawn to each memory he linked");
   await page.locator(".card .expander").click();
   const peers = await page.locator(".card .peer").allTextContents();
-  for (const title of ["GitHub", "The classroom", "I let TapQuo go", "A front end for the Bizkaibus"]) assert.ok(peers.some((text) => text.includes(title)), `${title} is not related`);
+  for (const i of everyone.links) assert.ok(peers.some((text) => text.includes(titleOf(marks[i].id))), `${titleOf(marks[i].id)} is not related`);
   assert.ok(peers.length <= 8);
   assert.ok(peers.length > strong.length);
   await close();
@@ -202,14 +222,15 @@ test("arrows step Earlier and Later in date order, Home and Escape return to the
   const { page, close } = await open();
   await immersive(page);
   await hud(page, "javi");
-  for (const [key, label] of [["ArrowDown", BORN], ["ArrowRight", "01 / Early years · A farmhouse in Plencia"], ["ArrowDown", "01 / Early years · Our first home"], ["ArrowUp", "01 / Early years · A farmhouse in Plencia"], ["PageDown", "01 / Early years · Our first home"], ["PageUp", "01 / Early years · A farmhouse in Plencia"], ["ArrowLeft", BORN]]) {
+  const [second, third] = [hudOf(milestones[1].id), hudOf(milestones[2].id)];
+  for (const [key, label] of [["ArrowDown", BORN], ["ArrowRight", second], ["ArrowDown", third], ["ArrowUp", second], ["PageDown", third], ["PageUp", second], ["ArrowLeft", BORN]]) {
     await page.keyboard.press(key);
     await hud(page, label);
   }
   await page.keyboard.press("Escape");
   await hud(page, "javi");
   await page.keyboard.press("End");
-  await hud(page, "08 / Say hello");
+  await hud(page, HELLO);
   await page.keyboard.press("Home");
   await hud(page, "javi");
   await close();
@@ -219,7 +240,7 @@ test("section links and hashes open their station, not the hero, and the address
   const { page, close } = await open("/#book");
   await hud(page, BOOK);
   await goTo(page, "contact");
-  await hud(page, "08 / Say hello");
+  await hud(page, HELLO);
   await goTo(page, "m-tapquo");
   await hud(page, TAPQUO);
   await goTo(page, "period-midlife");
@@ -238,9 +259,9 @@ test("section links and hashes open their station, not the hero, and the address
 
 test("landing or reloading on a memory still renders the scene", async () => {
   const { page, errors, close } = await open("/#m-mirai");
-  await hud(page, "05 / Midlife · Mirai");
+  await hud(page, hudOf("mirai"));
   await page.reload({ waitUntil: "load" });
-  await hud(page, "05 / Midlife · Mirai");
+  await hud(page, hudOf("mirai"));
   await page.waitForTimeout(1500);
   assert.deepEqual(errors.filter((message) => /GL_INVALID|shader|WebGL/i.test(message)), []);
   await close();
@@ -253,7 +274,7 @@ test("hashes that are malformed or look like object keys never break the page", 
     await hud(page, "javi");
     assert.equal(await page.locator(".card-form form.waitlist").count(), 3, hash);
     await press(page, "ArrowDown", 2);
-    await hud(page, "01 / Early years · A farmhouse in Plencia");
+    await hud(page, hudOf(milestones[1].id));
     assert.deepEqual(errors, [], hash);
     await close();
   }
@@ -398,7 +419,7 @@ test("browsers without WebGL2 get the flat page with every section readable and 
   });
   await page.waitForTimeout(600);
   assert.equal(await page.evaluate(() => document.documentElement.className), "flat");
-  for (const id of ["top", "period-early", "m-born", "m-lifenotjob", "book", "clone", "contact"]) assert.ok(await page.locator(`#${id}`).isVisible(), id);
+  for (const id of ["top", "period-early", "m-born", `m-${milestones.at(-2).id}`, "book", "clone", "contact"]) assert.ok(await page.locator(`#${id}`).isVisible(), id);
   assert.equal(await page.locator("[data-find], [data-guide-toggle], [data-surprise], [data-legend-toggle], [data-sound], [data-more-toggle]").evaluateAll((nodes) => nodes.filter((node) => node.getClientRects().length).length), 0, "none of the controls");
   assert.equal(await page.locator("[data-theme-toggle]").first().isVisible(), true, "the theme switch stays");
   assert.equal(await page.locator(".card").count(), 0);
@@ -422,7 +443,7 @@ test("a short or zoomed-in window gets the complete flat page, with the form, an
   await immersive(page);
   await page.setViewportSize({ width: 640, height: 400 });
   await flat(page);
-  for (const id of ["top", "period-early", "m-born", "m-lifenotjob", "book", "clone", "contact"]) assert.ok(await page.locator(`#${id}`).isVisible(), id);
+  for (const id of ["top", "period-early", "m-born", `m-${milestones.at(-2).id}`, "book", "clone", "contact"]) assert.ok(await page.locator(`#${id}`).isVisible(), id);
   for (const [section, list] of [["top", "hero"], ["book", "book"], ["clone", "clone"]]) {
     assert.ok(await page.locator(`#waitlist-${list}-email`).isVisible(), `the ${list} form is on the page`);
     assert.equal(await page.locator(`#${section} form.waitlist[data-list=${list}]`).count(), 1, `the ${list} form is back in its section`);
@@ -500,15 +521,65 @@ test("a right drag moves the picture and stops following the memory", async () =
   const { page, close } = await open("/#m-tapquo");
   await hud(page, TAPQUO);
   await settled(page);
-  const before = await cloudOf(page, "TapQuo");
+  const before = await cloudOf(page, TAPQUO_TITLE);
   await page.mouse.move(800, 420);
   await page.mouse.down({ button: "right" });
   await page.mouse.move(900, 420, { steps: 6 });
   await page.mouse.up({ button: "right" });
   await settled(page);
-  const after = await cloudOf(page, "TapQuo");
+  const after = await cloudOf(page, TAPQUO_TITLE);
   assert.ok(after.cx - before.cx > 60, `the memory moved ${(after.cx - before.cx).toFixed(0)}px with the pointer`);
   assert.equal(await page.locator(".hud").textContent(), TAPQUO);
+  await close();
+});
+
+test("the sky is drawn at the pace of film, never faster, and a hidden tab draws once a second", async () => {
+  const { page, close } = await open("/", {
+    before: (context) =>
+      context.addInitScript(() => {
+        window.__draws = 0;
+        const clear = WebGL2RenderingContext.prototype.clear;
+        WebGL2RenderingContext.prototype.clear = function (...args) {
+          window.__draws++;
+          return clear.apply(this, args);
+        };
+      }),
+  });
+  await immersive(page);
+  await settled(page);
+  const count = async (milliseconds) => {
+    const before = await page.evaluate(() => window.__draws);
+    await page.waitForTimeout(milliseconds);
+    return (await page.evaluate(() => window.__draws)) - before;
+  };
+  const visible = await count(3000);
+  assert.ok(visible <= 3 * 24 + 6, `${visible} draws in 3 s: never faster than 24 a second`);
+  assert.ok(visible >= 3 * 8, `${visible} draws in 3 s: it still draws`);
+  await page.evaluate(() => {
+    Object.defineProperty(document, "hidden", { configurable: true, get: () => true });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await page.waitForTimeout(1500);
+  const hidden = await count(4000);
+  assert.ok(hidden >= 2 && hidden <= 5, `${hidden} draws in 4 s while hidden: one a second`);
+  await page.evaluate(() => {
+    delete document.hidden;
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await page.waitForTimeout(500);
+  assert.ok((await count(2000)) >= 16, "it goes back to film pace when the tab is shown");
+  await close();
+});
+
+test("going back to the whole life lets go of a filter chosen from a card, so no jump lines or counts are left behind", async () => {
+  const { page, close } = await open("/#m-tapquo");
+  await hud(page, TAPQUO);
+  await page.locator(".card .chip", { hasText: "Ventures" }).click();
+  assert.equal(await page.locator(".stage").getAttribute("data-filter"), "threads:ventures");
+  await page.locator(".card-close").click();
+  await hud(page, "javi");
+  assert.equal(await page.locator(".stage").getAttribute("data-filter"), "", "the filter is gone with the memory");
+  assert.equal(await page.locator(".galaxy-count:not(:empty)").count(), 0, "no galaxy keeps a count");
   await close();
 });
 
@@ -518,7 +589,7 @@ test("pointing at a cloud names it, a click opens it and a click on empty space 
   await settled(page);
   await page.waitForTimeout(800);
   const card = await box(page, ".card");
-  const heavy = (await tagsShown(page)).find((tag) => tag.title !== "TapQuo" && tag.cx > card.right + 20 && tag.cx < 1240 && tag.cy > 120 && tag.cy < 640);
+  const heavy = (await tagsShown(page)).find((tag) => tag.title !== TAPQUO_TITLE && tag.cx > card.right + 20 && tag.cx < 1240 && tag.cy > 120 && tag.cy < 640);
   assert.ok(heavy, "a related memory is named in the free area");
   await page.mouse.move(640, 60);
   await page.mouse.move(heavy.cx, heavy.cy);
@@ -538,7 +609,7 @@ test("pointing at a cloud names it, a click opens it and a click on empty space 
 
 test("choosing a thread dims the rest, in the controls and in the card, and Escape lets go step by step", async () => {
   const { page, close } = await open("/#m-running");
-  await hud(page, "04 / Building a life · I start running");
+  await hud(page, hudOf("running"));
   await settled(page);
   assert.equal(await page.locator(".stage").getAttribute("data-filter"), "");
   assert.equal(await page.locator(".legend").isVisible(), false, "the threads wait behind Filter");
@@ -558,7 +629,7 @@ test("choosing a thread dims the rest, in the controls and in the card, and Esca
   await page.locator(".legend button", { hasText: "Family" }).click();
   await page.keyboard.press("Escape");
   assert.equal(await page.locator(".stage").getAttribute("data-filter"), "", "the first Escape lets go of the thread");
-  assert.equal(await page.locator(".hud").textContent(), "04 / Building a life · I start running", "and keeps the memory");
+  assert.equal(await page.locator(".hud").textContent(), hudOf("running"), "and keeps the memory");
   await page.keyboard.press("Escape");
   await hud(page, "javi");
   await close();
@@ -567,31 +638,33 @@ test("choosing a thread dims the rest, in the controls and in the card, and Esca
 test("related memories are buttons that open the other memory, and Earlier and Later follow the filter", async () => {
   const { page, close } = await open("/#m-tapquo");
   await hud(page, TAPQUO);
+  const linked = memory("tapquo").links[0];
   await page.locator(".card .expander").click();
-  await page.locator(".card .peer", { hasText: "GitHub" }).click();
-  await hud(page, "04 / Building a life · GitHub");
+  await page.locator(".card .peer", { hasText: titleOf(linked) }).click();
+  await hud(page, hudOf(linked));
   assert.equal(await page.evaluate(() => document.activeElement.classList.contains("card")), true, "the keyboard stays in the card");
   assert.ok(Number(await page.locator("#scene").getAttribute("data-links")) >= 1);
 
   await goTo(page, "m-running");
-  await hud(page, "04 / Building a life · I start running");
+  await hud(page, hudOf("running"));
+  const at = indexOfMemory("running");
   assert.equal(await page.locator(".step[data-step=next]").textContent(), "Later →");
   await page.locator(".step[data-step=next]").click();
-  await hud(page, "04 / Building a life · Minube");
+  await hud(page, hudOf(milestones[at + 1].id));
   await page.locator(".step[data-step=previous]").click();
-  await hud(page, "04 / Building a life · I start running");
+  await hud(page, hudOf("running"));
   await page.locator(".card .chip", { hasText: "Body" }).click();
-  for (const label of ["05 / Midlife · My fight with bedtime", "05 / Midlife · My first race", "05 / Midlife · First karate class with Eki"]) {
+  for (const entry of milestones.slice(at + 1).filter((candidate) => candidate.threads.includes("body"))) {
     await page.locator(".step[data-step=next]").click();
-    await hud(page, label);
+    await hud(page, hudOf(entry.id));
   }
   assert.equal(await page.locator(".step[data-step=next]").isVisible(), false, "the thread ends at its last memory");
   await page.keyboard.press("Escape");
   assert.equal(await page.locator(".stage").getAttribute("data-filter"), "");
-  await goTo(page, "m-lifenotjob");
-  await hud(page, "05 / Midlife · Life, not craft");
+  await goTo(page, `m-${milestones.at(-2).id}`);
+  await hud(page, hudOf(milestones.at(-2).id));
   await page.locator(".step[data-step=next]").click();
-  await hud(page, "05 / Midlife · Life at 45");
+  await hud(page, hudOf(milestones.at(-1).id));
   await page.locator(".step[data-step=next]").click();
   await hud(page, BOOK);
   await close();
@@ -606,21 +679,27 @@ test("the finder understands accents and thread names, opens with a slash and cl
   assert.equal(await page.locator(".finder").isVisible(), true);
   assert.equal(await page.evaluate(() => document.activeElement.id), "finder-input");
   assert.equal(await page.locator("#finder-input").inputValue(), "", "the slash is not typed");
-  await page.keyboard.type("ibermatica");
-  assert.deepEqual(await page.locator(".finder .peer").allTextContents(), ["Jun 2006Ibermática"]);
+  await page.keyboard.type("caserio");
+  assert.deepEqual(await page.locator(".finder .peer:not(.show)").allTextContents(), [`${whenOf("born-among-cows")}${titleOf("born-among-cows")}`]);
+  assert.equal(await page.locator(".finder .peer.show").first().textContent(), `1Show only ${content.dict.en.places["caserio-iturriagas"]}`, "the place is offered as a filter");
+  await page.locator(".finder .peer:not(.show)").click();
+  await hud(page, hudOf("born-among-cows"));
+  assert.equal(await page.locator(".finder").isVisible(), false);
+  await page.keyboard.press("/");
+  await page.keyboard.type("courtyard");
   await page.keyboard.press("Enter");
-  await hud(page, "04 / Building a life · Ibermática");
+  await hud(page, hudOf("courtyard-years"));
   assert.equal(await page.locator(".finder").isVisible(), false);
   await page.keyboard.press("/");
   await page.keyboard.type("body");
   const texts = await page.locator(".finder .peer").allTextContents();
   const body = content.life.milestones.filter((entry) => entry.threads.includes("body")).length;
   assert.equal(await page.locator(".finder .peer.show").first().textContent(), `${body}Show only Body`, "the thread is offered as a filter with its count");
-  for (const title of ["Taekwondo", "I start running"]) assert.ok(texts.some((text) => text.includes(title)), `${title} is a body memory`);
+  for (const id of ["childhood-taekwondo", "temporadas-snowboard"]) assert.ok(texts.some((text) => text.includes(titleOf(id))), `${titleOf(id)} is a body memory`);
   await page.keyboard.press("ArrowDown");
   assert.equal(await page.evaluate(() => document.activeElement.classList.contains("peer")), true, "the arrows walk the results");
-  await page.locator(".finder .peer", { hasText: "I start running" }).click();
-  await hud(page, "04 / Building a life · I start running");
+  await page.locator(".finder .peer", { hasText: titleOf("childhood-taekwondo") }).click();
+  await hud(page, hudOf("childhood-taekwondo"));
   assert.equal(await page.locator(".finder").isVisible(), false);
   await page.keyboard.press("/");
   await page.keyboard.type("zzzz");
@@ -628,7 +707,7 @@ test("the finder understands accents and thread names, opens with a slash and cl
   assert.equal(await page.locator(".finder .none").innerText(), "No memory matches");
   await page.keyboard.press("Escape");
   assert.equal(await page.locator(".finder").isVisible(), false);
-  assert.equal(await page.locator(".hud").textContent(), "04 / Building a life · I start running", "Escape only closed the finder");
+  assert.equal(await page.locator(".hud").textContent(), hudOf("childhood-taekwondo"), "Escape only closed the finder");
   await close();
 });
 
@@ -697,13 +776,15 @@ test("the timeline rail shows the years and the density and jumps to a decade or
   const { page, close } = await open("/", { colorScheme: "dark" });
   await immersive(page);
   assert.equal(await page.locator(".rail").isVisible(), true);
-  assert.equal(await page.locator(".rail-bars i").count(), 47);
+  assert.equal(await page.locator(".rail-bars i").count(), Math.max(2026, Math.floor(Math.max(...years(milestones)))) - 1980 + 1);
   assert.deepEqual(await page.locator(".rail-years a").allInnerTexts(), ["1980", "1990", "2000", "2010", "2020"]);
+  const moments = years(milestones);
+  const startOf = (decade) => milestones.find((_, i) => moments[i] >= decade && moments[i] < decade + 10).id;
   await page.locator(".rail-years a", { hasText: "2000" }).click();
-  await hud(page, "03 / Youth · First job");
+  await hud(page, hudOf(startOf(2000)));
   await page.locator(".rail-years a", { hasText: "2020" }).focus();
   await page.keyboard.press("Enter");
-  await hud(page, "05 / Midlife · Lookiero");
+  await hud(page, hudOf(startOf(2020)));
   await page.locator(".rail-home").click();
   await hud(page, "javi");
   await close();
@@ -716,7 +797,7 @@ test("the rail cursor follows the memory in view and the whole life is a click a
   const atBook = await cursor();
   assert.ok(atBook > 90 && atBook < 97, `${atBook}% at the book`);
   await goTo(page, "m-firstjob");
-  await hud(page, "03 / Youth · First job");
+  await hud(page, hudOf("firstjob"));
   const atFirstJob = await cursor();
   assert.ok(atFirstJob > 40 && atFirstJob < 43, `${atFirstJob}% at the first job`);
   await page.locator(".rail-home").click();
@@ -731,16 +812,18 @@ test("pressing or dragging along the rail jumps to the nearest memory", async ()
   const track = await page.locator(".rail-track").boundingBox();
   const at = (year) => track.x + ((year - 1980) / (2031 - 1980)) * track.width;
   const y = track.y + track.height / 2;
+  const moments = years(milestones);
+  const nearest = (year) => milestones.reduce((best, entry, i) => (Math.abs(moments[i] - year) < Math.abs(moments[indexOfMemory(best)] - year) ? entry.id : best), milestones[0].id);
   await page.mouse.click(at(2014.7), y);
-  await hud(page, "04 / Building a life · I leave Spain");
+  await hud(page, hudOf(nearest(2014.7)));
   await page.mouse.move(at(2001.4), y);
   await page.mouse.down();
-  await hud(page, "03 / Youth · First job");
+  await hud(page, hudOf(nearest(2001.4)));
   await page.mouse.move(at(1994.4), y, { steps: 8 });
-  await hud(page, "03 / Youth · Tortillas for a school trip");
+  await hud(page, hudOf(nearest(1994.4)));
   await page.mouse.up();
   await page.mouse.move(at(2022.1), y);
-  assert.match(await page.locator(".rail-tip").innerText(), /Feb 2022 · Mirai/);
+  assert.equal(await page.locator(".rail-tip").innerText(), `${whenOf(nearest(2022.1))} · ${titleOf(nearest(2022.1))}`);
   await close();
 });
 
@@ -770,22 +853,22 @@ test("a galaxy's name frames its galaxy and its card offers the first memory of 
   await hud(page, "javi");
   await page.waitForTimeout(5500);
   const target = await page.evaluate(() => {
-    const node = [...document.querySelectorAll(".labels .galaxy")].find((item) => item.style.visibility === "visible" && +item.style.opacity > 0.5 && item.dataset.go === "period-youth");
+    const node = [...document.querySelectorAll(".labels .galaxy")].find((item) => item.style.visibility === "visible" && +item.style.opacity > 0.5 && item.dataset.go === "period-school");
     const rect = node?.getBoundingClientRect();
     return rect && { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
   });
-  assert.ok(target, "the craft galaxy is named at the whole life");
+  assert.ok(target, "the school galaxy is named at the whole life");
   await page.mouse.click(target.x, target.y);
-  await hud(page, content.dict.en.periods.youth.kicker);
-  assert.equal(await page.locator(".stage").getAttribute("data-period"), "youth", "the age is framed, no memory is open");
+  await hud(page, content.dict.en.periods.school.kicker);
+  assert.equal(await page.locator(".stage").getAttribute("data-period"), "school", "the age is framed, no memory is open");
   assert.equal(await page.locator(".card .period-head").count(), 1, "the card tells the age");
   assert.match(await page.locator(".card .period-start").innerText(), /^START WITH /i);
-  await page.locator(".labels .galaxy[data-go='period-youth']").click();
+  await page.locator(".labels .galaxy[data-go='period-school']").click();
   await hud(page, "javi");
-  await page.locator(".labels .galaxy[data-go='period-youth']").click();
-  await hud(page, content.dict.en.periods.youth.kicker);
+  await page.locator(".labels .galaxy[data-go='period-school']").click();
+  await hud(page, content.dict.en.periods.school.kicker);
   await page.locator(".card .period-start").click();
-  await hud(page, "03 / Youth · First job");
+  await hud(page, hudOf(firstOf("school")));
   await close();
 });
 
@@ -825,7 +908,7 @@ const keepClear = async (page, where) => {
 };
 
 test("the memory in view is named beside its cloud and no label touches another, the card, the controls or the edge", async () => {
-  for (const [id, hudLabel, title] of [["m-tapquo", TAPQUO, "TapQuo"], ["m-github", "04 / Building a life · GitHub", "GitHub"], ["m-satoshi", "05 / Midlife · Satoshi Ltd.", "Satoshi Ltd."], ["m-child1", "05 / Midlife · My first child is born", "My first child is born"]]) {
+  for (const [id, hudLabel, title] of ["tapquo", "satoshi-ltd", "paternidad", "born"].map((id) => [`m-${id}`, hudOf(id), titleOf(id)])) {
     const { page, close } = await open(`/#${id}`);
     await hud(page, hudLabel);
     await settled(page);
@@ -847,7 +930,7 @@ test("the memory in view is named beside its cloud and no label touches another,
   await settled(phone.page);
   await phone.page.waitForTimeout(500);
   const shown = await keepClear(phone.page, "phone");
-  assert.ok(shown.some((tag) => tag.title === "TapQuo"), "the memory is named on a phone too");
+  assert.ok(shown.some((tag) => tag.title === TAPQUO_TITLE), "the memory is named on a phone too");
   await phone.close();
 });
 
@@ -856,7 +939,7 @@ test("the card and the controls fit the screen at every kind of station, on a la
     const mobile = viewport.width < 600;
     const { page, close } = await open("/", { viewport, hasTouch: mobile, isMobile: mobile });
     await immersive(page);
-    for (const [id, label] of [["top", "javi"], ["m-tapquo", TAPQUO], ["book", BOOK], ["clone", CLONE], ["contact", "08 / Say hello"]]) {
+    for (const [id, label] of [["top", "javi"], ["m-tapquo", TAPQUO], ["book", BOOK], ["clone", CLONE], ["contact", HELLO]]) {
       await goTo(page, id);
       await hud(page, label);
       await page.waitForTimeout(500);
@@ -871,7 +954,7 @@ test("the card and the controls fit the screen at every kind of station, on a la
       assert.ok(explore.left >= -1 && explore.right <= viewport.width + 1, `${where}: the controls are off to the side`);
       if (id === "m-tapquo") {
         await settled(page);
-        const cloud = await cloudOf(page, "TapQuo");
+        const cloud = await cloudOf(page, TAPQUO_TITLE);
         assert.ok(cloud, `${where}: the memory is not named`);
         assert.ok(!(cloud.cx >= card.left && cloud.cx <= card.right && cloud.cy >= card.top && cloud.cy <= card.bottom), `${where}: the memory is behind the card (${cloud.cx.toFixed(0)}, ${cloud.cy.toFixed(0)})`);
         assert.ok(cloud.cx > 0 && cloud.cx < viewport.width && cloud.cy > 0 && cloud.cy < viewport.height, `${where}: the memory is off screen`);
@@ -980,12 +1063,12 @@ test("the thread filters are named and the controls stay on one row in both lang
 });
 
 test("on a phone a tap opens a memory, one finger turns the scene and the card keeps below the controls", async () => {
-  const { page, close } = await open("/#m-satoshi", PHONE);
-  await hud(page, "05 / Midlife · Satoshi Ltd.");
+  const { page, close } = await open("/#m-satoshi-ltd", PHONE);
+  await hud(page, hudOf("satoshi-ltd"));
   await settled(page);
   await page.waitForTimeout(800);
   const top = (await box(page, ".card")).top;
-  const target = (await tagsShown(page)).find((tag) => tag.title !== "Satoshi Ltd." && tag.cy > 150 && tag.cy < top - 20 && tag.cx > 20 && tag.cx < 370);
+  const target = (await tagsShown(page)).find((tag) => tag.title !== titleOf("satoshi-ltd") && tag.cy > 150 && tag.cy < top - 20 && tag.cx > 20 && tag.cx < 370);
   assert.ok(target, "a named cloud is above the card");
   await page.touchscreen.tap(target.cx, target.cy);
   await page.waitForFunction((title) => document.querySelector(".hud").textContent.endsWith(title), target.title, { timeout: 20000 });
@@ -1184,11 +1267,11 @@ test("each waitlist card keeps its copy and its form on screen, with the email f
       await immersive(page);
       await page.waitForTimeout(300);
       await goTo(page, "book");
-      await hud(page, lang === "es" ? "06 / El libro" : BOOK);
+      await hud(page, lang === "es" ? content.dict.es.book.kicker : BOOK);
       for (const list of ["book", "clone"]) {
         if (list === "clone") {
           await page.locator(".step[data-step=next]").click();
-          await hud(page, lang === "es" ? "07 / Mi clon" : CLONE);
+          await hud(page, lang === "es" ? content.dict.es.clone.kicker : CLONE);
         }
         await page.waitForTimeout(500);
         const where = `${lang} ${list} ${width}x${height}`;
@@ -1272,12 +1355,13 @@ test("the controls and the card speak Spanish on the Spanish page", async () => 
   await openFilters(page);
   assert.deepEqual(await page.locator(".legend button").allInnerTexts(), content.life.threads.map((id) => content.dict.es.threads[id].toUpperCase()));
   await goTo(page, "m-tapquo");
-  await hud(page, "04 / Construir una vida · TapQuo");
+  await hud(page, hudOf("tapquo", "es"));
   const tapquo = content.life.milestones.find((entry) => entry.id === "tapquo");
-  assert.deepEqual(await page.locator(".card .chip:visible").allInnerTexts(), tapquo.threads.map((id) => content.dict.es.threads[id].toUpperCase()), "the card shows the first row of chips");
+  const chips = [...tapquo.threads.map((id) => content.dict.es.threads[id]), ...tapquo.people.map((id) => content.dict.es.people[id])];
+  assert.deepEqual(await page.locator(".card .chip:visible").allInnerTexts(), chips, "the card shows a row for its people and one for its threads");
   assert.match(await page.locator(".card .expander").innerText(), /^TODOS LOS RELACIONADOS \(\d+\)/i);
   await page.locator(".card .expander").click();
-  assert.deepEqual(await page.locator(".card .chip").allInnerTexts(), [...tapquo.threads.map((id) => content.dict.es.threads[id]), ...tapquo.people.map((id) => content.dict.es.people[id])].map((name) => name.toUpperCase()));
+  assert.deepEqual(await page.locator(".card .chip").allInnerTexts(), chips);
   assert.match(await page.locator(".card .related .kicker").innerText(), /RELACIONADOS/i);
   assert.match(await page.locator(".step[data-step=next]").innerText(), /Después/i);
   await close();
@@ -1316,7 +1400,7 @@ test("a life of 250 memories with people and places explores without a hitch", a
   const shown = await keepClear(page, "250 at the whole life");
   assert.ok(shown.length <= 24, `${shown.length} labels`);
   const named = await galaxyNames(page);
-  assert.equal(named.every.length, 6, "the six galaxies have a name");
+  assert.equal(named.every.length, life.periods.length, "every galaxy has a name");
   assert.ok(named.shown.length >= 3, "the names that fit are shown");
   assert.deepEqual(named.unexplained, [], "a name is hidden only where the card, the controls, the rail or another name is over it");
   const fits = async (where) => {
@@ -1358,7 +1442,6 @@ test("a life of 250 memories with people and places explores without a hitch", a
 });
 
 const peerRows = (page) => page.locator(".card .related .peer");
-const indexOfMemory = (id) => content.life.milestones.findIndex((entry) => entry.id === id);
 
 test("the rail's two buttons carry their names without a box, keep a 44 px target and swap Play for Pause", async () => {
   for (const [lang, whole, play, pause] of [["en", "Whole life", "Play", "Pause"], ["es", "Vida entera", "Ver", "Pausa"]]) {
@@ -1469,16 +1552,16 @@ test("the whole-life view names the heaviest, earliest memory of each galaxy in 
 });
 
 test("with a memory open the galaxy shows a dashed ring for each year, labelled, and they go with the memory", async () => {
-  const { page, errors, close } = await open("/#m-satoshi");
-  await hud(page, "05 / Midlife · Satoshi Ltd.");
+  const { page, errors, close } = await open("/#m-firstjob");
+  await hud(page, hudOf("firstjob"));
   await settled(page);
   await page.waitForTimeout(900);
   assert.equal(await page.locator(".stage").getAttribute("data-gentle"), "1", "the first memory of a visit starts quietly");
   assert.equal(await page.locator("#scene").getAttribute("data-rings"), "", "no year rings while it is gentle");
   await wake(page);
-  assert.equal(await page.locator("#scene").getAttribute("data-rings"), "6");
+  assert.equal(await page.locator("#scene").getAttribute("data-rings"), String(ringsOf("firstjob").length));
   const years = async () => page.locator(".ring-year").evaluateAll((nodes) => nodes.filter((node) => node.style.visibility === "visible" && +node.style.opacity > 0.5).map((node) => node.textContent));
-  assert.deepEqual(await years(), ["2021", "2022", "2023", "2024", "2025", "2026"]);
+  assert.deepEqual(await years(), ringsOf("firstjob"));
   const where = await page.locator(".ring-year").evaluateAll((nodes) => nodes.filter((node) => node.style.visibility === "visible").map((node) => node.getBoundingClientRect()));
   const card = await box(page, ".card");
   for (const rect of where) assert.ok(!overlap(rect, card), "a year never sits behind the card");
@@ -1486,8 +1569,9 @@ test("with a memory open the galaxy shows a dashed ring for each year, labelled,
   await hud(page, BORN);
   await settled(page);
   await page.waitForTimeout(900);
-  assert.equal(await page.locator("#scene").getAttribute("data-rings"), "4");
-  assert.deepEqual(await years(), ["1985", "1990", "1995", "2000"], "a long period shows every fifth year");
+  assert.equal(await page.locator("#scene").getAttribute("data-rings"), String(ringsOf("born").length));
+  const named = await years();
+  assert.ok(named.length >= 1 && named.every((year) => ringsOf("born").includes(year)), `every label is one of the rings: ${named}`);
   await page.keyboard.press("Escape");
   await hud(page, "javi");
   await page.waitForTimeout(1500);
@@ -1498,15 +1582,15 @@ test("with a memory open the galaxy shows a dashed ring for each year, labelled,
 });
 
 test("a line to a memory off the screen ends at the edge of the free area in a labelled marker that opens it, and the card flags the same memories", async () => {
-  const { page, errors, close } = await open("/#m-thailand");
-  await hud(page, "05 / Midlife · Why I fell for Thailand");
+  const { page, errors, close } = await open(`/#m-${FAR.from}`);
+  await hud(page, hudOf(FAR.from));
   await settled(page);
   await page.waitForTimeout(900);
   const marks = await page.locator(".edge-mark:not([hidden])").evaluateAll((nodes) => nodes.map((node) => ({ text: node.textContent, memory: +node.dataset.memory, ...Object.fromEntries(["left", "right", "top", "bottom"].map((key) => [key, node.getBoundingClientRect()[key]])) })));
   assert.ok(marks.length >= 1 && marks.length <= 2, `${marks.length} markers`);
   assert.ok(marks.every((mark) => !/\+\d/.test(mark.text)), "a marker names one memory and never counts more");
   assert.equal(await page.evaluate(() => getComputedStyle(document.querySelector(".edge-mark")).fontFamily === getComputedStyle(document.querySelector(".tag")).fontFamily), true, "markers use the serif of the tags");
-  assert.ok(marks.some((mark) => mark.text.includes("Bali, where I decided no")), "Bali is off the screen");
+  assert.ok(marks.some((mark) => mark.text.includes(titleOf(FAR.to))), "the far memory is off the screen");
   assert.equal(await page.locator(".stage").getAttribute("data-edges"), String(marks.length));
   const around = { card: await box(page, ".card"), explore: await box(page, ".explore"), rail: await box(page, ".rail") };
   for (const mark of marks) {
@@ -1518,11 +1602,11 @@ test("a line to a memory off the screen ends at the edge of the free area in a l
   for (const mark of marks) assert.ok(flagged.includes(String(mark.memory)), `${mark.text} is flagged in the card`);
   assert.ok((await page.locator(".card .related .peer:not([data-out='1'])").count()) >= 1, "memories on the screen carry no arrow");
   const placed = layout(content.life.milestones, { threads: content.life.threads });
-  assert.equal(await page.locator("#scene").getAttribute("data-links"), String(strongest(placed, placed.findIndex((entry) => entry.id === "thailand")).length), "only the strongest relations are drawn");
-  const target = marks.find((mark) => mark.text.includes("Bali, where I decided no"));
+  assert.equal(await page.locator("#scene").getAttribute("data-links"), String(declared(placed, indexOfMemory(FAR.from)).length), "only the memories he linked are drawn");
+  const target = marks.find((mark) => mark.text.includes(titleOf(FAR.to)));
   await page.locator(`.edge-mark[data-memory='${target.memory}']`).click();
-  await hud(page, "04 / Building a life · Bali, where I decided no");
-  assert.equal(await page.evaluate(() => location.hash), "#m-bali");
+  await hud(page, hudOf(FAR.to));
+  assert.equal(await page.evaluate(() => location.hash), `#m-${FAR.to}`);
   assert.deepEqual(errors, []);
   await close();
 });
@@ -1545,17 +1629,19 @@ test("a related list that scrolls fades with a count of what is hidden, and a ho
   await block.locator("ul").evaluate((node) => (node.scrollTop = 0));
   await page.waitForFunction((wanted) => document.querySelector(".card .related").dataset.more === wanted, hidden, { timeout: 5000 }).catch(() => {});
   assert.equal(await block.getAttribute("data-more"), hidden);
-  assert.equal(await page.locator("#scene").getAttribute("data-preview"), "");
-  const classroom = peerRows(page).filter({ hasText: "The classroom" }).first();
-  await classroom.hover();
+  await page.mouse.move(700, 120);
   await page.waitForTimeout(300);
-  assert.equal(await page.locator("#scene").getAttribute("data-preview"), String(indexOfMemory("teaching")));
+  assert.equal(await page.locator("#scene").getAttribute("data-preview"), "");
+  const hovered = peerRows(page).filter({ hasText: titleOf(memory("tapquo").links[1]) }).first();
+  await hovered.hover();
+  await page.waitForTimeout(300);
+  assert.equal(await page.locator("#scene").getAttribute("data-preview"), String(indexOfMemory(memory("tapquo").links[1])));
   await page.mouse.move(700, 120);
   await page.waitForTimeout(300);
   assert.equal(await page.locator("#scene").getAttribute("data-preview"), "", "leaving the row restores the scene");
-  await peerRows(page).filter({ hasText: "GitHub" }).first().focus();
+  await peerRows(page).filter({ hasText: titleOf(COMPANION) }).first().focus();
   await page.waitForTimeout(300);
-  assert.equal(await page.locator("#scene").getAttribute("data-preview"), String(indexOfMemory("github")), "keyboard focus does the same");
+  assert.equal(await page.locator("#scene").getAttribute("data-preview"), String(indexOfMemory(COMPANION)), "keyboard focus does the same");
   await page.locator(".card-close").focus();
   await page.waitForTimeout(300);
   assert.equal(await page.locator("#scene").getAttribute("data-preview"), "");
@@ -1574,7 +1660,7 @@ test("the finder is a wide palette with one-line rows and a preview of the highl
   assert.ok(finder.top >= bar.bottom, "it never covers the controls");
   const rows = await page.locator(".finder .results .peer").evaluateAll((nodes) => nodes.slice(0, 12).map((node) => node.getBoundingClientRect().height));
   assert.ok(rows.length >= 10 && Math.max(...rows) < 40, "every row is one line");
-  await page.keyboard.type("tap");
+  await page.keyboard.type("company");
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("ArrowDown");
   await page.waitForTimeout(400);
@@ -1610,8 +1696,8 @@ test("the minimap appears once the camera is zoomed in and the first memory is n
   await immersive(page);
   await page.waitForTimeout(3000);
   assert.equal(await page.locator(".minimap").isHidden(), true, "none in the whole-life view");
-  await goTo(page, "m-satoshi");
-  await hud(page, "05 / Midlife · Satoshi Ltd.");
+  await goTo(page, "m-satoshi-ltd");
+  await hud(page, hudOf("satoshi-ltd"));
   await settled(page);
   await page.waitForTimeout(700);
   assert.equal(await page.locator(".minimap").isHidden(), true, "none while the first memory of the visit is gentle");
@@ -1630,7 +1716,7 @@ test("the minimap appears once the camera is zoomed in and the first memory is n
   await keepClear(page, "with the minimap");
   const craft = await box(page, ".mini-galaxy >> nth=1");
   await page.mouse.click(craft.left + craft.width / 2, craft.top + craft.height / 2);
-  await page.waitForFunction(() => document.querySelector(".hud").textContent.startsWith("02 / School years"));
+  await page.waitForFunction((prefix) => document.querySelector(".hud").textContent.startsWith(prefix), content.dict.en.periods[content.life.periods[1]].kicker.split(" · ")[0]);
   await page.locator(".card-close").click();
   await hud(page, "javi");
   await page.waitForFunction(() => document.querySelector(".minimap").hidden);
@@ -1650,7 +1736,7 @@ test("a line is cut only where its marker shows, so the card's arrows and the ma
     const { page, errors, close } = await open("/", { viewport: size });
     await immersive(page);
     await page.waitForTimeout(3000);
-    for (const id of ["m-satoshi", "m-clonara", "m-arca", "m-tapquo", "m-tortillas", "m-learning-ai", "m-hua-hin"]) {
+    for (const id of ["satoshi-ltd", "clonara", "arca", "tapquo", "school-trip-1994", "aprendizaje-continuo-hasta-la-ia", "relocation-hua-hin"].map((id) => `m-${id}`)) {
       await goTo(page, id);
       await page.waitForFunction((wanted) => document.documentElement.dataset.at !== undefined && location.hash === `#${wanted}`, id);
       await settled(page);
@@ -1681,8 +1767,8 @@ test("the minimap never reaches the card on a stacked layout, so the close butto
 });
 
 test("the frame on the minimap follows the camera", async () => {
-  const { page, close } = await open("/#m-satoshi");
-  await hud(page, "05 / Midlife · Satoshi Ltd.");
+  const { page, close } = await open("/#m-satoshi-ltd");
+  await hud(page, hudOf("satoshi-ltd"));
   await settled(page);
   await wake(page);
   await page.waitForTimeout(600);
@@ -1923,8 +2009,8 @@ test("sound is on by default but waits for the first gesture, plays a pluck for 
   await page.waitForTimeout(400);
   assert.equal(await page.evaluate(() => window.__audio.oscillators.length), bed, "moving over empty sky adds nothing");
   await page.evaluate(() => (window.__audio.time += 1));
-  await goTo(page, "m-github");
-  await hud(page, "04 / Building a life · GitHub");
+  await goTo(page, `m-mirai`);
+  await hud(page, hudOf("mirai"));
   const plucked = await page.evaluate(() => window.__audio.oscillators.length);
   assert.ok(plucked > bed, "opening a memory plays a note");
   assert.ok(await page.evaluate(() => Math.max(...window.__audio.gains.map((gain) => gain[1])) <= 0.7), "no level is ever set above 0.7 of full scale");
@@ -1938,8 +2024,8 @@ test("sound is on by default but waits for the first gesture, plays a pluck for 
   await hud(page, TAPQUO);
   assert.equal(await page.evaluate(() => window.__audio.sources), 2, "flying to another galaxy adds one soft sweep of air");
   const flown = await page.evaluate(() => window.__audio.oscillators.length);
-  await goTo(page, "m-github");
-  await hud(page, "04 / Building a life · GitHub");
+  await goTo(page, `m-mirai`);
+  await hud(page, hudOf("mirai"));
   assert.equal(await page.evaluate(() => window.__audio.oscillators.length), flown, "two notes within a moment are one note");
   await page.evaluate(() => (window.__audio.time += 1));
   await goTo(page, "book");
@@ -1995,7 +2081,7 @@ test("opening the sheet is itself a gesture that starts the sound, and the butto
   await close();
 });
 
-const askIds = [content.life.milestones[0].id, "github", "tapquo", "satoshi", content.life.milestones.at(-1).id];
+const askIds = [content.life.milestones[0].id, "running", "tapquo", "satoshi-ltd", content.life.milestones.at(-1).id];
 const withAsks = renderSite({
   ...content,
   life: { ...content.life, questions: [{ id: "q1", memories: askIds.slice(0, 2) }, { id: "q2", memories: askIds.slice(1, 4) }, { id: "q3", memories: [askIds[4]] }, { id: "q4", memories: askIds }, { id: "q5", memories: [askIds[2]] }] },
@@ -2051,7 +2137,7 @@ test("with five questions the clone's card still shows its email field on laptop
       const { page, close } = await open(lang === "es" ? "/es/" : "/", { viewport: { width, height }, locale: lang === "es" ? "es-ES" : "en-US", hasTouch: mobile, isMobile: mobile, before: withQuestions(lang) });
       await immersive(page);
       await goTo(page, "clone");
-      await hud(page, lang === "es" ? "07 / Mi clon" : CLONE);
+      await hud(page, lang === "es" ? content.dict.es.clone.kicker : CLONE);
       await page.waitForTimeout(500);
       const where = `${lang} ${width}x${height}`;
       const [card, field] = [await box(page, ".card"), await box(page, "#waitlist-clone-email")];
@@ -2133,8 +2219,8 @@ test("a mouse over the sky gently pushes the fine dust, which settles when it le
 });
 
 test("the galaxies turn slowly after the opening, the memory in view follows its cloud, and the quality can be forced", async () => {
-  const { page, errors, close } = await open("/#m-satoshi");
-  await hud(page, "05 / Midlife · Satoshi Ltd.");
+  const { page, errors, close } = await open("/#m-satoshi-ltd");
+  await hud(page, hudOf("satoshi-ltd"));
   const spin = () => page.locator("#scene").getAttribute("data-spin").then(Number);
   assert.equal(await spin(), 0, "at rest during the opening");
   await page.waitForTimeout(9500);
@@ -2232,7 +2318,7 @@ test("between 901 and 1199 px the header stays on one row, the controls fold int
   for (const [lang, widths] of [["en", [901, 1024, 1100, 1180]], ["es", [901, 1024, 1180]]]) {
     for (const width of widths) {
       const { page, errors, close } = await open(lang === "es" ? "/es/#m-tapquo" : "/#m-tapquo", { viewport: { width, height: 700 }, locale: lang === "es" ? "es-ES" : "en-US" });
-      await hud(page, lang === "es" ? "04 / Construir una vida · TapQuo" : TAPQUO);
+      await hud(page, lang === "es" ? hudOf("tapquo", "es") : TAPQUO);
       await settled(page);
       const header = await box(page, ".masthead");
       assert.ok(header.height <= 90, `${lang} ${width}: the header is ${header.height} px`);
@@ -2411,8 +2497,8 @@ const visibleLabels = (page) =>
   );
 
 test("with a memory open the scene names and draws only its three strongest relations, and the rest recede until the card's list is expanded", async () => {
-  const { page, errors, close } = await open("/#m-hua-hin", { viewport: { width: 1280, height: 800 } });
-  await hud(page, "05 / Midlife · We arrive in Hua Hin");
+  const { page, errors, close } = await open("/#m-relocation-hua-hin", { viewport: { width: 1280, height: 800 } });
+  await hud(page, hudOf("relocation-hua-hin"));
   await settled(page);
   await quiet(page);
   const tagCount = () => page.locator(".tag[data-on='1']").count();
@@ -2441,8 +2527,8 @@ test("with a memory open the scene names and draws only its three strongest rela
 
 test("at most two edge markers, each labelled in the tags' typeface, and no line reaches further than half the shorter side of the window", async () => {
   for (const [width, height] of [[1280, 640], [1280, 800], [1000, 1100]]) {
-    const { page, close } = await open("/#m-hua-hin", { viewport: { width, height } });
-    await hud(page, "05 / Midlife · We arrive in Hua Hin");
+    const { page, close } = await open("/#m-relocation-hua-hin", { viewport: { width, height } });
+    await hud(page, hudOf("relocation-hua-hin"));
     await settled(page);
     await quiet(page);
     const marks = await page.locator(".edge-mark:not([hidden])").evaluateAll((nodes) => nodes.map((node) => ({ text: node.querySelector("span").textContent.trim(), family: getComputedStyle(node).fontFamily, left: node.getBoundingClientRect().left, top: node.getBoundingClientRect().top, ax: node.getBoundingClientRect().left + parseFloat(node.querySelector("i").style.left), ay: node.getBoundingClientRect().top + parseFloat(node.querySelector("i").style.top) })));
@@ -2460,8 +2546,8 @@ test("at most two edge markers, each labelled in the tags' typeface, and no line
 });
 
 test("every label speaks in one of three tiers: the open memory large and bright, the relations smaller, the anchors small and quiet", async () => {
-  const { page, close } = await open("/#m-hua-hin", { viewport: { width: 1280, height: 800 } });
-  await hud(page, "05 / Midlife · We arrive in Hua Hin");
+  const { page, close } = await open("/#m-relocation-hua-hin", { viewport: { width: 1280, height: 800 } });
+  await hud(page, hudOf("relocation-hua-hin"));
   await settled(page);
   await quiet(page);
   const labels = await visibleLabels(page);
@@ -2481,8 +2567,8 @@ test("every label speaks in one of three tiers: the open memory large and bright
 test("a galaxy name never sits under the card or the controls, and only the open memory's galaxy is named while a memory is open", async () => {
   for (const [width, height] of [[1280, 640], [1280, 800], [390, 844]]) {
     const mobile = width < 600;
-    const { page, close } = await open("/#m-hua-hin", { viewport: { width, height }, hasTouch: mobile, isMobile: mobile });
-    await hud(page, "05 / Midlife · We arrive in Hua Hin");
+    const { page, close } = await open("/#m-relocation-hua-hin", { viewport: { width, height }, hasTouch: mobile, isMobile: mobile });
+    await hud(page, hudOf("relocation-hua-hin"));
     await settled(page);
     await quiet(page).catch(() => {});
     const shown = await page.locator(".galaxy").evaluateAll((nodes) => nodes.filter((node) => getComputedStyle(node).visibility === "visible" && Number(getComputedStyle(node).opacity) > 0.05).map((node) => node.getBoundingClientRect().toJSON()));
@@ -2501,15 +2587,15 @@ test("a galaxy name never sits under the card or the controls, and only the open
   await close();
 });
 
-test("a memory's card is calm: three relations, one row of chips, no period introduction, and an expander the keyboard can use", async () => {
+test("a memory's card is calm: three relations, a row for each of its people and threads, no period introduction, and an expander the keyboard can use", async () => {
   for (const [width, height] of [[1280, 640], [1366, 657], [1280, 800]]) {
-    const { page, close } = await open("/#m-hua-hin", { viewport: { width, height } });
-    await hud(page, "05 / Midlife · We arrive in Hua Hin");
+    const { page, close } = await open("/#m-paternidad", { viewport: { width, height } });
+    await hud(page, hudOf("paternidad"));
     await settled(page);
     assert.equal(await page.locator(".card .period-head").count(), 0, "the period's introduction stays in the document");
     assert.equal(await page.locator(".card .related .peer").count(), 3);
-    const rows = await page.locator(".card .facets").evaluateAll((nodes) => nodes.filter((node) => getComputedStyle(node).display !== "none").length);
-    assert.equal(rows, 1, "one row of chips");
+    const rows = () => page.locator(".card .facets").evaluateAll((nodes) => nodes.filter((node) => getComputedStyle(node).display !== "none").map((node) => node.dataset.facet));
+    assert.deepEqual(await rows(), ["threads", "people"], "a row for each of its threads and people");
     const card = await box(page, ".card");
     const steps = await box(page, ".card-steps");
     assert.ok(steps.bottom <= card.bottom + 1 && steps.top >= card.top && card.bottom <= height, `${width}x${height}: Earlier and Later are in view`);
@@ -2517,8 +2603,7 @@ test("a memory's card is calm: three relations, one row of chips, no period intr
     await page.locator(".card .expander").focus();
     await page.keyboard.press("Enter");
     assert.equal(await page.locator(".card .expander").getAttribute("aria-expanded"), "true");
-    const chips = await page.locator(".card .facets").evaluateAll((nodes) => nodes.filter((node) => getComputedStyle(node).display !== "none").length);
-    assert.ok(chips > 1, "all the chips are back once expanded");
+    assert.deepEqual(await rows(), ["threads", "people"], "the rows stay once expanded");
     await close();
   }
 });
@@ -2552,8 +2637,8 @@ test("the top bar holds Find, Surprise me and More; the rest waits in the sheet;
 });
 
 test("the minimap has no button: it shows whenever the camera is zoomed in and not in the whole life, and the rail rests quiet until pointed at", async () => {
-  const { page, close } = await open("/#m-hua-hin", { viewport: { width: 1280, height: 800 } });
-  await hud(page, "05 / Midlife · We arrive in Hua Hin");
+  const { page, close } = await open("/#m-relocation-hua-hin", { viewport: { width: 1280, height: 800 } });
+  await hud(page, hudOf("relocation-hua-hin"));
   await settled(page);
   assert.equal(await page.locator(".rail [data-map], .rail-map").count(), 0, "no map button");
   assert.equal(await page.locator(".stage").getAttribute("data-map"), "off", "waiting out the gentle first look");
@@ -2581,8 +2666,8 @@ test("the first memory of a visit opens gently, with no year rings and no minima
   await immersive(page);
   await page.mouse.move(640, 420);
   await page.waitForTimeout(500);
-  await goTo(page, "m-hua-hin");
-  await hud(page, "05 / Midlife · We arrive in Hua Hin");
+  await goTo(page, "m-relocation-hua-hin");
+  await hud(page, hudOf("relocation-hua-hin"));
   await settled(page);
   assert.equal(await page.locator(".stage").getAttribute("data-gentle"), "1");
   assert.equal(await page.locator("#scene").getAttribute("data-rings"), "", "no year rings");
@@ -2595,15 +2680,15 @@ test("the first memory of a visit opens gently, with no year rings and no minima
   await page.mouse.move(700, 470);
   await page.waitForFunction(() => document.querySelector(".stage").dataset.gentle === "", null, { timeout: 4000 });
   await page.waitForFunction(() => Number(document.querySelector("#scene").dataset.rings) > 0, null, { timeout: 8000 });
-  await goTo(page, "m-github");
-  await hud(page, "04 / Building a life · GitHub");
+  await goTo(page, `m-${COMPANION}`);
+  await hud(page, hudOf(COMPANION));
   assert.equal(await page.locator(".stage").getAttribute("data-gentle"), "", "only the first memory of the visit is gentle");
   await close();
 
   const keyed = await open("/", { viewport: { width: 1280, height: 800 } });
   await immersive(keyed.page);
-  await goTo(keyed.page, "m-hua-hin");
-  await hud(keyed.page, "05 / Midlife · We arrive in Hua Hin");
+  await goTo(keyed.page, "m-relocation-hua-hin");
+  await hud(keyed.page, hudOf("relocation-hua-hin"));
   assert.equal(await keyed.page.locator(".stage").getAttribute("data-gentle"), "1");
   await keyed.page.keyboard.press("Shift");
   await keyed.page.waitForFunction(() => document.querySelector(".stage").dataset.gentle === "", null, { timeout: 4000 });
@@ -2619,9 +2704,9 @@ test("after three memories a quiet line inside the card, above Earlier and Later
     await page.waitForTimeout(800);
     const nudge = page.locator(".nudge");
     await goTo(page, "m-born");
-    await hud(page, "01 / Early years · Born in Bilbao");
-    await goTo(page, "m-github");
-    await hud(page, "04 / Building a life · GitHub");
+    await hud(page, BORN);
+    await goTo(page, `m-${COMPANION}`);
+    await hud(page, hudOf(COMPANION));
     await settled(page);
     assert.equal(await nudge.isVisible(), false, `${width}x${height}: not before the third memory`);
     const before = await box(page, ".card");
@@ -2640,14 +2725,14 @@ test("after three memories a quiet line inside the card, above Earlier and Later
     await goTo(page, "clone");
     await hud(page, CLONE);
     assert.equal(await nudge.isVisible(), false, `${where}: not on the clone's own card`);
-    await goTo(page, "m-github");
-    await hud(page, "04 / Building a life · GitHub");
+    await goTo(page, `m-${COMPANION}`);
+    await hud(page, hudOf(COMPANION));
     await settled(page);
     assert.equal(await nudge.locator("a").getAttribute("data-go"), "clone", `${where}: the clone's list once its station was seen`);
     await nudge.locator("button").click();
     assert.equal(await nudge.isVisible(), false, `${where}: closed`);
     await goTo(page, "m-born");
-    await hud(page, "01 / Early years · Born in Bilbao");
+    await hud(page, BORN);
     assert.equal(await nudge.isVisible(), false, `${where}: closed for the rest of the visit`);
     assert.equal(await page.evaluate(() => Object.keys(localStorage).filter((key) => !["lang", "theme"].includes(key)).length), 0, "nothing stored");
     assert.deepEqual(errors, []);
@@ -2655,7 +2740,7 @@ test("after three memories a quiet line inside the card, above Earlier and Later
   }
   const link = await open("/", { viewport: { width: 1280, height: 800 } });
   await immersive(link.page);
-  for (const [id, label] of [["m-born", "01 / Early years · Born in Bilbao"], ["m-github", "04 / Building a life · GitHub"], ["m-tapquo", TAPQUO]]) {
+  for (const [id, label] of [["m-born", BORN], [`m-${COMPANION}`, hudOf(COMPANION)], ["m-tapquo", TAPQUO]]) {
     await goTo(link.page, id);
     await hud(link.page, label);
   }
@@ -2685,8 +2770,8 @@ test("the brand and every section link sit on one line across the header at lapt
 });
 
 test("a memory whose relations are all shown has no expander and keeps every chip", async () => {
-  const { page, close } = await open("/#m-bali", { viewport: { width: 1280, height: 800 } });
-  await hud(page, "04 / Building a life · Bali, where I decided no");
+  const { page, close } = await open("/#m-lookiero", { viewport: { width: 1280, height: 800 } });
+  await hud(page, hudOf("lookiero"));
   await settled(page);
   assert.equal(await page.locator(".card .expander").count(), 0);
   assert.ok((await page.locator(".card .related .peer").count()) <= 3);

@@ -1,0 +1,29 @@
+{
+  "date": "1984-09",
+  "kind": "personal",
+  "weight": 1,
+  "threads": [
+    "learning",
+    "family"
+  ],
+  "people": [
+    "aitor",
+    "andoni-valiente",
+    "merche"
+  ],
+  "places": [
+    "colegio-herrieztegui",
+    "galdacano"
+  ],
+  "links": [
+    "first-meeting-aitor"
+  ],
+  "en": {
+    "title": "The boy who was crying",
+    "body": "They took me to school at four. Before sorting us into classes they left us in a playground with the other children, and my mother was there, handing me over. There were children crying everywhere, but there was one who cried as if the world were ending.\n\nForty-two years later I still remember his first name and his surnames. Of my own tears I have no record: I do not know whether I cried. What stayed with me was not the classroom or the teacher. It was him."
+  },
+  "es": {
+    "title": "El niño que lloraba",
+    "body": "Me llevaron al colegio con cuatro años. Antes de asignarnos a las profesoras nos dejaron en un patio con otros niños, y mi madre estaba allí, entregándome. Había críos llorando por todas partes, pero había uno que lloraba como si se acabara el mundo.\n\nCuarenta y dos años después sigo recordando su nombre y sus apellidos. Del mío, en cambio, no tengo constancia: no sé si lloré. Lo que se me quedó no fue el aula ni la maestra. Fue él."
+  }
+}

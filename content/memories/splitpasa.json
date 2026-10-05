@@ -1,0 +1,17 @@
+{
+  "date": "2020",
+  "approx": true,
+  "kind": "product",
+  "weight": 1,
+  "threads": [
+    "ventures"
+  ],
+  "en": {
+    "title": "Another product I made myself",
+    "body": "Like the others that come out of my company, this one is small and it is mine: I built it, with no partners and nobody on a payroll, and I put it out myself.\n\nThis one too has no record beyond its name and its launch. I know it exists and that it is part of what I have been building on my own; what it does inside and when it came out was never told."
+  },
+  "es": {
+    "title": "Otro producto hecho por mí",
+    "body": "Como los demás que salen de mi empresa, este es pequeño y es mío: lo construí yo, sin socios y sin nadie en nómina, y lo saqué yo mismo.\n\nTampoco este tiene más registro que el nombre y el lanzamiento. Sé que existe y que forma parte de lo que he ido construyendo por mi cuenta; lo que hace por dentro y cuándo salió se quedó sin contar."
+  }
+}

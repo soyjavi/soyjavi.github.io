@@ -1,0 +1,26 @@
+{
+  "date": "1985",
+  "approx": true,
+  "kind": "personal",
+  "weight": 1,
+  "threads": [
+    "family",
+    "home"
+  ],
+  "people": [
+    "aitor"
+  ],
+  "places": [
+    "braga",
+    "galdacano",
+    "galicia"
+  ],
+  "en": {
+    "title": "Summers in the campsite",
+    "body": "In summer we went camping, and in winter my father took us up to the hills at weekends. It is the childhood I sum up in one word: normal. I remember one of those campsites above all, next to a canal, enormous in my head, and I remember playing with whatever children turned up there. Of another summer all I have left is a visit to my mother's part of the country and the trip my parents made from the campsite to cross a border: on that journey I met the first country that was not mine. More than the places, what I keep is the texture: the whole family outside with very little, and the feeling that everything was fine."
+  },
+  "es": {
+    "title": "Los veranos de camping",
+    "body": "En verano nos íbamos de camping, y en invierno mi padre nos sacaba al monte los fines de semana. Es la infancia que yo resumo en una palabra: normal. Recuerdo sobre todo uno de esos campings, junto a un canal, enorme en mi cabeza, y recuerdo jugar con los niños que aparecieran por allí. De otro verano solo me queda una visita a la tierra de mi madre y la excursión que hicieron mis padres desde el camping para cruzar una frontera: en aquel viaje conocí el primer país que no era el mío. Más que los sitios, lo que guardo es la textura: la familia entera fuera, con lo justo, y la sensación de que todo estaba bien."
+  }
+}

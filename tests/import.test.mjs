@@ -175,7 +175,7 @@ test("the schema and the example describe exactly what the importer reads", () =
   assert.deepEqual(Object.keys(memory.properties).sort(), [...read].sort(), "every field the importer keeps, and no other");
   assert.deepEqual(memory.required, ["id", "public", "date", "kind", "weight", "threads", "en", "es"]);
   assert.deepEqual(memory.properties.kind.enum, ["personal", "professional", "product", "education"]);
-  assert.equal(schema.$defs.memoryCopy.properties.body.maxLength, 600);
+  assert.equal(schema.$defs.memoryCopy.properties.body.maxLength, 900);
   for (const entry of example.memories) for (const key of Object.keys(entry)) assert.ok(read.includes(key) || key === "note", `${entry.id}: ${key} is not a field`);
   assert.doesNotMatch(JSON.stringify(example), /\b\d{4}-\d{2}-\d{2}\b/, "no day in the example");
 });
@@ -186,6 +186,37 @@ test("a memory dated before his birth stops the import and writes nothing, inste
     const before = readdirSync(join(dir, "memories")).length;
     assert.throws(() => importArchive({ memories: [memory({ id: "too-early", date: "1970-05" })] }, url), /too-early.*before his birth/);
     assert.equal(readdirSync(join(dir, "memories")).length, before);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("a memory text is one or two paragraphs of at most 900 characters: two print as two paragraphs, a longer one stops the import", () => {
+  const { dir, url } = copyOfContent();
+  try {
+    const before = readdirSync(join(dir, "memories")).length;
+    const two = { title: "T", body: `${"a".repeat(400)}.\n\n${"b".repeat(400)}.` };
+    importArchive({ memories: [memory({ id: "two-parts", en: two, es: two })] }, url);
+    const home = renderSite(loadContent(url)).get("index.html");
+    assert.match(home, new RegExp(`<p>a{400}\\.</p>\\s*<p>b{400}\\.</p>`));
+    const long = { title: "T", body: "c".repeat(901) };
+    assert.throws(() => importArchive({ memories: [memory({ id: "too-long", en: long })] }, url), /too-long \(en\): body is 901 characters/);
+    const three = { title: "T", body: "One.\n\nTwo.\n\nThree." };
+    assert.throws(() => importArchive({ memories: [memory({ id: "three-parts", es: three })] }, url), /three-parts \(es\): body has 3 paragraphs/);
+    assert.equal(readdirSync(join(dir, "memories")).length, before + 1, "only the good one was written");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("a person or place nobody is remembered with is not written, even when the archive lists it as public", () => {
+  const { dir, url } = emptyLife();
+  try {
+    const named = (en) => ({ public: true, en, es: en });
+    const report = importArchive({ people: { used: named("Used"), idle: named("Idle") }, places: { somewhere: named("Somewhere") }, memories: [memory({ people: ["used"] })] }, url);
+    assert.deepEqual([report.people, report.places], [1, 0]);
+    assert.deepEqual(Object.keys(JSON.parse(readFileSync(join(dir, "people.json"), "utf8"))), ["used"]);
+    assert.equal(Object.keys(JSON.parse(readFileSync(join(dir, "places.json"), "utf8"))).length, 0);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

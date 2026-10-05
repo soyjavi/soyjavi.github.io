@@ -1,0 +1,21 @@
+{
+  "date": "2026-09",
+  "kind": "personal",
+  "weight": 2,
+  "threads": [
+    "craft",
+    "learning"
+  ],
+  "links": [
+    "aprendizaje-continuo-hasta-la-ia",
+    "viaje-2014-vuelta-al-mundo"
+  ],
+  "en": {
+    "title": "My trade is not what I am",
+    "body": "When they asked me what I wanted to teach in my last stage, the question did not hold: what I want to pass on is not my trade, it is life. I have spent twenty-five years writing software and building companies, and none of that defines who I am; it is one more experience in the pile. My real trade has been learning from what I lived.\n\nAnd I have not been the same person all the way through. The boy from a working-class neighbourhood, the programmer abroad, the founder, the man who left a country, the father: those are not one person with different jobs, they are stages of someone who kept changing. That is why I want to go back to my origins without going back to being who I was."
+  },
+  "es": {
+    "title": "Mi oficio no es lo que soy",
+    "body": "Cuando me preguntaron qué quería enseñar en mi última etapa, la pregunta no se sostenía: lo que quiero transmitir no es mi oficio, es la vida. Llevo veinticinco años escribiendo software y montando empresas, y nada de eso define quién soy; es una experiencia más en el montón. Mi verdadero oficio ha sido aprender de lo que viví.\n\nY no he sido la misma persona en todo el camino. El crío de un barrio obrero, el programador fuera de casa, el fundador, el que dejó un país, el padre: no son uno con distintos empleos, son etapas de alguien que fue cambiando. Por eso quiero volver a los orígenes sin volver a ser el que fui."
+  }
+}

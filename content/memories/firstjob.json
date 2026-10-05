@@ -1,21 +1,19 @@
 {
   "date": "2001-06",
   "kind": "professional",
-  "weight": 3,
+  "weight": 2,
   "threads": [
     "craft"
   ],
-  "people": [
-    "luisma",
-    "ruben",
-    "javi-perez"
+  "links": [
+    "last-school-year"
   ],
   "en": {
-    "title": "First job",
-    "body": "My first payroll: Junior Developer at Staples, in a team I loved."
+    "title": "My first payslip",
+    "body": "My first payslip arrived on 11 June 2001. I joined just as the company was changing hands, so for five years I worked under a sign that was not the one there when I signed: for me it was always the same stretch, one job with two names.\n\nI went in nervous and eager in equal parts. I wanted to prove I was a good programmer, and the title they gave me — junior — I carried for years without it weighing on me: I understood early that you do not leave junior behind through a rank, but through hours. That was the first money I earned doing what I wanted to do."
   },
   "es": {
-    "title": "Primer trabajo",
-    "body": "Mi primera nómina: Junior Developer en Staples, con un equipo que me encantaba."
+    "title": "Mi primera nómina",
+    "body": "El 11 de junio de 2001 llegó mi primera nómina. Entré justo cuando la empresa estaba cambiando de dueño, así que durante cinco años trabajé bajo un cartel que no era el que había cuando firmé: para mí siempre fue la misma etapa, un solo empleo con dos nombres.\n\nEntré con miedo y con ganas a partes iguales. Quería demostrar que era un buen programador, y el título que me pusieron —junior— lo llevé años sin que me pesara: entendí pronto que de junior no se sale por cargo, sino por horas. Aquel fue el primer dinero que gané haciendo lo que quería hacer."
   }
 }

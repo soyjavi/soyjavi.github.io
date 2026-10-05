@@ -1,0 +1,37 @@
+{
+  "date": "1988-03",
+  "approx": true,
+  "kind": "personal",
+  "weight": 3,
+  "threads": [
+    "family",
+    "home"
+  ],
+  "people": [
+    "abuelo-paco",
+    "aitor",
+    "francisco-javier",
+    "merche"
+  ],
+  "places": [
+    "deusto",
+    "galdacano",
+    "galicia",
+    "iparralde",
+    "terreno-saratxagas"
+  ],
+  "links": [
+    "estancia-galicia-1988",
+    "comidas-domingo-saratxagas",
+    "childhood-taekwondo"
+  ],
+  "quiet": true,
+  "en": {
+    "title": "The night the house broke",
+    "body": "I was eight and I was ill at my grandparents' house. I got up in the night, was sick, and went back to bed. I saw nothing: I woke up to shouting. Someone was asking who had done it, and at eight years old I was not able to say it was me. They all knew it was me, and I stayed silent. That silence lit a fight between my parents, and out of it came a separation. We went far away, to my other grandparents' house, and I carried the whole guilt with me: I was sure it had been my fault. Suddenly the world was too big for an eight-year-old boy. I am not sure we ever talked about that night."
+  },
+  "es": {
+    "title": "La noche en que se rompió la casa",
+    "body": "Tenía ocho años y estaba enfermo en casa de mis abuelos. Me levanté por la noche, vomité y volví a la cama. No vi nada: me desperté con gritos. Alguien preguntaba quién lo había hecho, y yo, con ocho años, no fui capaz de decir que había sido yo. Todos sabían que era yo, y yo callé. Aquel silencio encendió una discusión entre mis padres y de ahí salió una separación. Nos fuimos lejos, a casa de mis otros abuelos, y yo me llevé la culpa entera: estaba convencido de que había sido por mí. De pronto el mundo era demasiado grande para un niño de ocho años. No sé si alguna vez hablamos de aquella noche."
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "date": "1988",
+  "kind": "personal",
+  "weight": 2,
+  "threads": [
+    "body",
+    "family"
+  ],
+  "people": [
+    "francisco-javier",
+    "merche",
+    "tio-emilio"
+  ],
+  "places": [
+    "colegio-herrieztegui",
+    "galicia",
+    "iparralde"
+  ],
+  "links": [
+    "estancia-galicia-1988",
+    "lesion-sexto-egb"
+  ],
+  "en": {
+    "title": "The family sport",
+    "body": "I started at eight, following a tradition at home: my father and my uncle had both trained in it when they were young, so taekwondo was more or less the family sport. I went as far as the brown belt, at fourteen, and for all those years I was always the tallest in the class.\n\nWhat stayed with me is not the gym but the fact that it never stopped. When life broke and we went far away, I kept training wherever there was room: with my mother as my teacher, sometimes on the beach. She is the reason I did not quit when there was no mat and no coach."
+  },
+  "es": {
+    "title": "El deporte de la familia",
+    "body": "Empecé a los ocho años siguiendo una tradición de casa: mi padre y mi tío ya lo habían practicado de jóvenes, así que el taekwondo era algo así como el deporte de la familia. Llegué hasta el cinturón marrón, a los catorce, y durante todos esos años fui siempre el más alto de la clase.\n\nLo que más me ha quedado no es el gimnasio, sino que nunca se interrumpió. Cuando la vida se rompió y nos fuimos lejos, seguí practicando donde hubiera sitio: con mi madre, que me hacía de maestra, alguna vez en la playa. Ella fue la que me mantuvo entrenando cuando no había ni tatami ni profesor."
+  }
+}

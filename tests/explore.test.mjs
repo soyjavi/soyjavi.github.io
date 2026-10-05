@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { LEVEL, RING_CLEARANCE, STRONG, askLevels, askPairs, declared, periodNames, strongest, TAG_GAP, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, jumps, leaderOf, levels, matching, miniMap, MINI_ZOOM, miniVisible, QUALITY, averageMs, nextQuality, normalize, perGalaxy, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, tagSpots, tourPlan, tourTick } from "../assets/js/explore.js";
+import { CADENCE, LEVEL, RING_CLEARANCE, STRONG, askLevels, askPairs, declared, periodNames, strongest, TAG_GAP, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, jumps, leaderOf, levels, matching, miniMap, MINI_ZOOM, miniVisible, QUALITY, averageMs, nextQuality, normalize, perGalaxy, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, tagSpots, tourPlan, tourTick, pace, worked } from "../assets/js/explore.js";
 import { layout } from "../assets/js/life.js";
 import { ORBIT, approach, ease, eye, nearest, slide, turn, zoom } from "../assets/js/orbit.js";
 import { loadContent } from "../src/content.mjs";
@@ -28,10 +28,10 @@ test("searching ignores case and accents and finds a word in the title, the text
 
 test("related memories are the declared links in both directions, then the neighbours in each thread", () => {
   const { links, near } = related(placed, at("tapquo"));
-  assert.deepEqual(ids(links), ["bizkaibus", "github", "teaching", "shares", "cypherpunk"].sort((a, b) => at(a) - at(b)));
+  assert.deepEqual(ids(links), ["origen-tapquo-bizkaibus-2009", "tapquo-equipo-cypherpunk", "viaje-2014-vuelta-al-mundo", "satoshi-ltd"].sort((a, b) => at(a) - at(b)));
   assert.ok(near.length > 0 && near.every((i) => !links.includes(i) && i !== at("tapquo")));
-  assert.ok(related(placed, at("bizkaibus")).links.includes(at("tapquo")), "a link declared on one side is seen from the other");
-  assert.deepEqual(ids(related(placed, at("child2")).links), ["child1", "house"]);
+  assert.ok(related(placed, at("origen-tapquo-bizkaibus-2009")).links.includes(at("tapquo")), "a link declared on one side is seen from the other");
+  assert.deepEqual(ids(related(placed, at("running")).links), ["childhood-taekwondo", "temporadas-snowboard", "paternidad"].sort((a, b) => at(a) - at(b)));
 });
 
 test("every memory has something related, so no memory is a dead end", () => {
@@ -459,4 +459,26 @@ test("edge labels that stack exactly one gap apart stay where they are when the 
     assert.ok(items.every((item) => item.shown));
     assert.equal(Math.round(items[1].box.top), 112, `the second label sits one step below the first (wobble ${wobble})`);
   }
+});
+
+test("the sky is drawn at the pace of film and a hidden tab at one frame a second", () => {
+  assert.deepEqual(CADENCE, { fps: 24, hidden: 1 });
+  const drawn = (hertz, seconds) => {
+    const clock = { last: -Infinity };
+    let count = 0;
+    for (let t = 0; t < seconds * 1000; t += 1000 / hertz) if (pace(clock, t)) count++;
+    return count;
+  };
+  for (const hertz of [60, 75, 120, 144, 240]) assert.ok(Math.abs(drawn(hertz, 10) - 240) <= 4, `${hertz} Hz draws about 24 a second, not ${drawn(hertz, 10) / 10}`);
+  const slow = { last: -Infinity };
+  assert.equal(pace(slow, 0), true);
+  assert.equal(pace(slow, 10), false);
+  assert.equal(pace(slow, 5000), true, "a long stall draws at once and does not try to catch up");
+  assert.equal(pace(slow, 5010), false);
+});
+
+test("a frame that arrives on time at film pace is not mistaken for a slow device", () => {
+  assert.ok(worked(1000 / 24) < QUALITY.slow, "on time");
+  assert.ok(worked(1000 / 24 + 33) > QUALITY.slow, "two refreshes late");
+  assert.equal(nextQuality(0, worked(1000 / 24)), 0);
 });

@@ -1,6 +1,6 @@
 # soyjavi.com roadmap
 
-Updated 2026-10-04.
+Updated 2026-10-05.
 
 This is the task pool. [SPEC.md](SPEC.md) owns current state and contracts; [AGENTS.md](AGENTS.md) defines the
 autonomous workflow that consumes this file. The site has no versions: git is the history.
@@ -162,12 +162,29 @@ Ordered by what must be decided or applied first; each group names what it waits
 
 ### 2. Review
 
-- **MEMORY-LENGTH** — How long a memory text may be
-  `decision · creator · high`
-  Memory texts are capped at 600 characters in one paragraph. The creator wants one or two paragraphs. Choose the limit (900 or 1,200 characters) and then an agent task makes the card, the flat page and the finder print one `<p>` per paragraph, moves the limit in the schema, the README, the example and the test, and tells the biographer to write a paragraph or two.
+- **PERF-CPU** — Stop the per-frame garbage and DOM churn
+  `chore · agent · normal`
+  From the performance audit (24 frames a second already ships). The dotted guides are re-projected every frame with destructuring and closures (`scene.js` guides), about 115 KB of garbage a frame; the year-ring labels are measured every frame although they are empty (`engine.js` label loop, `||=` on a width of 0); `data-leader`, `hidden`, `data-edges`, `data-jumps` and `--cx`/`--cy`/`--r` are written with the same value every frame; five to eight `getBoundingClientRect` per frame; `centerOf` and `tagSpots` allocate; the minimap rewrites its attributes every frame; the probe WebGL context of `webglAvailable` is never released.
+  accept: a browser test over an idle second counts the mutation records and the DOM reads and they stay under a set budget; no visible change in a before and after capture.
+- **PERF-HAZE** — Do not compute the haze noise for every pixel every frame
+  `chore · agent · normal`
+  The dome shader runs three octaves of noise on a full-screen sphere every frame, about 28% of the GPU frame at a pixel ratio of 2, for a haze that moves 0.01 units a second, and tier 2 still computes it with the haze at zero. Gate it on `uHaze`, then bake it or draw it at half size.
+  accept: before and after captures of the opening, the whole-life view and a galaxy are indistinguishable; the draw time of the dome falls in the same headless measurement.
+- **PERF-POWER** — Ask for the default GPU
+  `chore · agent · low`
+  `powerPreference: "high-performance"` forces the discrete GPU on dual-GPU Macs; `"default"` costs nothing on Apple Silicon. Also draw the dust by sorting on its seed and `setDrawRange` instead of discarding in the vertex shader, so the lower tiers submit fewer points.
+  accept: the tiers draw fewer points (a test reads the draw range); no visible change.
+- **PERF-AUDIO** — Shorten the reverb of the sound bed
+  `decision · creator · low`
+  The bed runs a 5 s convolution reverb continuously once sound is on: about 7 points of a core, 6.6 of them the reverb. A 2.5 to 3 s tail halves it and `latencyHint: "playback"` saves a little more, at 20 to 40 ms of latency on the bells. Listen to both and choose, or fade the bed out after some idle minutes.
+- **PERF-RATIO** — Pixel ratio 2 or 1.5 on a retina screen
+  `decision · creator · low`
+  Capping at 1.5 saves about 22% of the GPU frame and slightly fades the dotted outlines and enlarges the selection ring; the clouds look the same. Only the creator's eye can say.
+
 - **ART-REVIEW** — An art review by an expert subagent, with screenshots of every screen
   `chore · agent · normal`
   A read-only subagent with an art and interface direction brief goes through the site screen by screen (the opening, the whole-life view, a galaxy, a memory open, the finder, the guide, the book and the clone cards, the contact, the flat page, the light theme, 1280×640 and 390×844 and a large screen) and returns ranked, evidence-backed findings on composition, hierarchy, motion, type, colour, the dots and the glass. It needs screenshots, so it launches a browser: the creator has asked that no browser is started without his word, so this task waits for his explicit go-ahead and for the screenshots to be kept in the scratchpad, never in the repository.
+  The way to drive the site, the states to capture and the format of the report are in SPEC, "Reviewing the interface".
   accept: a ranked report with one screenshot per finding; the creator turns what he approves into tasks.
 
 ### 3. Depth and the book — need content or approvals from the creator

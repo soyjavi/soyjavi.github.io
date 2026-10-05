@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { BUDGET, FACETS, FLOOR, RAIL, START, shapeBy, futures, layout, memories, playElapsed, monthsUntil, playYear, railPercent, skyOf, todayYear, untilText, yearRings } from "./life.js";
-import { LEVEL, askLevels, askPairs, declared, periodNames, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, jumps, leaderOf, levels as levelsOf, matching, perGalaxy, miniMap, miniVisible, QUALITY, averageMs, nextQuality, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, strongest, tagSpots, tourPlan, tourTick } from "./explore.js";
+import { LEVEL, askLevels, askPairs, declared, periodNames, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, jumps, leaderOf, levels as levelsOf, matching, perGalaxy, miniMap, miniVisible, QUALITY, averageMs, nextQuality, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, strongest, tagSpots, tourPlan, tourTick, worked } from "./explore.js";
 import { clamp } from "./orbit.js";
 import { createSound } from "./sound.js";
 import { OVERVIEW_PITCH, createScene } from "./scene.js";
@@ -689,6 +689,7 @@ async function start() {
   const select = (index, { push = true, hush = false } = {}) => {
     quiet = hush;
     stopPlay();
+    const leaving = periodView >= 0 || stations[current].kind !== "hero";
     current = clamp(index, 0, END);
     periodView = -1;
     periodSet = new Set();
@@ -696,6 +697,7 @@ async function start() {
     asked = null;
     showAll = false;
     stage.dataset.asked = "";
+    if (filter && leaving && stations[current].kind === "hero") setFilter(null);
     if (stations[current].kind === "milestone" && !gentle.seen) {
       gentle.seen = true;
       gentle.on = true;
@@ -1236,10 +1238,10 @@ async function start() {
       });
       if (entered) finishEntering();
     }
-    if (adapting && measure.windows < QUALITY.windows && intro >= 1) {
+    if (adapting && measure.windows < QUALITY.windows && intro >= 1 && !document.hidden) {
       measure.from ||= time + 1;
       if (time >= measure.from) {
-        measure.frames.push(dt * 1000);
+        measure.frames.push(worked(dt * 1000));
         if (measure.frames.length >= QUALITY.window) {
           const next = nextQuality(tier, averageMs(measure.frames));
           measure.frames = [];

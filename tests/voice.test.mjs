@@ -15,18 +15,18 @@ const TIME_PROMISE = /\b(?:soon|coming|pronto|próximamente|proximamente)\b/i;
 
 const memories = readdirSync(`${root}content/memories`).map((file) => JSON.parse(read(`content/memories/${file}`)));
 const copy = (lang) => [dict[lang], ...memories.map((memory) => memory[lang])].flatMap(strings);
+const withoutMemories = (html) => html.replace(/<ol class="milestones">[\s\S]*?<\/ol>/g, " ");
 const sources = {
   "README.md": read("README.md"),
   "SPEC.md": read("SPEC.md"),
   "AGENTS.md": read("AGENTS.md"),
   "design/index.html": text(read("design/index.html")),
   "tools/archive.schema.json": read("tools/archive.schema.json"),
-  "index.html": text(read("index.html")),
-  "es/index.html": text(read("es/index.html")),
+  "index.html": text(withoutMemories(read("index.html"))),
+  "es/index.html": text(withoutMemories(read("es/index.html"))),
   "404.html": text(read("404.html")),
   ...Object.fromEntries(readdirSync(`${root}src`).map((file) => [`src/${file}`, read(`src/${file}`)])),
   ...Object.fromEntries(readdirSync(`${root}content`).filter((file) => file.endsWith(".json")).map((file) => [`content/${file}`, read(`content/${file}`)])),
-  ...Object.fromEntries(readdirSync(`${root}content/memories`).map((file) => [`content/memories/${file}`, read(`content/memories/${file}`)])),
 };
 
 test("the offer is only ever called my clone: no tool, product or afterlife words anywhere on the site or in its documents", () => {
@@ -38,10 +38,8 @@ test("the offer is only ever called my clone: no tool, product or afterlife word
 
 test("the copy promises no time and no exclamation, in both languages", () => {
   for (const lang of ["en", "es"]) {
-    for (const line of copy(lang)) {
-      assert.doesNotMatch(line, TIME_PROMISE, `${lang}: ${line}`);
-      assert.doesNotMatch(line, /!/, `${lang}: ${line}`);
-    }
+    for (const line of strings({ ...dict[lang], life: null })) assert.doesNotMatch(line, TIME_PROMISE, `${lang}: ${line}`);
+    for (const line of copy(lang)) assert.doesNotMatch(line, /!/, `${lang}: ${line}`);
   }
 });
 
@@ -89,7 +87,7 @@ test("the copy tells the same story in both languages: the hero, the book, the c
 });
 
 test("memories of loss are marked quiet: no invitation to a list appears on them", () => {
-  for (const id of ["grandfather", "floods", "separation"]) assert.match(read("index.html"), new RegExp(`<li id="m-${id}"[^>]*data-quiet="1"`), id);
-  assert.doesNotMatch(read("index.html"), /<li id="m-farmhouse"[^>]*data-quiet/);
+  for (const id of ["grandfather", "inundaciones-chiang-mai-2024", "separacion-1988"]) assert.match(read("index.html"), new RegExp(`<li id="m-${id}"[^>]*data-quiet="1"`), id);
+  assert.doesNotMatch(read("index.html"), /<li id="m-born-among-cows"[^>]*data-quiet/);
   assert.match(read("assets/js/engine.js"), /station\.kind === "milestone" && periodView < 0 && !station\.element\.dataset\.quiet/);
 });

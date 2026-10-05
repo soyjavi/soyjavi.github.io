@@ -68,7 +68,7 @@ The home pages declare `rel=canonical`, `hreflang` for `en`, `es` and `x-default
   template `tools/archive.example.json`) or a bare list of memories, into these files; `threads` replace the
   list of `content/life.json` and their copy in both dictionaries, and the import refuses to drop one that memories use (a memory's galaxy is its age, never written). Only entries with `"public": true` are written, a day
   is cut to its month, people and places must be public to be pointed at, and if any public entry is wrong (id, date,
-  kind, weight, threads, people, places, links, a language) nothing is written and every reason is printed.
+  kind, weight, threads, people, places, links, a language, a text over 900 characters or in more than two paragraphs) nothing is written and every reason is printed; a person or place no imported memory uses is not written.
 
 ## What is public
 
@@ -170,7 +170,7 @@ carries the strength for tests.
 ### Nodes
 
 Nodes are the elements with `data-station` inside `main.story`, in document order: the hero, every milestone (the `li`
-of each period), the book, the clone and the contact, 66 stations at the moment. Each milestone carries `data-period`. `data-hud` is the label
+of each period), the book, the clone and the contact, 75 stations at the moment. Each milestone carries `data-period`. `data-hud` is the label
 announced when the station opens. The first milestone of each period also carries the period's title and introduction. The story is
 clipped to 1×1 px: it stays the accessible tree and the source of every card.
 
@@ -251,7 +251,7 @@ Two and a half seconds after the last touch, wherever it is (the hero, a memory,
   people and places they share, then nearness in time, then position); the ones named and joined are the memories he linked by hand, at most three (`declared`, `STRONG`), and the neighbours in time stay lit without a name or a line. At rest the scene draws and names only those; a button in the card, "All related (n)"
   (`.expander`, `aria-expanded`), shows all of them in the card's list, draws all the lines, names up to eight and lights
   them all, and "Fewer" puts it back. Any memory a card row or the finder points at is previewed on top of that.
-- **The age view.** Pressing an age (its label in the sky, the nav, a link to `#period-<id>`) opens no memory: the camera frames the galaxy, its year rings and constellation show, the other galaxies fall quiet, and only the age's headline and up to three other heavy memories are named, in italics (`periodNames`; pointing at another memory names that one alone). The card holds the age's number, title and introduction and one button, "Start with <first memory>", that opens the first memory; Earlier and Later are hidden. The address is `#period-<id>`; pressing the label again returns to the whole-life view. The card also says what the age holds (memories, people and places) and its button is solid; Earlier and Later step between ages. A book or clone card carries the lockup under its title, the clone's disclosure as a quiet note with a rule, and a memory text may be a paragraph of up to 600 characters. The contact card puts X on the address's line and has Earlier like the others; the clone's Later leads to it.
+- **The age view.** Pressing an age (its label in the sky, the nav, a link to `#period-<id>`) opens no memory: the camera frames the galaxy, its year rings and constellation show, the other galaxies fall quiet, and only the age's headline and up to three other heavy memories are named, in italics (`periodNames`; pointing at another memory names that one alone). The card holds the age's number, title and introduction and one button, "Start with <first memory>", that opens the first memory; Earlier and Later are hidden. The address is `#period-<id>`; pressing the label again returns to the whole-life view. The card also says what the age holds (memories, people and places) and its button is solid; Earlier and Later step between ages. A book or clone card carries the lockup under its title, the clone's disclosure as a quiet note with a rule, and a memory text is one or two paragraphs (a blank line between them, one `<p>` each) of up to 900 characters in all; the build and the import refuse a longer one. The contact card puts X on the address's line and has Earlier like the others; the clone's Later leads to it.
 - **Guide.** The ? button or the `?` key opens a panel of six marks drawn with the real glyphs (a cloud, a dotted
   circle, a line, a hollow ring, today, the dust) and the keys; Escape, a press on the sky, the finder or the thread
   legend closes it. It never covers the card (on a phone it is capped above it and scrolls).
@@ -278,11 +278,17 @@ Two and a half seconds after the last touch, wherever it is (the hero, a memory,
   1.4 s; the book and the clone each get a low, slow swell (G2 and D3). Turning it on fades in over about ten seconds;
   turning it off fades out and suspends the context four seconds later, as a hidden tab does and the scene falling back to
   the flat page closes it. Under reduced motion the scene, and so the button, is not there.
+- **Pace.** The sky is drawn like film, at 24 frames a second and never faster, whatever the screen's refresh rate
+  (`CADENCE` and `pace` in `explore.js`; on a 120 Hz screen every fifth refresh, on a 60 Hz one an uneven 2-and-3). The
+  cap holds while the camera is dragged or flown as well: the interface (card, controls, finder) is not drawn by the
+  loop and stays at the screen's rate. A hidden tab keeps the loop alive at one frame a second (`CADENCE.hidden`, a timer, since
+  the browser sends no refresh to a hidden tab): time and the tour's clock go on, nothing is measured and the sound is
+  paused. Under reduced motion or without WebGL2 there is no loop at all.
 - **Quality.** The scene measures its own frames: from a second after the opening it averages 90 frames, up to three
-  times, and each time the average is slower than 30 a second it steps one tier down and never back up. Tier 0 is the
+  times (`worked` discounts the film pace, so a frame on time reads as a healthy one), and each time the average is
+  slower than 30 a second it steps one tier down and never back up. It does not measure while the tab is hidden. Tier 0 is the
   whole life; 1 keeps 65% of the dust at a pixel ratio of at most 1.5; 2 keeps 40% at 1 (the memories' clouds always keep
-  at least 55%). `data-quality` on `#scene` carries the tier; `?quality=full` or `?quality=low` fixes it. Drawing
-  pauses while the tab is hidden, and a first frame stamped before the clock started cannot make time run backwards.
+  at least 55%). `data-quality` on `#scene` carries the tier; `?quality=full` or `?quality=low` fixes it. A first frame stamped before the clock started cannot make time run backwards.
 - **Motion.** From half a second after the opening each galaxy turns about its centre, rigidly, slowly (the bigger the
   slower, `spinAngle`, about a degree in two minutes for the largest) and starting from rest: the dust and the clouds in
   the shader, and in the same turn the constellation lines, the clouds' positions for labels, rings and links, and the
@@ -293,7 +299,7 @@ Two and a half seconds after the last touch, wherever it is (the hero, a memory,
   announced to a screen reader, then returns to the whole life (`tourPlan`, `tourTick`). It runs once per visit: any
   interaction ends it where the reader is, and for good.
 - **Filtering.** A chip in a card, a filter offered by the finder or a thread in the legend dims everything outside it;
-  pressing it again, the ✕ button or Escape lets go. The legend of threads sits behind the Filter button. In the sky a
+  pressing it again, the ✕ button or Escape lets go, and so does going back to the whole life from a memory or an age (the card's ✕, Whole life, the address without a hash). The legend of threads sits behind the Filter button. In the sky a
   filter draws arcs between its memories in order, higher when they jump from one galaxy to another (`matching`,
   `jumps`), and each galaxy's label counts how many it holds (`perGalaxy`), dimmed when none. Earlier and Later step
   along the filter while it is on.
@@ -413,6 +419,38 @@ Instrument Serif for the wordmark, headings and milestone titles, Geist for text
 addresses; the three are open licence and ship in `assets/fonts/` with `LICENSES.txt`. The wordmark and monogram are
 outlined SVG in `assets/brand/`, generated from the font by `tools/wordmark.mjs` (kerning from the font, quadratic paths, ink and bone and `currentColor` variants); the header inlines the `currentColor` one at 28 px high (24 px on a phone) so no live text spells the name. `favicon.svg` is the j at 72% of the tile with a 0.03 em stroke, on night, and inverts with the system theme; `favicon-32.png` and the opaque 180 px `apple-touch-icon.png` come from `tools/icons.mjs`. `npm run brand` rewrites all of them. Type is a named scale in `brand.css` (`--fs-*`, `--track-*`): labels at 12 px, small 14, body 17 (16 on a phone), tags and edge markers in serif at 17 (16 on a phone), and no stylesheet declares a literal size or tracking. The book's and the clone's cards end with the same lockup (a mono preposition and the wordmark at 20 px; *by* / *with*, *de* / *con*), and the clone's also says it is a program built from what he wrote and not him. Hairlines, no shadows,
 square corners, round dots. `design/index.html` shows all of it.
+
+## Reviewing the interface
+
+What an agent (or a person) needs to look at the site and give art feedback. Nothing here changes the site; a review is read-only.
+
+**Run it.** `npm run build`, then `npm run dev` (http://localhost:4392, never cached). The scene needs WebGL2: drive Chromium with `playwright-core` and the arguments `--use-angle=swiftshader --enable-unsafe-swiftshader --ignore-gpu-blocklist` (software drawing: the look is right, the timings are not). Open every page with `?quality=full`, or the slowness of software drawing lowers the quality tier and thins the dust. The scene is ready when `<html>` has the class `immersive`; wait about three seconds more, because the opening flies in and the clouds gather. The class `flat` means the flat page (reduced motion, no WebGL2, a window too small to read the panels). The sky is drawn at 24 frames a second, so a screenshot is one frame and a transition needs one or two seconds before it is captured; a hover needs the pointer moved onto the cloud.
+
+**Reach every state.**
+
+| State | How |
+| --- | --- |
+| The opening and the hero card | `/` |
+| The whole-life view, the interface alone | `/`, then `H` hides the interface and any key brings it back |
+| An age (its card, rings, year labels) | `#period-early`, `#period-school`, `#period-youth`, `#period-building`, `#period-midlife` |
+| A memory (card, related, edge marks, tags) | `#m-<id>`, the id being the file name in `content/memories/` |
+| The book, the clone, the contact | `#book`, `#clone`, `#contact` |
+| Related memories expanded | the "All related" button of a memory's card |
+| A filter (jump lines, counts on the galaxies) | a chip of a card, or Filter in the sheet; `✕` in the sheet or Escape lets go |
+| The finder, the guide, the sheet | `[data-find]` or `/`; `[data-guide-toggle]` or `?`; `[data-more-toggle]` |
+| Playing the life year by year | `[data-play]` on the rail |
+| Light theme | `[data-theme-toggle]` in the sheet, or `localStorage.theme = "light"` before loading |
+| Spanish | `/es/` |
+| The flat page | emulate `prefers-reduced-motion: reduce` |
+| Sizes | 1280×800, 1280×640 (short), 390×844 (phone), 2560×1440 (large); the stacked layout up to 900 px wide |
+
+Hooks that do not change: `.hud` (the label of where you are), `#card`, `.card-close`, `.step[data-step="previous"|"next"]`, `.rail-home`, `[data-surprise]`, `[data-legend-toggle]`, `[data-sound]`, `[data-lang]`, `.stage[data-filter]`, `#scene` and its `data-*` attributes. Keys are in "Exploring". A drag orbits, the wheel zooms, a right drag pans.
+
+**What the look is meant to be.** Calm, floating and quiet: slow and soft motion, never excited; the form is clear and the memories diffuse; twelve neutrals with no hue; the glass of the card the same all over; film pace. Judge against `design/index.html` (the brand, the type scale, the interface and the voice rules), against the decisions of AGENTS.md ("Product decisions") and against the "Look" section above. A finding that asks to break a non-negotiable decision is a question for the creator, not a defect.
+
+**What a review must not do.** Send the waitlist forms (Buttondown is real), reach any origin but the dev server, write inside the repository (screenshots and notes go in the scratchpad) or edit a file.
+
+**What a review returns.** Findings ranked by impact, each with the address and viewport that show it, a screenshot, what is wrong, the principle it breaks (hierarchy, rhythm, contrast, motion, consistency, voice) and one proposed change. Findings the creator approves become entries in ROADMAP and, when they are visual, boards in `design/proposals.html` with the same ID.
 
 ## Tests
 

@@ -1,11 +1,27 @@
 {
-  "bilbao": {
-    "en": "Bilbao",
-    "es": "Bilbao"
+  "bali": {
+    "en": "Bali",
+    "es": "Bali"
   },
-  "plencia": {
-    "en": "Plencia",
-    "es": "Plencia"
+  "braga": {
+    "en": "Braga",
+    "es": "Braga"
+  },
+  "caserio-iturriagas": {
+    "en": "Caserío Iturriagas",
+    "es": "Caserío Iturriagas"
+  },
+  "colegio-herrieztegui": {
+    "en": "Colegio Herrieztegui",
+    "es": "Colegio Herrieztegui"
+  },
+  "deusto": {
+    "en": "Deusto",
+    "es": "Deusto"
+  },
+  "dma-servicios-informaticos": {
+    "en": "DMA Servicios Informáticos",
+    "es": "DMA Servicios Informáticos"
   },
   "galdacano": {
     "en": "Galdácano",
@@ -15,40 +31,20 @@
     "en": "Galicia",
     "es": "Galicia"
   },
-  "bali": {
-    "en": "Bali",
-    "es": "Bali"
+  "iparralde": {
+    "en": "Iparralde",
+    "es": "Iparralde"
   },
-  "kuala-lumpur": {
-    "en": "Kuala Lumpur",
-    "es": "Kuala Lumpur"
+  "pirineo-frances": {
+    "en": "El Pirineo francés",
+    "es": "El Pirineo francés"
   },
-  "chiang-mai": {
-    "en": "Chiang Mai",
-    "es": "Chiang Mai"
+  "roots-rock-reggae": {
+    "en": "Roots Rock Reggae (Chiang Mai)",
+    "es": "Roots Rock Reggae (Chiang Mai)"
   },
-  "hong-kong": {
-    "en": "Hong Kong",
-    "es": "Hong Kong"
-  },
-  "hua-hin": {
-    "en": "Hua Hin",
-    "es": "Hua Hin"
-  },
-  "bangkok": {
-    "en": "Bangkok",
-    "es": "Bangkok"
-  },
-  "kanchanaburi": {
-    "en": "Kanchanaburi",
-    "es": "Kanchanaburi"
-  },
-  "ayutthaya": {
-    "en": "Ayutthaya",
-    "es": "Ayutthaya"
-  },
-  "asturias": {
-    "en": "Asturias",
-    "es": "Asturias"
+  "terreno-saratxagas": {
+    "en": "El terreno de Saratxagas",
+    "es": "El terreno de Saratxagas"
   }
 }

@@ -1,0 +1,26 @@
+{
+  "date": "1992",
+  "kind": "personal",
+  "weight": 2,
+  "threads": [
+    "body",
+    "learning"
+  ],
+  "people": [
+    "francisco-javier",
+    "javi-ramirez"
+  ],
+  "places": [
+    "colegio-herrieztegui",
+    "galdacano",
+    "iparralde"
+  ],
+  "en": {
+    "title": "Three months at home in plaster",
+    "body": "I tore the vastus medialis trying to jump a wall in a park that was not ours. I was limping and it hurt, but I kept playing, walked home and said nothing. My parents asked about the limp and I played it down. The next day I could not move my leg.\n\nAt the hospital they gave us two options: surgery or a plaster up to the groin. My father chose the plaster. I spent three months without leaving the house, on a fifth floor with no lift, with morning television for company; from that term I remember one classmate who came to tell me what we had done in class. When the plaster came off, the leg had lost its strength, and that was the year I ate at the school canteen."
+  },
+  "es": {
+    "title": "Tres meses en casa con una escayola",
+    "body": "Me rompí el vasto interno intentando saltar un muro en un parque que no era el nuestro. Cojeaba y me dolía, pero seguí jugando, volví andando a casa y no dije nada. Mis padres me preguntaron por la cojera y lo minimicé. Al día siguiente no podía mover la pierna.\n\nEn el hospital nos dieron dos opciones: operar o escayola hasta la ingle. Mi padre eligió la escayola. Pasé tres meses sin salir de casa, en un quinto sin ascensor, con la televisión de la mañana como única compañía; de aquel trimestre solo recuerdo a un compañero que venía a contarme lo que hacíamos en clase. Cuando me quitaron la escayola la pierna había perdido fuerza, y ese año comí en el comedor."
+  }
+}

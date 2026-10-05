@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { ageAt, precisionOf } from "../assets/js/life.js";
-import { CONTENT, KINDS, LANGS } from "../src/content.mjs";
+import { bodyProblem, CONTENT, KINDS, LANGS } from "../src/content.mjs";
 
 const SLUG = /^[a-z0-9-]+$/;
 const LISTS = ["people", "places", "links"];
@@ -43,11 +43,13 @@ export function importArchive(data, dir = CONTENT) {
   for (const name of ["book", "clone"]) if (!(nextLife.threads ?? life.threads).includes((nextLife.ahead ?? life.ahead)[name])) errors.push(`ahead.${name}: "${(nextLife.ahead ?? life.ahead)[name]}" is not one of the threads`);
   const threadIds = nextLife.threads ?? life.threads;
 
+  const incoming = (Array.isArray(data) ? data : data.memories ?? []).filter((entry) => entry?.public === true || (report.private++, false));
   const tables = {};
   for (const facet of ["people", "places"]) {
     const table = readJson(new URL(`${facet}.json`, dir), {});
+    const used = new Set(incoming.flatMap((entry) => entry[facet] ?? []));
     for (const [id, item] of Object.entries(data[facet] ?? {})) {
-      if (item?.public !== true) continue;
+      if (item?.public !== true || !used.has(id)) continue;
       if (!SLUG.test(id)) errors.push(`${facet}/${id}: id must be lowercase letters, digits and hyphens`);
       const names = Object.fromEntries(LANGS.map((lang) => [lang, item[lang] ?? item.name]));
       if (LANGS.some((lang) => !names[lang])) errors.push(`${facet}/${id}: needs a name`);
@@ -57,7 +59,6 @@ export function importArchive(data, dir = CONTENT) {
     tables[facet] = table;
   }
 
-  const incoming = (Array.isArray(data) ? data : data.memories ?? []).filter((entry) => entry?.public === true || (report.private++, false));
   const ids = new Set([...incoming.map((entry) => entry.id), ...readdirSync(folder).filter((file) => file.endsWith(".json")).map((file) => file.slice(0, -5))]);
   const ready = incoming.map((entry, n) => {
     const where = `memory ${entry.id ?? `#${n + 1}`}`;
@@ -71,6 +72,7 @@ export function importArchive(data, dir = CONTENT) {
     for (const facet of ["people", "places"]) for (const id of entry[facet] ?? []) if (!tables[facet][id]) errors.push(`${where}: ${facet} "${id}" is not public in ${facet}.json or in this archive`);
     for (const id of entry.links ?? []) if (!ids.has(id) || id === entry.id) errors.push(`${where}: link "${id}" points at no other memory`);
     for (const lang of LANGS) if (!entry[lang]?.title || !entry[lang]?.body) errors.push(`${where}: needs "${lang}" with a title and a body`);
+    for (const lang of LANGS) if (entry[lang]?.body && bodyProblem(entry[lang].body)) errors.push(`${where} (${lang}): ${bodyProblem(entry[lang].body)}`);
     const memory = { date, ...(entry.approx ? { approx: true } : {}), kind: entry.kind, weight: entry.weight, threads: entry.threads };
     for (const key of LISTS) if (entry[key]?.length) memory[key] = entry[key];
     if (entry.order !== undefined) memory.order = entry.order;

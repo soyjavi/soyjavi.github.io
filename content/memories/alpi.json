@@ -1,0 +1,17 @@
+{
+  "date": "2025",
+  "approx": true,
+  "kind": "product",
+  "weight": 2,
+  "threads": [
+    "craft"
+  ],
+  "en": {
+    "title": "The platform where my agents live",
+    "body": "I built a platform for my own agents to live inside: that is where their profiles, their tools and whatever each one knows how to do sit. Everything I do today with artificial intelligence goes through that layer, and one of my applications — the one that writes these memories — runs on top of it.\n\nTo me it is not just another product. It is the piece that lets me work in a different way: instead of writing every line by hand, I put agents together and they work with me. I built it, I maintain it and I am the only real user. Nobody commissioned it; I needed it to work the way I wanted to work."
+  },
+  "es": {
+    "title": "La plataforma donde viven mis agentes",
+    "body": "Construí una plataforma para que mis propios agentes vivan dentro de ella: ahí están sus perfiles, sus herramientas y lo que cada uno sabe hacer. Todo lo que hago hoy con inteligencia artificial pasa por esa capa, y una de mis aplicaciones —la que escribe estas memorias— funciona encima.\n\nPara mí no es un producto más. Es la pieza que me deja trabajar de otra manera: en vez de escribir cada línea a mano, monto agentes que trabajan conmigo. La hice yo, la mantengo yo y soy el único que la usa de verdad. Nadie me la encargó; la necesitaba para trabajar como quería."
+  }
+}

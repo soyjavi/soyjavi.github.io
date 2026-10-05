@@ -1,0 +1,25 @@
+{
+  "date": "1996",
+  "approx": true,
+  "kind": "professional",
+  "weight": 2,
+  "threads": [
+    "craft",
+    "learning"
+  ],
+  "people": [
+    "begona-materna",
+    "iker-perez-de-albeniz"
+  ],
+  "places": [
+    "dma-servicios-informaticos"
+  ],
+  "en": {
+    "title": "From an old language to JavaScript",
+    "body": "My first programming language was an old one, the kind you learn from a manual and a lot of patience. Later, at sixteen, I was already building real applications in two fashionable tools for Windows, and with that money I bought my first laptop.\n\nSince then I have not stopped: almost all of my craft has been the same language of the web, the one that has carried my career for more than twenty years. I have written books about it, I have taught it and I still use it every day. I started playing and I have ended up living off it."
+  },
+  "es": {
+    "title": "De un lenguaje antiguo a JavaScript",
+    "body": "Mi primer lenguaje de programación fue uno antiguo, de los que se aprendían con un manual y mucha paciencia. Después, con dieciséis, ya hacía aplicaciones de verdad en dos herramientas de moda para Windows, y con ese dinero me compré mi primer portátil.\n\nDesde entonces no he parado: casi todo mi oficio ha sido el mismo lenguaje de la web, el que sostiene mi carrera desde hace más de veinte años. He escrito libros sobre él, lo he enseñado y lo sigo usando cada día. Empecé jugando y he terminado viviendo de esto."
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "date": "1984",
+  "approx": true,
+  "kind": "personal",
+  "weight": 2,
+  "threads": [
+    "home",
+    "family"
+  ],
+  "people": [
+    "lander",
+    "koldo",
+    "jon"
+  ],
+  "places": [
+    "galdacano"
+  ],
+  "en": {
+    "title": "The years of the courtyard and the jumped stairs",
+    "body": "In that flat I lived the years I remember as the best of my childhood. I went down the stairs jumping step by step, there was a courtyard a few metres away where I played with two neighbours, and opposite lived a cousin I grew up with.\n\nThere was a bakery right in front, where milk was still bought in bags, and on Sundays came church and catechism. My father had his little cabin inside the house. From that time I keep very, very good memories; it was the part of my childhood that holds together whole in my memory."
+  },
+  "es": {
+    "title": "Los años del patio y las escaleras saltadas",
+    "body": "En aquel piso viví los años que recuerdo como los mejores de mi infancia. Bajaba las escaleras saltando de peldaño en peldaño, tenía un patio a unos metros donde jugaba con dos vecinos, y enfrente vivía un primo con el que me crié.\n\nHabía una panadería justo delante, donde la leche todavía se compraba en bolsas, y los domingos tocaban iglesia y catequesis. Mi padre tenía su pequeño camarote dentro de casa. De aquella época guardo muy, muy buenos recuerdos; fue la parte de mi niñez que se sostiene entera en la memoria."
+  }
+}

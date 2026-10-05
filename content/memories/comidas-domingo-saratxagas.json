@@ -1,0 +1,30 @@
+{
+  "date": "1985",
+  "approx": true,
+  "kind": "personal",
+  "weight": 1,
+  "threads": [
+    "family",
+    "home"
+  ],
+  "people": [
+    "abuela-agustina",
+    "abuelo-paco",
+    "aitor"
+  ],
+  "places": [
+    "deusto",
+    "terreno-saratxagas"
+  ],
+  "links": [
+    "first-meeting-aitor"
+  ],
+  "en": {
+    "title": "Soda from my grandfather's glass",
+    "body": "I must have been five or six. On Sundays we ate at my grandparents' plot of land, and my grandfather put the radio on. He let us try a little of his soda, and to me that was a promotion: drinking from his glass was, in a small boy's head, something grown-ups did.\n\nI do not remember the taste, or the exact year, or what that radio looked like. What stayed is the table, the sound of the set, and the feeling of being let into a place that was not mine. When I try to remember him, that is the first image that comes."
+  },
+  "es": {
+    "title": "Gaseosa del vaso del abuelo",
+    "body": "Tendría cinco o seis años. Los domingos se comía en el terreno de mis abuelos, y mi abuelo ponía la radio. Nos dejaba probar un poco de su gaseosa, y para mí aquello era un ascenso: beber de su vaso era, en mi cabeza de niño, cosa de mayores.\n\nNo recuerdo el sabor, ni el año exacto, ni cómo era aquella radio. Lo que se ha quedado es la mesa, el aparato sonando y la sensación de que me dejaban entrar en un territorio que no era el mío. Si me preguntan por él, es la primera imagen que me viene."
+  }
+}

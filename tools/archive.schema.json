@@ -199,8 +199,8 @@
         "body": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 600,
-          "description": "First person, a short paragraph: one to six sentences."
+          "maxLength": 900,
+          "description": "First person, one or two paragraphs separated by a blank line (\\n\\n), 900 characters in all."
         }
       }
     }

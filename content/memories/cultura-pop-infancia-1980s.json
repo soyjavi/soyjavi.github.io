@@ -1,0 +1,29 @@
+{
+  "date": "1988",
+  "approx": true,
+  "kind": "personal",
+  "weight": 1,
+  "threads": [
+    "family",
+    "home"
+  ],
+  "people": [
+    "aitor",
+    "francisco-javier"
+  ],
+  "places": [
+    "galdacano"
+  ],
+  "links": [
+    "first-meeting-aitor",
+    "estancia-galicia-1988"
+  ],
+  "en": {
+    "title": "The small television, the toys and the last carnival",
+    "body": "We were no different from anyone: we watched television at home and played with whatever there was. What I remember most is the programme about the sea that I watched with my parents. While it was on they put my father's motorbike goggles on me as if they were a diving helmet, and I looked at the bottom of the ocean from a fifth floor with no lift.\n\nThe set was small at first, with a cable remote and buttons from one to eight, and my father used me as his remote control. With my brother I watched the wrestling and we had figures of those fighters. And I remember the carnival when I dressed up as a cartoon character: it was the last one the four of us spent together, because weeks later we left."
+  },
+  "es": {
+    "title": "La tele pequeña, los muñecos y el último carnaval",
+    "body": "No éramos distintos de nadie: veíamos la tele en casa y jugábamos con lo que había. Lo que más recuerdo era el programa del mar que ponían con mis padres. Mientras lo veíamos me colocaban las gafas de moto de mi padre como si fueran una escafandra, y yo miraba el fondo del océano desde un quinto sin ascensor.\n\nLa tele era pequeña al principio, con un mando de cable y botones del uno al ocho, y mi padre me usaba a mí de mando a distancia. Con mi hermano veía la lucha libre y teníamos muñecos de aquellos luchadores. Y recuerdo el carnaval en que me disfracé de un dibujo animado: fue el último que pasamos los cuatro juntos, porque semanas después nos fuimos."
+  }
+}

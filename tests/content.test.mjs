@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { build } from "esbuild";
 import { FACETS, precisionOf, todayYear, years } from "../assets/js/life.js";
-import { LANGS, loadContent, root } from "../src/content.mjs";
+import { bodyProblem, LANGS, loadContent, root } from "../src/content.mjs";
 import { ageAt, ageIdOf } from "../assets/js/life.js";
 import { renderSite } from "../src/site.mjs";
 import { bundleOptions } from "../tools/bundle.mjs";
@@ -117,7 +117,7 @@ test("every milestone and period has short copy in both languages", () => {
       const copy = d.life[entry.id];
       assert.ok(copy?.title && copy?.body, `${lang}/${entry.id}`);
       assert.ok(copy.title.length <= 60, `${lang}/${entry.id}: title is ${copy.title.length} characters`);
-      assert.ok(copy.body.length <= 600, `${lang}/${entry.id}: body is ${copy.body.length} characters`);
+      assert.equal(bodyProblem(copy.body), null, `${lang}/${entry.id}`);
     }
     for (const id of life.periods) {
       assert.match(d.periods[id].kicker, /^\d\d \/ .+ · \d{4}–\d{4}$/, `${lang}/${id}`);

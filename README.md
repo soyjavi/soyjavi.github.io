@@ -107,8 +107,8 @@ flag of your own) is ignored.
       "kind": "personal", "weight": 2,
       "threads": ["family"],
       "people": ["a-person"], "places": ["a-place"], "links": ["second-memory"],
-      "en": { "title": "…", "body": "First person, a short paragraph of one to six sentences, under 600 characters." },
-      "es": { "title": "…", "body": "En primera persona, un párrafo corto de una a seis frases, menos de 600 caracteres." }
+      "en": { "title": "…", "body": "First person. One paragraph, or two separated by a blank line.\n\nUnder 900 characters in all." },
+      "es": { "title": "…", "body": "En primera persona. Un párrafo, o dos separados por una línea en blanco.\n\nMenos de 900 caracteres en total." }
     }
   ]
 }
@@ -121,7 +121,7 @@ flag of your own) is ignored.
   everything); `date` is `YYYY` or `YYYY-MM` (`"approx": true` when it is roughly then); `order` breaks a tie between
   memories of the same date.
 - `people`, `places` and `links` are ids (of this file, of `content/people.json`, `content/places.json` or memories
-  already in the site). An id that already exists is updated, so a batch can be imported again.
+  already in the site). An id that already exists is updated, so a batch can be imported again. A person or place that no imported memory uses is not written.
 
 ### The waitlists
 

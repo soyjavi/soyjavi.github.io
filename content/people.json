@@ -1,106 +1,110 @@
 {
-  "merche": {
-    "en": "Merche",
-    "es": "Merche"
+  "abuela-agustina": {
+    "en": "Agustina",
+    "es": "Agustina"
   },
-  "francisco": {
-    "en": "Francisco Javier",
-    "es": "Francisco Javier"
+  "abuela-maria-luz": {
+    "en": "María Luz (Lucy)",
+    "es": "María Luz (Lucy)"
+  },
+  "abuelo-jose": {
+    "en": "José",
+    "es": "José"
+  },
+  "abuelo-paco": {
+    "en": "Paco",
+    "es": "Paco"
   },
   "aitor": {
     "en": "Aitor",
     "es": "Aitor"
   },
-  "paco": {
-    "en": "Paco",
-    "es": "Paco"
+  "aitor-trayectoria-profesional": {
+    "en": "Aitor Jiménez Villar",
+    "es": "Aitor Jiménez Villar"
   },
-  "agustina": {
-    "en": "Agustina",
-    "es": "Agustina"
-  },
-  "emilio": {
-    "en": "Emilio",
-    "es": "Emilio"
-  },
-  "andoni": {
+  "andoni-valiente": {
     "en": "Andoni Valiente",
     "es": "Andoni Valiente"
   },
-  "luisma": {
-    "en": "Luisma",
-    "es": "Luisma"
-  },
-  "ruben": {
-    "en": "Rubén",
-    "es": "Rubén"
-  },
-  "javi-perez": {
-    "en": "Javi Pérez",
-    "es": "Javi Pérez"
-  },
-  "iker": {
-    "en": "Iker Pérez de Albeniz",
-    "es": "Iker Pérez de Albeniz"
-  },
-  "cata": {
-    "en": "Cata",
-    "es": "Cata"
-  },
-  "pasku": {
-    "en": "Pasku",
-    "es": "Pasku"
-  },
-  "yuri": {
-    "en": "Yuri",
-    "es": "Yuri"
-  },
-  "eki": {
-    "en": "Eki",
-    "es": "Eki"
+  "begona-materna": {
+    "en": "Begoña",
+    "es": "Begoña"
   },
   "benji": {
     "en": "Benji",
     "es": "Benji"
   },
-  "jose": {
-    "en": "José",
-    "es": "José"
+  "catalina-oyaneder": {
+    "en": "Catalina Oyaneder",
+    "es": "Catalina Oyaneder"
   },
-  "lucy": {
-    "en": "María Luz",
-    "es": "María Luz"
+  "david-pascual": {
+    "en": "David Pascual",
+    "es": "David Pascual"
   },
-  "jon": {
-    "en": "Jon Mikel",
-    "es": "Jon Mikel"
+  "eki": {
+    "en": "Eki",
+    "es": "Eki"
   },
-  "lander": {
-    "en": "Lander",
-    "es": "Lander"
+  "francisco-javier": {
+    "en": "Francisco Javier",
+    "es": "Francisco Javier"
   },
-  "koldo": {
-    "en": "Koldo",
-    "es": "Koldo"
+  "ibon": {
+    "en": "Ibon",
+    "es": "Ibon"
+  },
+  "iker-perez-de-albeniz": {
+    "en": "Iker Pérez de Albeniz",
+    "es": "Iker Pérez de Albeniz"
   },
   "javi-ramirez": {
     "en": "Javi Ramírez",
     "es": "Javi Ramírez"
   },
-  "laura": {
+  "jon": {
+    "en": "Jon Mikel",
+    "es": "Jon Mikel"
+  },
+  "koldo": {
+    "en": "Koldo",
+    "es": "Koldo"
+  },
+  "lander": {
+    "en": "Lander",
+    "es": "Lander"
+  },
+  "laura-toribio": {
     "en": "Laura Toribio",
     "es": "Laura Toribio"
   },
-  "coco": {
-    "en": "Coco",
-    "es": "Coco"
+  "leire-maguregi": {
+    "en": "Leire Maguregi",
+    "es": "Leire Maguregi"
   },
-  "view": {
-    "en": "View",
-    "es": "View"
+  "merche": {
+    "en": "Merche",
+    "es": "Merche"
   },
-  "javi-leon": {
-    "en": "Javi, from León",
-    "es": "Javi, de León"
+  "tio-emilio": {
+    "en": "Emilio",
+    "es": "Emilio"
+  },
+  "vanessa": {
+    "en": "Vanessa",
+    "es": "Vanessa"
+  },
+  "villarcalo": {
+    "en": "Villarcalo",
+    "es": "Villarcalo"
+  },
+  "yam": {
+    "en": "Yam",
+    "es": "Yam"
+  },
+  "yuri": {
+    "en": "Yuri (Piyanut Tajumpa)",
+    "es": "Yuri (Piyanut Tajumpa)"
   }
 }

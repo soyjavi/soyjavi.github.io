@@ -1,0 +1,28 @@
+{
+  "date": "1996",
+  "approx": true,
+  "kind": "education",
+  "weight": 2,
+  "threads": [
+    "learning"
+  ],
+  "people": [
+    "ibon",
+    "villarcalo"
+  ],
+  "places": [
+    "colegio-herrieztegui",
+    "dma-servicios-informaticos"
+  ],
+  "links": [
+    "primer-portatil-1996"
+  ],
+  "en": {
+    "title": "The year I failed out of rebellion",
+    "body": "I repeated the third year of secondary school, and it was not for lack of ability: it was out of rebellion. I spent that year in my own head, drifting; only one subject interested me, the one taught by a teacher whose name I still remember, and the rest bored me. It is the only school year I have ever lost. Because I was a repeater and the curriculum in the country was changing, I was moved into the new two-year pre-university programme. And in that classroom, without looking for it, I met my first serious girlfriend. My only academic failure turned out to be the door into what came next."
+  },
+  "es": {
+    "title": "El curso que suspendí por rebeldía",
+    "body": "Repetí tercero de bachillerato, y no fue por falta de capacidad: fue por rebeldía. Ese curso me lo pasé contemplativo, yéndome por las ramas; solo me interesaba una asignatura, la que daba un profesor cuyo nombre todavía recuerdo, y el resto me aburría. Es el único curso que he perdido en mi vida. Como era repetidor y el plan de estudios del país estaba cambiando, me tocó empezar el bachillerato nuevo, el de dos años. Y en aquella aula, sin buscarlo, conocí a mi primera pareja formal. Mi único fracaso escolar acabó siendo la puerta de entrada a lo que vino después."
+  }
+}

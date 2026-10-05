@@ -1,0 +1,24 @@
+{
+  "date": "1998",
+  "approx": true,
+  "kind": "education",
+  "weight": 1,
+  "threads": [
+    "learning",
+    "love"
+  ],
+  "people": [
+    "villarcalo"
+  ],
+  "links": [
+    "first-breakup"
+  ],
+  "en": {
+    "title": "The last course, and each of us on our own way",
+    "body": "I finished my last year of secondary school in 1999, and when it ended each of us went our own way: she went into nursing and I went into computing, but outside the university.\n\nThat is where our paths separated, after a few years of sharing the same classroom. I learned the trade on my own, without going through a faculty, and that way of studying — by myself, with whatever I had at hand — is the one I have kept ever since."
+  },
+  "es": {
+    "title": "El último curso, y cada uno por su lado",
+    "body": "Terminé el último curso de bachillerato en 1999, y al acabar cada uno se fue por su lado: ella se metió en enfermería y yo me decanté por la informática, pero fuera de la universidad.\n\nAhí se separaron nuestros caminos, después de unos años compartiendo la misma aula. Yo aprendí el oficio por mi cuenta, sin pasar por una facultad, y esa manera de estudiar —por mí mismo, con lo que tenía a mano— es la que he mantenido desde entonces."
+  }
+}

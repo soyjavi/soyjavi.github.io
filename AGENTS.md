@@ -116,6 +116,9 @@ no ROADMAP entry or is malformed.
   ahead are the book and the clone. The form is clear and the memories are diffuse; the name is never spelled with dots.
   Nothing is only reachable in order: clicking, the rail, the finder, Surprise me, related memories and the keyboard
   all get there, and Earlier and Later are one way among them.
+- The sky moves like film: it is drawn at 24 frames a second and never faster, on any screen, and a hidden tab draws at
+  one frame a second. This is an art decision of the creator, not a performance setting: a change to `CADENCE`
+  needs his approval, and the tests count the draws.
 - The brand is `javi` in outlined Instrument Serif Italic; `soyjavi` is an address (domain, X, email), not the
   brand. The identity has no hue: twelve neutrals in a light and a dark theme (the one exception is `KIND_TINT`, a barely
   perceptible warm or cool tint of the memory clouds by kind, drawn in the scene only, never in the interface and never

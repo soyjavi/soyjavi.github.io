@@ -1,23 +1,25 @@
 {
   "date": "2017",
+  "approx": true,
   "kind": "personal",
   "weight": 2,
   "threads": [
-    "body"
+    "body",
+    "family"
   ],
   "places": [
-    "chiang-mai"
+    "pirineo-frances"
   ],
   "links": [
-    "race",
-    "taekwondo"
+    "childhood-taekwondo",
+    "temporadas-snowboard"
   ],
   "en": {
-    "title": "I start running",
-    "body": "Ten kilometres a day become non-negotiable."
+    "title": "The third sport I do not negotiate",
+    "body": "I started running almost ten years ago, in the city where I lived then, with no plan at all. The first runs were three or four kilometres and I struggled to hold a steady pace. Little by little it became a daily hour of ten kilometres, almost always the same loop, and it is no longer negotiable.\n\nIt does three things at once: therapy for a job that keeps me sitting, time alone to listen to things, and time to think with nobody interrupting. I always run alone. Last year I ran my first real race and came fifth in my category. It is not the sport of my life, it is the third one; but it is the one that shows them how you do something every single day."
   },
   "es": {
-    "title": "Empiezo a correr",
-    "body": "Los diez kilómetros diarios se vuelven innegociables."
+    "title": "El tercer deporte que no se negocia",
+    "body": "Empecé a correr hace casi diez años, en la ciudad donde vivía entonces, sin ningún plan. Las primeras carreras eran de tres o cuatro kilómetros y me costaba mantener el ritmo. Poco a poco se convirtió en una hora diaria de diez kilómetros, casi siempre el mismo circuito, y ya no se negocia.\n\nMe sirve para tres cosas a la vez: terapia para un trabajo que me tiene sentado, un rato a solas para escuchar cosas y tiempo de pensar sin que nadie me interrumpa. Siempre corro solo. El año pasado hice mi primera carrera de verdad y quedé quinto de mi categoría. No es el deporte de mi vida, es el tercero; pero es el que les enseña cómo se hace algo todos los días."
   }
 }

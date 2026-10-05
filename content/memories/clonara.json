@@ -1,19 +1,17 @@
 {
   "date": "2025-09",
   "kind": "product",
-  "weight": 3,
+  "weight": 2,
   "threads": [
-    "ventures"
-  ],
-  "links": [
-    "satoshi"
+    "craft",
+    "family"
   ],
   "en": {
-    "title": "The first version of Clonara",
-    "body": "An app to digitise a person's legacy and preserve it, built on alpi. “A historic day for Satoshi Limited”."
+    "title": "The application that writes my memory",
+    "body": "On 23 September I finished the first version of an application and said it was a historic day for my company. It was not a line for effect: I had invented it, and it exists to digitise a person's legacy and keep it forever. A year later I am using it for exactly what I built it for. It is collecting my memories and writing them, with me as the first user and the first legacy to be preserved. That is what turns this archive into a deliberate work and not a notebook. The book has two readers: my sons, so they know things about their father that a father never says out loud, and anyone looking in one life for a reason for their own."
   },
   "es": {
-    "title": "La primera versión de Clonara",
-    "body": "Una aplicación para digitalizar el legado de una persona y preservarlo, construida sobre alpi. «Un día histórico para Satoshi Limited»."
+    "title": "La aplicación que escribe mi memoria",
+    "body": "El 23 de septiembre terminé la primera versión de una aplicación y dije que era un día histórico para mi empresa. No era una frase para la galería: la había inventado yo, y sirve para digitalizar el legado de una persona y conservarlo para siempre. Un año después la estoy usando justo para lo que la construí. Está recogiendo mis memorias y escribiéndolas, conmigo como primer usuario y primer legado que se conserva. Eso es lo que convierte este archivo en una obra deliberada y no en un cuaderno de notas. El libro tiene dos lectores: mis hijos, para que sepan de su padre cosas que un padre no dice en voz alta, y cualquiera que busque en una vida una razón para la suya."
   }
 }

@@ -200,7 +200,7 @@ test("milestone dates are printed no more precisely than they are stored", () =>
   const byYear = content.life.milestones.find((entry) => /^\d{4}$/.test(entry.date) && !entry.approx);
   assert.match(html, new RegExp(`<time datetime="${byYear.date}">${byYear.date}</time>`));
   assert.match(html, /<time datetime="2001-06">Jun 2001<\/time>/);
-  assert.match(html, /<time datetime="1981">~1981<\/time>/);
+  assert.match(html, /<time datetime="1982">~1982<\/time>/);
   assert.doesNotMatch(html, /<time datetime="\d{4}-\d{2}-\d{2}"/);
   assert.match(read(homes.es), /<time datetime="2001-06">jun 2001<\/time>/);
 });
@@ -380,15 +380,15 @@ test("with a Buttondown account each list is its own accessible form posting onl
 test("questions for the clone render in the clone's panel with their memories linked, and without questions nothing is drawn", () => {
   const withAsks = {
     ...content,
-    life: { ...content.life, questions: [{ id: "q1", memories: ["born", "github"] }, { id: "q2", memories: ["github"] }, { id: "q3", memories: ["born"] }] },
+    life: { ...content.life, questions: [{ id: "q1", memories: ["born", "firstjob"] }, { id: "q2", memories: ["firstjob"] }, { id: "q3", memories: ["born"] }] },
     dict: Object.fromEntries(["en", "es"].map((lang) => [lang, { ...content.dict[lang], asks: { q1: `one ${lang}`, q2: `two ${lang}`, q3: `three ${lang}` } }])),
   };
   const out = renderSite(withAsks);
   for (const lang of ["en", "es"]) {
     const clone = out.get(homes[lang]).match(/<section class="chapter" id="clone"[\s\S]*?<\/section>/)[0];
     assert.equal((clone.match(/<li data-ask=/g) ?? []).length, 3);
-    assert.ok(clone.includes('<li data-ask="q1" data-memories="born,github"><p class="ask-q">one ' + lang + "</p>"));
-    assert.match(clone, /<a href="#m-github" data-go="m-github">[^<]+<\/a>/, "each memory is linked, so the flat page reaches it");
+    assert.ok(clone.includes('<li data-ask="q1" data-memories="born,firstjob"><p class="ask-q">one ' + lang + "</p>"));
+    assert.match(clone, /<a href="#m-firstjob" data-go="m-firstjob">[^<]+<\/a>/, "each memory is linked, so the flat page reaches it");
     assert.match(clone, /<div class="ask" role="group" aria-label="[^"]+">/);
     assert.ok(clone.indexOf('class="ask"') < clone.indexOf("waitlist-clone"), "the questions come before the form");
     assert.doesNotMatch(files.get(homes[lang]), /class="ask"|data-ask/);

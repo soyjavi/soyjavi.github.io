@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { AHEAD, FLOOR, KINDS, SPIN, START, shapeBy, onPath, spinAngle, starfield, unitsOf, yearOf } from "./life.js";
 import { createBackdrop } from "./backdrop.js";
-import { QUALITY } from "./explore.js";
+import { CADENCE, QUALITY, pace } from "./explore.js";
 import { approach, clamp, ease, eye, slide, turn, zoom } from "./orbit.js";
 import { DIRECT, ENTRANCE, DUST_FRAGMENT, DUST_VERTEX, formedAt, KIND_TINT, MARK_FRAGMENT, MARK_VERTEX, HOVER, POINTER, STAR_FRAGMENT, STAR_VERTEX } from "./shaders.js";
 import { lerp, reducedMotion, seeded, smoothstep } from "./util.js";
@@ -481,14 +481,20 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
   let dolly = null;
   let levelsMoving = true;
 
+  const clock = { last: -Infinity };
+  let ticket = 0;
+  const queue = () => {
+    const mine = ++ticket;
+    if (document.hidden) setTimeout(() => ticket === mine && frame(performance.now()), 1000 / CADENCE.hidden);
+    else requestAnimationFrame((now) => ticket === mine && frame(now));
+  };
+  document.addEventListener("visibilitychange", () => running && queue());
+
   const frame = (now) => {
     if (!running) return;
+    if (!document.hidden && !pace(clock, now)) return queue();
     timer.update(now);
     const dt = Math.min(Math.max(timer.getDelta(), 0), 0.25);
-    if (document.hidden) {
-      requestAnimationFrame(frame);
-      return;
-    }
     const time = timer.getElapsed();
     loaded ??= time;
     const from = clamp(homeDistance() * entrance.from, 6, 640);
@@ -690,7 +696,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
       callbacks.error(error);
       return;
     }
-    if (running) requestAnimationFrame(frame);
+    if (running) queue();
   };
 
   return {
@@ -709,7 +715,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
       renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.5 : 2, step.ratio));
       renderer.setSize(innerWidth, innerHeight, false);
     },
-    start: () => requestAnimationFrame(frame),
+    start: () => queue(),
     begin: (mode = "full") => {
       armed = true;
       still = mode !== "full";

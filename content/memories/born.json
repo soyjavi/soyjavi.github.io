@@ -1,27 +1,23 @@
 {
   "date": "1980-04",
   "kind": "personal",
-  "weight": 3,
+  "weight": 2,
   "threads": [
     "family",
     "home"
   ],
   "people": [
     "merche",
-    "francisco"
-  ],
-  "places": [
-    "bilbao"
-  ],
-  "links": [
-    "farmhouse"
+    "francisco-javier",
+    "abuela-maria-luz",
+    "abuelo-paco"
   ],
   "en": {
-    "title": "Born in Bilbao",
-    "body": "I'm born in Bilbao, in the Basque Country."
+    "title": "I was born before dawn in a big hospital",
+    "body": "I was born one April morning before dawn, around one o'clock, in a big hospital on the outskirts. My mother was the eldest daughter of a family that had emigrated from the coast to make a living in the north, and my father was a metalworker from a coastal town.\n\nBoth were very young and came from simple families. My maternal and paternal grandparents are there too, at the start of this story. I remember nothing, of course; I only know what I have been told, and I keep it as the first line of everything else."
   },
   "es": {
-    "title": "Nazco en Bilbao",
-    "body": "Nazco en Bilbao, en el País Vasco."
+    "title": "Nací de madrugada en un hospital grande",
+    "body": "Nací una madrugada de abril, hacia la una, en un hospital grande a las afueras. Mi madre era la hija mayor de una familia que había emigrado desde la costa para buscarse la vida en el norte, y mi padre era un trabajador del metal de un pueblo de la costa.\n\nLos dos eran muy jóvenes y venían de familias sencillas. Mis abuelos maternos y paternos también están ahí, en el arranque de esta historia. No recuerdo nada, claro; solo sé lo que me han contado, y lo guardo como la primera línea de todo lo demás."
   }
 }

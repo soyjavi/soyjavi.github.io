@@ -3,6 +3,7 @@ import { footer, head, masthead, personLd, tools, websiteLd, wordmark } from "./
 import { FACETS } from "../assets/js/life.js";
 import { explore, stats } from "./explore.mjs";
 import { rail } from "./rail.mjs";
+import { paragraphsOf } from "./content.mjs";
 
 
 const when = (locale, date, approx) => {
@@ -69,7 +70,7 @@ const milestone = (d, life, entry, head) => {
             <p class="kicker">${kicker(period.kicker)}</p>${head ? `\n            <div class="period-head"><h2 class="h2">${period.title}</h2><p class="intro">${esc(period.intro)}</p></div>` : ""}
             <time datetime="${entry.date}">${esc(when(d.locale, entry.date, entry.approx))}</time>
             <h3 class="h3">${esc(copy.title)}</h3>
-            <p>${esc(copy.body)}</p>
+            ${paragraphsOf(copy.body).map((part) => `<p>${esc(part)}</p>`).join("\n            ")}
             ${facetLists(d, life, entry)}
           </li>`;
 };

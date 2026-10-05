@@ -1,0 +1,20 @@
+{
+  "date": "1986",
+  "approx": true,
+  "kind": "education",
+  "weight": 1,
+  "threads": [
+    "learning"
+  ],
+  "places": [
+    "colegio-herrieztegui"
+  ],
+  "en": {
+    "title": "I date my childhood by school years, not by years",
+    "body": "When I talk about my childhood I do not give years, I give school years. I did the whole old system: eight compulsory years, from six to fourteen, and from there you went on to the baccalaureate or to vocational training.\n\nThat is why I remember things by the year I was in and not by the date. It was the system I happened to live through, and I am one of the last to come out of it: the law that changed it arrived just as I was finishing. When I want to order my memories, the first thing I do is put them in their school year."
+  },
+  "es": {
+    "title": "Fecho mi infancia por cursos, no por años",
+    "body": "Cuando hablo de mi niñez no doy años, doy cursos. Hice toda la escuela del sistema antiguo: ocho cursos obligatorios, de los seis a los catorce, y de ahí se pasaba al bachillerato o a la formación profesional.\n\nPor eso me acuerdo de las cosas por el curso en que estaba y no por la fecha. Fue el sistema que me tocó vivir, y soy de los últimos que salieron de él: la ley que lo cambió entró justo cuando yo terminaba. Cuando quiero ordenar mis recuerdos, lo primero que hago es ponerlos en su curso."
+  }
+}
