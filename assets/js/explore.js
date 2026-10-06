@@ -52,13 +52,17 @@ export function declared(marks, index, limit = STRONG) {
   return strongest(marks, index, Infinity).filter((i) => links.includes(i)).slice(0, limit);
 }
 
-export function periodNames(marks, period, limit = 4) {
-  return marks
+export function periodNames(marks, period, limit = 3, apart = 3) {
+  const ranked = marks
     .map((mark, i) => [mark, i])
     .filter(([mark]) => mark.period === period)
-    .sort((a, b) => b[0].weight - a[0].weight || a[0].year - b[0].year || a[1] - b[1])
-    .slice(0, limit)
-    .map(([, i]) => i);
+    .sort((a, b) => b[0].weight - a[0].weight || a[0].year - b[0].year || a[1] - b[1]);
+  const chosen = [];
+  for (const [mark, i] of ranked) {
+    if (chosen.length >= limit) break;
+    if (chosen.every(([other]) => !mark.position || !other.position || Math.hypot(...mark.position.map((value, axis) => value - other.position[axis])) >= apart)) chosen.push([mark, i]);
+  }
+  return chosen.map(([, i]) => i);
 }
 
 export function sequence(marks, index, filter = null) {

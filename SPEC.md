@@ -102,6 +102,34 @@ site in memory and compares it, and the bundle, with the disk.
 
 ## The scene
 
+### The sky and its words
+
+The site borrows its words from astronomy and uses each for one thing only. The mapping is fixed; the pages, the code and the documents follow it.
+
+| In the life | In astronomy | What it is on the site |
+| --- | --- | --- |
+| The whole life | **The sky**: a group of galaxies bound together, seen as one night | Everything told, from 1980 to the edge of what is ahead. It is not a galaxy; a life is the sky and the sky holds galaxies |
+| An age (`early` … `later`) | **A galaxy**: a long-lived structure of stars turning round a core, with arms | One per age lived and remembered (at most seven), as large as what it holds. The core is the start of the age and the rim its end; the arms are the threads it holds |
+| A memory | **A star cluster or a nebula**: a cloud of stars | A cloud of dots, bigger and brighter by weight; its centre is dimmer than its edge so its dots stay apart. Many dots, no sharp point |
+| A thread (home, body, craft…) | **A constellation**: the pattern people draw between stars; also **an arm** of the galaxy | A sector of each galaxy and a line joining its memories in time, drawn when the camera is close |
+| A person, a place | A constellation drawn by another rule | A filter that lights the memories sharing it and dims the rest |
+| A year | **An orbit**, a growth ring of the galaxy | A ring round the core at the radius of that year, with its date; time is distance from the core |
+| The dust between memories | **Interstellar dust and gas** | The days nobody told, thicker where a thread was busy; it shows the shape of the age |
+| The path | **A filament** of the cosmic web along which galaxies lie | The spiral line that turns clockwise and outwards, with the galaxies one after another |
+| Today | A star still burning | A filled dot with a pulsing ring, just past the last galaxy |
+| The book, the clone | **Galaxies not yet formed**: a ring of gas before the stars | Two hollow rings further along the path |
+| The real stars behind | The deep sky | Nothing of the life: depth, so the camera has parallax |
+| The visitor | The observer | A free camera that orbits, never a character |
+
+How the sky behaves follows astronomy where that helps legibility and stops where it would hide the life:
+
+- **A galaxy turns about its centre**, rigidly, a turn in four to six minutes (the larger, the slower: `spinRate`). It turns against the winding of its arms, so the arms trail behind the turn as they do in nature. A real galaxy turns faster in the middle than at the rim and its arms are waves rather than stuff, which would wind ours up; ours turn like a record so the arms keep their shape.
+- **Scale is not copied.** A real galaxy holds a hundred billion stars and turns in two hundred million years; ours holds tens of memories and turns in minutes. Brightness and size say the weight of a memory, never its distance.
+- **The older is near the core**, as in a galaxy: inside an age a memory sits further out as its date comes later (`fractionIn`, from 22% of the radius to the rim).
+- **Where astronomy and the life disagree the life decides**: the galaxies lie on a spiral path that real ones do not follow, and the same age is never two galaxies.
+
+Why the life is the sky and not one galaxy: a single disc would hold all the memories (the site is built for two or three hundred) and would leave nothing to turn to between ages; the arms are already the threads, so the ages would have to become rings with nowhere left to stand. Seven galaxies give seven places to enter and keep the density low. Why an age is a galaxy and not a planetary system: a system would make its memories planets, small and alike, and lose the weight a cloud can show.
+
 ### Geometry
 
 `life.js` places everything with pure functions of the memories:
@@ -155,7 +183,7 @@ its memory at its own very slow pace (`CLOUD`: at most 0.07 rad/s) and breathes 
 from a one-row float texture with one level per memory (`levels` in `explore.js`: 1 normal; with a memory in view 1 for
 it, 0.85 for its strongest relations (all of them once the card's list is expanded), 0.5 for its weaker ones and 0.3 for the rest; with a filter 0.1 for what is outside it) and eased on the CPU. A
 trail dot's brightness follows the filter and, with a memory in view, a window of years around it. `uReveal` hides
-every dot after a year while the life plays. Alpha falls with
+every dot after a year while the life plays. The centre of a cloud is dimmer than its edge (`CORE`: its dots lose up to 97% of their light at the middle, fading out by 2.6 units from it), so a cloud shows its dots instead of one white patch; the dust between memories gains up to 140% of its light as the camera pulls out (`CORE.dust`, `uFar`), so the structure of each galaxy stays visible from afar. Alpha falls with
 distance and fades when closer than a few units to the camera; trail dots are fainter, ahead dots 30%. Zoomed out, cloud dots are drawn dimmer and larger so the clouds stay soft and do not burn out. The marks are today, its pulse, the two rings and a thin ring
 on the memory in view; `data-ring` on `#scene` carries the ring's position, `data-view` the camera's yaw, pitch and
 distance, `data-links` the number of lines drawn and `data-jumps` the number of jumps a filter draws in the sky, for
@@ -251,7 +279,7 @@ Two and a half seconds after the last touch, wherever it is (the hero, a memory,
   people and places they share, then nearness in time, then position); the ones named and joined are the memories he linked by hand, at most three (`declared`, `STRONG`), and the neighbours in time stay lit without a name or a line. At rest the scene draws and names only those; a button in the card, "All related (n)"
   (`.expander`, `aria-expanded`), shows all of them in the card's list, draws all the lines, names up to eight and lights
   them all, and "Fewer" puts it back. Any memory a card row or the finder points at is previewed on top of that.
-- **The age view.** Pressing an age (its label in the sky, the nav, a link to `#period-<id>`) opens no memory: the camera frames the galaxy, its year rings and constellation show, the other galaxies fall quiet, and only the age's headline and up to three other heavy memories are named, in italics (`periodNames`; pointing at another memory names that one alone). The card holds the age's number, title and introduction and one button, "Start with <first memory>", that opens the first memory; Earlier and Later are hidden. The address is `#period-<id>`; pressing the label again returns to the whole-life view. The card also says what the age holds (memories, people and places) and its button is solid; Earlier and Later step between ages. A book or clone card carries the lockup under its title, the clone's disclosure as a quiet note with a rule, and a memory text is one or two paragraphs (a blank line between them, one `<p>` each) of up to 900 characters in all; the build and the import refuse a longer one. The contact card puts X on the address's line and has Earlier like the others; the clone's Later leads to it.
+- **The age view.** Pressing an age (its label in the sky, the nav, a link to `#period-<id>`) opens no memory: the camera frames the galaxy, its year rings and constellation show, the other galaxies fall quiet, and no memory is named in the sky: the card lists all of them (`.related` rows, date and title), pointing at a row rings and names that memory in the galaxy and pointing at a cloud lights its row (`data-lit`); the label of the age stays, with its hint under it. The card holds the age's number, title and introduction and one button, "Start with <first memory>", that opens the first memory; Earlier and Later are hidden. The address is `#period-<id>`; pressing the label again returns to the whole-life view. The card also says what the age holds (memories, people and places) and its button is solid; Earlier and Later step between ages. A book or clone card carries the lockup under its title, the clone's disclosure as a quiet note with a rule, and a memory text is one or two paragraphs (a blank line between them, one `<p>` each) of up to 900 characters in all; the build and the import refuse a longer one. The contact card puts X on the address's line and has Earlier like the others; the clone's Later leads to it.
 - **Guide.** The ? button or the `?` key opens a panel of six marks drawn with the real glyphs (a cloud, a dotted
   circle, a line, a hollow ring, today, the dust) and the keys; Escape, a press on the sky, the finder or the thread
   legend closes it. It never covers the card (on a phone it is capped above it and scrolls).
@@ -289,8 +317,8 @@ Two and a half seconds after the last touch, wherever it is (the hero, a memory,
   slower than 30 a second it steps one tier down and never back up. It does not measure while the tab is hidden. Tier 0 is the
   whole life; 1 keeps 65% of the dust at a pixel ratio of at most 1.5; 2 keeps 40% at 1 (the memories' clouds always keep
   at least 55%). `data-quality` on `#scene` carries the tier; `?quality=full` or `?quality=low` fixes it. A first frame stamped before the clock started cannot make time run backwards.
-- **Motion.** From half a second after the opening each galaxy turns about its centre, rigidly, slowly (the bigger the
-  slower, `spinAngle`, about a degree in two minutes for the largest) and starting from rest: the dust and the clouds in
+- **Motion.** From half a second after the opening each galaxy turns about its centre, rigidly, against the winding of its arms, and calmly (the bigger the
+  slower, `spinAngle`: about a degree a second, a turn in four to six minutes, so it is seen without being watched; zoomed into an age it turns at a fifth of that, `SPIN.near`, `state.turned`) and starting from rest: the dust and the clouds in
   the shader, and in the same turn the constellation lines, the clouds' positions for labels, rings and links, and the
   minimap (`data-spin` carries the first galaxy's angle). After 20 s without a pointer move of more than 6 px, a press,
   a key, the wheel or a touch, and only on the opening shot with nothing open (no finder, sheet, guide, filter, play or
@@ -329,17 +357,13 @@ three rings further out, taking the first place that touches no other cloud's di
 label, no edge marker, not the card, the controls, the minimap, the rail or the edge, and otherwise the first that only
 touches clouds. A tag that had to move out to a ring is joined to its cloud by a hairline that starts at the tag and
 stops at the cloud's edge (`leaderOf`). At most 24 are shown (14 while the whole life is in view, 8 on a phone); the
-memory in view and the one pointed at are always named. In the whole-life view, with nothing open and no filter, one
-memory per galaxy is named in italics, without its date: the heaviest of its period and, among equals, the earliest
-(`headlines`); they give way to the usual tags as the camera comes into a galaxy and to nothing once a memory opens or once the pointer has rested on another memory for a third of a second (they return 0.8 s after it leaves every cloud, so a sweep across clouds never makes them pulse). A tag fades in over most of a second, rising a few pixels out of a blur, and the one in
+memory in view and the one pointed at are always named. In the whole-life view, with nothing open and no filter, the
+age's hint (see below) is written in italics under the galaxy's label, so a name never sits on the label (`.galaxy-hint`; hidden with a memory open and with a filter). A tag fades in over most of a second, rising a few pixels out of a blur, and the one in
 view or pointed at floats gently. In the whole-life view, pointing at a memory keeps that view's style: the same italic name, without its date, at the same size and brighter. An age's name stands outside its galaxy with its near edge at the point, so it never sits on the clouds. Pointing at a memory is eased, never a jump: its cloud draws in about 10% and glows (`HOVER`, quicker in than out), its name comes up out of a soft blur over 1.6 s and glides from where it stood (a tag that has to change side glides there too, never jumps), and on release it lingers for 1.4 s; nothing is quick. Tags publish the screen position of their cloud as `--cx` and `--cy`.
 
-Every label speaks in one of three tiers. The open or pointed memory is serif at 22 px in full ink; the other tags and
-the edge markers are serif at 15 px in the soft ink (19 and 14 px on a phone); the anchors (a galaxy's name, the year
-rings, today and the countdown) are small mono capitals at 10 px in the muted ink, never brighter than the relations.
-Each galaxy is named by its period's kicker outside the ring (only the number and name on a phone), kept inside the
-window and hidden where it would touch the card, the controls, the rail, the minimap, an edge marker or another label;
-with a memory open only that memory's galaxy is named. Today
+Every label speaks in two tiers. Every memory name is the same italic serif at 15 px (16 on a phone), and the open or pointed one only brightens to full ink; it never changes size. A name that cannot sit beside its cloud is not shown, and no hairline joins a name to its cloud. The edge markers are serif at 14 px on a phone and 15 px otherwise; the anchors (a galaxy's name, the year
+rings, today and the countdown) are small mono capitals at 10 px in the muted ink, never brighter than the relations; the date of a year ring is the quietest of them, at 40% of that ink, except the year of the memory in view, at 90% (`YEAR_LABEL`), so the ring that matters is found without reading the others.
+Each galaxy is named by its period's kicker beside the visible mass of the galaxy (only the number and name on a phone, where the hint shows only under the label of the age in view), with the age's hint under it; the hints are decorative, like the labels, and the cards and the flat page say the same in words. The hint is `ages.<id>.hint` when the creator has written one, and otherwise the two threads that mark the age most against the rest of the life (`distinctive`: the share of the thread among the memories of the age over its share in the whole life, with at least two memories), as "Marked by body and family" (`ui.explore.mostly`); it is data, never an invented summary, and `data-hint` on the period section carries it. Among sixty-four places (sixteen directions at four distances from the galaxy's visible mass; the one it holds is kept while it crowds nothing) it takes the one that touches no card, control, rail, minimap, edge marker or other label and crowds the least: a galaxy's mass counts (its own less), today and the two rings count more, and each step away from the galaxy costs, so it stays beside it unless that is crowded. A label that stands off is joined to its galaxy by a hairline (`data-leader`), and it is kept inside the window; where nothing is free it is hidden. Under 1500 px wide the years go on their own line so the label is narrow. Each label publishes its galaxy's centre and visible radius as `--cx`, `--cy` and `--r`. With a memory open or in an age only that galaxy's label is shown, and it is never hidden: it is the way back to the whole-life view, a little brighter, with the title "Back to the whole life", and it moves to the nearest free place instead. Today
 and the book and the clone are named beside their marks (the nav's own words; the book and the clone in italic serif at 15 px, today as an anchor), at the first
 of sixteen places around the mark that touches nothing, starting a clearance of 8 px beyond the mark's drawn radius
 (`ringClearance`, capped where the shader caps a mark at 140 px across), so the ring never covers the first letters at

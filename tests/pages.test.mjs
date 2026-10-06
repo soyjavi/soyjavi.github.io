@@ -188,7 +188,7 @@ test("each period starts with its title and introduction and only there", () => 
   for (const lang of ["en", "es"]) {
     const html = read(homes[lang]);
     for (const id of content.life.periods) {
-      const section = html.match(new RegExp(`<section class="chapter period" id="period-${id}">[\\s\\S]*?</section>`))[0];
+      const section = html.match(new RegExp(`<section class="chapter period" id="period-${id}"[^>]*>[\\s\\S]*?</section>`))[0];
       assert.equal((section.match(/class="period-head"/g) ?? []).length, 1, `${lang}/${id}`);
       assert.ok(section.indexOf("period-head") < section.indexOf("<time"), `${lang}/${id}: the head comes first`);
     }

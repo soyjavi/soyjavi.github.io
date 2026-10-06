@@ -62,6 +62,10 @@ education, `weight` 1 to 3, `threads` (one to three, the first one decides its l
 galaxy (see the seven ages below). `npm run
 build` stops with the file name and the reason when something is missing.
 
+### The sky and its words
+
+A life is a **sky**, not a galaxy: the sky holds the galaxies. Each **age** of the life is a **galaxy** (its core is the start of the age, its rim the end, its arms the threads it holds), each **memory** is a **cloud** like a star cluster, each **thread** a **constellation**, each **year** a **ring** round the core, and the book and the clone are **hollow rings**, galaxies that have not formed yet. Each galaxy turns slowly about its centre. SPEC ("The sky and its words") has the full table, what the site borrows from astronomy and where it stops, and `design/index.html` draws it.
+
 ### The seven ages
 
 A galaxy takes its shape from what it holds, never from chance: an age that lasts long and holds little is stretched into an ellipse, it has only the arms of the threads it holds, as wide as their share, and it winds more the more years it lasts.

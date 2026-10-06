@@ -4,9 +4,10 @@ import { cpSync, existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, sym
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 import { build } from "esbuild";
 import { FACETS, precisionOf, todayYear, years } from "../assets/js/life.js";
-import { bodyProblem, LANGS, loadContent, root } from "../src/content.mjs";
+import { bodyProblem, distinctive, LANGS, loadContent, root } from "../src/content.mjs";
 import { ageAt, ageIdOf } from "../assets/js/life.js";
 import { renderSite } from "../src/site.mjs";
 import { bundleOptions } from "../tools/bundle.mjs";
@@ -288,6 +289,34 @@ test("life.json totals and ages are checked: totals is an object of whole number
       writeFileSync(file, JSON.stringify({ ...life, ...patch }));
       assert.throws(() => loadContent(url), message);
     }
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("the hint under an age says the threads that mark it against the rest of the life, and an age's own hint wins", () => {
+  const at = (...threads) => ({ threads });
+  const everything = [at("home", "family"), at("home"), at("home"), at("body", "craft"), at("body", "craft"), at("craft"), at("family")];
+  const order = ["home", "family", "body", "craft"];
+  assert.deepEqual(distinctive(everything.slice(0, 3), everything, order, 2), ["home"], "a thread with a single memory is not what marks an age");
+  assert.deepEqual(distinctive(everything.slice(3, 6), everything, order, 2), ["body", "craft"]);
+  const html = renderSite(content);
+  for (const id of life.periods) for (const page of ["index.html", "es/index.html"]) assert.match(html.get(page), new RegExp(`<section class="chapter period" id="period-${id}" data-hint="[^"]+"`), `${page} ${id}`);
+  assert.match(content.dict.en.periods.early.hint, /^Marked by /);
+  assert.match(content.dict.es.periods.early.hint, /^Huella de /);
+  const dir = mkdtempSync(join(tmpdir(), "hint-"));
+  try {
+    cpSync(`${root}content`, dir, { recursive: true });
+    for (const lang of LANGS) {
+      const file = join(dir, `${lang}.json`);
+      const words = JSON.parse(readFileSync(file, "utf8"));
+      words.ages.early.hint = `own ${lang}`;
+      writeFileSync(file, JSON.stringify(words));
+    }
+    const own = loadContent(pathToFileURL(`${dir}/`));
+    assert.equal(own.dict.en.periods.early.hint, "own en");
+    assert.equal(own.dict.es.periods.early.hint, "own es");
+    assert.match(own.dict.en.periods.school.hint, /^Marked by /, "the other ages keep the derived one");
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

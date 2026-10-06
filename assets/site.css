@@ -862,11 +862,13 @@ ul.facets {
   font-size: var(--fs-label);
 }
 
-.peer:hover {
+.peer:hover,
+.peer[data-lit="1"] {
   color: var(--fg);
 }
 
-.peer:hover span {
+.peer:hover span,
+.peer[data-lit="1"] span {
   font-style: italic;
 }
 
@@ -1097,6 +1099,10 @@ ul.facets {
   pointer-events: none;
 }
 
+.card[data-kind="period"] .related ul {
+  overscroll-behavior: contain;
+}
+
 .card[data-kind="milestone"] .related ul {
   max-height: 190px;
   overflow-y: auto;
@@ -1187,24 +1193,15 @@ ul.facets {
   transform-origin: 0 0;
 }
 
-.tag[data-leader="1"] .leader {
-  display: block;
-}
-
 .tag[data-name="1"] > b {
   display: none;
 }
 
-.tag[data-name="1"] > span {
+.tag > span {
   font-style: italic;
 }
 
-.tag[data-name="1"][data-hot="1"] {
-  font-size: var(--fs-tag);
-}
-
 .tag[data-hot="1"] {
-  font-size: var(--fs-hot);
   color: var(--fg);
   animation: arrive 1.6s var(--ease), drift 7s ease-in-out infinite;
 }
@@ -1280,6 +1277,7 @@ ul.facets {
   letter-spacing: var(--track-label);
   text-transform: uppercase;
   white-space: nowrap;
+  text-align: center;
   color: var(--muted);
   opacity: 0;
   visibility: hidden;
@@ -1287,6 +1285,58 @@ ul.facets {
   pointer-events: auto;
   text-shadow: 0 0 10px var(--bg), 0 0 10px var(--bg);
   transition: color 0.3s var(--ease);
+}
+
+.galaxy .leader {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: none;
+  height: 1px;
+  background: var(--muted);
+  opacity: 0.5;
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+
+.galaxy[data-leader="1"] .leader {
+  display: block;
+}
+
+.galaxy-years::before {
+  content: " · ";
+  white-space: pre;
+}
+
+@media (max-width: 1500px) {
+  .galaxy-years {
+    display: block;
+  }
+
+  .galaxy-years::before {
+    content: none;
+  }
+}
+
+.galaxy-hint {
+  display: block;
+  max-width: 34ch;
+  margin: 3px auto 0;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: var(--fs-small);
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: normal;
+  color: var(--soft);
+}
+
+.galaxy-hint[hidden] {
+  display: none;
+}
+
+.galaxy[data-pin="1"] {
+  color: var(--soft);
 }
 
 .galaxy:hover {
@@ -1645,6 +1695,10 @@ html:not(.immersive) .masthead {
     display: none;
   }
 
+  .galaxy:not([data-pin="1"]) .galaxy-hint {
+    display: none;
+  }
+
   .immersive .explore .legend {
     flex-wrap: nowrap;
     justify-content: flex-start;
@@ -1713,9 +1767,6 @@ html:not(.immersive) .masthead {
     font-size: var(--fs-tag-phone);
   }
 
-  .tag[data-hot="1"] {
-    font-size: var(--fs-hot-phone);
-  }
 }
 
 @media (max-height: 520px) and (orientation: landscape) {

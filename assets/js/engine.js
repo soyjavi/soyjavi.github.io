@@ -16,6 +16,7 @@ const MAX_RELATED = 8;
 const AHEAD_GAPS = [0, 22];
 const RING_UNITS = { today: 2.4, book: 1.2, clone: 1.2 };
 const YEAR_RING_MAX = 8;
+const YEAR_LABEL = { quiet: 0.4, current: 0.9 };
 const EDGE_SAMPLES = 20;
 const EDGE_MARKS = 2;
 const EDGE_GRACE = 0.6;
@@ -243,12 +244,15 @@ async function start() {
       const [x, y, z] = galaxy.centre;
       const [ox, oy] = [x + sky.pole[0], y + sky.pole[1]];
       const length = Math.hypot(ox, oy) || 1;
-      const reach = galaxy.radius + 9;
+      const reach = galaxy.radius * 0.8 + 2;
       const [sx, sy] = shapeBy(galaxy, (ox / length) * reach, (oy / length) * reach);
       const [name, span] = (first.querySelector(".kicker")?.textContent ?? periods[k]).split(" · ");
       const node = addFixed("", vector([x + sx, y + sy, z]), "galaxy", 0.9, (galaxy.start + galaxy.end) / 2);
-      node.append(element("span", "", name), ...(span ? [element("span", "galaxy-years", ` · ${span}`)] : []), element("b", "galaxy-count"));
+      const hint = element("span", "galaxy-hint", story.querySelector(`#period-${periods[k]}`)?.dataset.hint ?? "");
+      node.append(element("span", "", name), ...(span ? [element("span", "galaxy-years", span)] : []), element("b", "galaxy-count"), hint, element("i", "leader"));
       galaxyLabels[k] = fixed.at(-1);
+      galaxyLabels[k].hint = hint;
+      galaxyLabels[k].leader = node.querySelector(".leader");
       galaxyLabels[k].centre = vector(galaxy.centre);
       node.dataset.go = `period-${periods[k]}`;
       node.addEventListener("click", (event) => {
@@ -257,7 +261,7 @@ async function start() {
       });
   });
   const yearLabels = Array.from({ length: YEAR_RING_MAX }, () => {
-    addFixed("", new THREE.Vector3(), "ring-year", 0.8, START);
+    addFixed("", new THREE.Vector3(), "ring-year", YEAR_LABEL.quiet, START);
     fixed.at(-1).dim = 0;
     return fixed.at(-1);
   });
@@ -368,7 +372,6 @@ async function start() {
 
   let current = 0;
   let periodView = -1;
-  let periodSet = new Set();
   const viewedMemory = () => (periodView >= 0 ? -1 : memoryOf(current));
   let filter = null;
   let hover = -1;
@@ -416,6 +419,7 @@ async function start() {
       item.dim = ring ? 1 : 0;
       if (!ring) return;
       item.node.textContent = String(ring.year);
+      item.base = memory >= 0 && ring.year === Math.floor(marks[memory].year) ? YEAR_LABEL.current : YEAR_LABEL.quiet;
       const [dx, dy] = shapeBy(galaxy, ring.radius * Math.sin(YEAR_RING_ANGLE), ring.radius * Math.cos(YEAR_RING_ANGLE));
       item.world.set(galaxy.centre[0] + dx, galaxy.centre[1] + dy, galaxy.centre[2]);
       item.width = 0;
@@ -429,6 +433,11 @@ async function start() {
       galaxyLabels.forEach((item, k) => {
         if (!item) return;
         item.dim = viewed >= 0 && viewed !== k ? 0 : filter && !counts[k] ? 0.3 : 1;
+        item.pin = viewed === k;
+        item.node.dataset.pin = item.pin ? "1" : "";
+        if (item.pin) item.node.setAttribute("title", tools.dataset.overview);
+        else item.node.removeAttribute("title");
+        item.hint.hidden = memory >= 0 || !!filter;
         item.node.querySelector(".galaxy-count").textContent = filter ? ` · ${counts[k]}` : "";
         item.width = 0;
       });
@@ -568,7 +577,20 @@ async function start() {
       [new Set(held.flatMap((mark) => mark.members.people ?? [])).size, tools.dataset.countPeople],
       [new Set(held.flatMap((mark) => mark.members.places ?? [])).size, tools.dataset.countPlaces],
     ].filter(([n, text]) => n > 0 && text).map(([n, text]) => text.replace("{n}", String(n)));
-    clone.append(element("p", "period-facts kicker", facts.join(" · ")), start);
+    const roster = element("div", "related");
+    const rows = element("ul");
+    marks.forEach((mark, i) => {
+      if (mark.period !== periodView) return;
+      const item = element("li");
+      const button = element("button", "peer");
+      button.type = "button";
+      button.dataset.memory = String(i);
+      button.append(element("time", "", info[i].time), element("span", "", info[i].title));
+      item.append(button);
+      rows.append(item);
+    });
+    roster.append(rows);
+    clone.append(element("p", "period-facts kicker", facts.join(" · ")), start, roster);
     setPreview(-1);
     cardBody.replaceChildren(clone);
     card.dataset.collapsed = "";
@@ -692,7 +714,6 @@ async function start() {
     const leaving = periodView >= 0 || stations[current].kind !== "hero";
     current = clamp(index, 0, END);
     periodView = -1;
-    periodSet = new Set();
     stage.dataset.period = "";
     asked = null;
     showAll = false;
@@ -732,7 +753,6 @@ async function start() {
     stopPlay();
     current = stationOf(first);
     periodView = k;
-    periodSet = new Set(periodNames(marks, k));
     asked = null;
     showAll = false;
     stage.dataset.asked = "";
@@ -1153,6 +1173,16 @@ async function start() {
   scene.on("hover", (index) => {
     if (index >= 0 && index !== hover) sound.tick();
     hover = index;
+    card.querySelectorAll(".peer[data-lit]").forEach((row) => delete row.dataset.lit);
+    if (index >= 0 && periodView >= 0) {
+      const row = card.querySelector(`.peer[data-memory="${index}"]`);
+      if (row) {
+        row.dataset.lit = "1";
+        const list = row.closest("ul");
+        if (row.offsetTop < list.scrollTop) list.scrollTop = row.offsetTop;
+        else if (row.offsetTop + row.offsetHeight > list.scrollTop + list.clientHeight) list.scrollTop = row.offsetTop + row.offsetHeight - list.clientHeight;
+      }
+    }
     scene.setHover(index);
     canvas.style.cursor = index >= 0 ? "pointer" : "";
   });
@@ -1377,6 +1407,13 @@ async function start() {
 
     const point = { x: 0, y: 0, visible: false };
     const middle = { x: 0, y: 0, visible: false };
+    const masses = galaxyLabels.filter((item) => item && item.dim > 0).map((item) => {
+      scene.project(item.centre, middle);
+      const [x, y] = [middle.x, middle.y];
+      scene.project(item.world, point);
+      return { item, x, y, r: Math.hypot(point.x - x, point.y - y) };
+    });
+    const marksAhead = projected.slice(marks.length).filter((spot) => spot.on).map((spot) => ({ item: null, x: spot.x, y: spot.y, r: Math.max(spot.r, 12) }));
     fixed.forEach((item) => {
       let opacity = item.base * (item.year <= formed ? 1 : 0);
       if (play.year !== null && item.year > play.year) opacity = 0;
@@ -1406,19 +1443,55 @@ async function start() {
         } else {
           if (item.centre) {
             scene.project(item.centre, middle);
-            const [dx, dy] = [point.x - middle.x, point.y - middle.y];
-            const length = Math.hypot(dx, dy) || 1;
-            const reach = (Math.abs(dx) / length) * (item.width / 2) + (Math.abs(dy) / length) * (item.height / 2);
-            point.x += (dx / length) * reach;
-            point.y += (dy / length) * reach;
+            const base = Math.atan2(point.y - middle.y, point.x - middle.x);
+            const out = Math.hypot(point.x - middle.x, point.y - middle.y);
+            const around = ({ turn, scale }) => {
+              const [ux, uy] = [Math.cos(base + turn * (Math.PI / 4)), Math.sin(base + turn * (Math.PI / 4))];
+              const push = Math.abs(ux) * (item.width / 2) + Math.abs(uy) * (item.height / 2) + 4;
+              const x = clamp(middle.x + ux * (out * scale + push), item.width / 2 + 12, innerWidth - item.width / 2 - 12);
+              const y = middle.y + uy * (out * scale + push);
+              return { x, y, box: { left: x - item.width / 2, right: x + item.width / 2, top: y - item.height / 2, bottom: y + item.height / 2 } };
+            };
+            const free = ({ box }) => !keepOut.some((other) => overlaps(box, other)) && !solid.some((other) => overlaps(box, other));
+            const crowding = (candidate) => {
+              const { box } = around(candidate);
+              return [...masses, ...marksAhead].reduce((sum, mass) => sum + Math.max(0, mass.r * 0.95 - Math.hypot(clamp(mass.x, box.left, box.right) - mass.x, clamp(mass.y, box.top, box.bottom) - mass.y)) * (mass.item === item ? 0.6 : mass.item === null ? 1.5 : 1), 0);
+            };
+            const held = item.option && free(around(item.option)) && crowding(item.option) === 0 ? item.option : null;
+            const option = held ?? (() => {
+              const options = [1, 1.5, 2.1, 2.8].flatMap((scale) => [0, 1, -1, 2, -2, 3, -3, 4, 0.5, -0.5, 1.5, -1.5, 2.5, -2.5, 3.5, -3.5].map((turn) => ({ turn, scale })));
+              const open = options.filter((candidate) => free(around(candidate))).map((candidate) => ({ candidate, cost: crowding(candidate) + (candidate.scale - 1) * 18 }));
+              const best = open.reduce((least, entry) => (entry.cost < least.cost - 0.5 ? entry : least), { candidate: options[0], cost: Infinity });
+              const kept = open.find((entry) => entry.candidate.turn === item.option?.turn && entry.candidate.scale === item.option?.scale);
+              return kept && kept.cost <= best.cost + 8 ? kept.candidate : best.candidate;
+            })();
+            item.option = option;
+            const spot = around(option);
+            point.x = spot.x;
+            point.y = spot.y;
+            const away = leaderOf(spot.box, { x: middle.x, y: middle.y, r: out * 2 });
+            item.node.dataset.leader = away && away.length > 10 && !item.pin ? "1" : "";
+            if (away) Object.assign(item.leader.style, { left: `${away.x.toFixed(1)}px`, top: `${away.y.toFixed(1)}px`, width: `${away.length.toFixed(1)}px`, transform: `rotate(${away.angle.toFixed(3)}rad)` });
+            const mass = `${middle.x.toFixed(0)},${middle.y.toFixed(0)},${out.toFixed(0)}`;
+            if (item.mass !== mass) {
+              item.mass = mass;
+              item.node.style.setProperty("--cx", middle.x.toFixed(0));
+              item.node.style.setProperty("--cy", middle.y.toFixed(0));
+              item.node.style.setProperty("--r", out.toFixed(0));
+            }
           }
           point.x = clamp(point.x, item.width / 2 + 12, innerWidth - item.width / 2 - 12);
+          if (item.pin) {
+            const rise = item.height + 6;
+            const free = [0, 1, -1, 2, -2, 3, -3].map((step) => point.y + step * rise).find((y) => !keepOut.some((other) => overlaps({ left: point.x - item.width / 2, right: point.x + item.width / 2, top: y - item.height / 2, bottom: y + item.height / 2 }, other)));
+            if (free !== undefined) point.y = free;
+          }
           item.node.style.transform = `translate3d(${point.x.toFixed(1)}px, ${point.y.toFixed(1)}px, 0)`;
           const pad = item.kind === "ring-year" || item.kind === "countdown-mark" ? 1 : 4;
           const spot = { left: point.x - item.width / 2 - pad, right: point.x + item.width / 2 + pad, top: point.y - item.height / 2 - pad, bottom: point.y + item.height / 2 + pad };
           if ((item.kind === "ring-year" || item.kind === "countdown-mark") && keepOut.some((other) => overlaps(spot, other))) opacity = 0;
           const inner = { left: spot.left + 4, right: spot.right - 4, top: spot.top + 4, bottom: spot.bottom - 4 };
-          if (item.kind === "galaxy" && (solid.some((other) => overlaps(inner, other)) || keepOut.some((other) => overlaps(inner, other)))) opacity = 0;
+          if (item.kind === "galaxy" && !item.pin && (solid.some((other) => overlaps(inner, other)) || keepOut.some((other) => overlaps(inner, other)))) opacity = 0;
           if (opacity > 0.2) keepOut.push(spot);
         }
       }
@@ -1443,7 +1516,6 @@ async function start() {
       else if (i === preview) priority = 880;
       else if (peers.has(i)) priority = 500 + mark.weight;
       else if (filter && mark.members[filter.facet]?.includes(filter.item)) priority = 300 + mark.weight;
-      else if (heads.has(i) && ratio >= 0.6 && !filter) priority = 40;
       else if (mark.weight >= 3 && ratio < 0.6) priority = 30;
       else if (mark.weight === 2 && ratio < 0.5) priority = 20;
       else if (ratio < 0.22) priority = 10;
@@ -1451,7 +1523,7 @@ async function start() {
       if (headsQuiet.on && i !== hover && priority === 40) priority = 0;
       if (mark.year + 3 > formed && i !== selected) priority = 0;
       if (!begun && seen && i === firstMemory) priority = 900;
-      if (periodView >= 0) priority = i === hover ? 900 : periodSet.has(i) && hover < 0 ? 40 : 0;
+      if (periodView >= 0) priority = i === hover || i === preview ? 900 : 0;
       if (play.year !== null) priority = mark.year <= play.year && mark.year > play.year - 2.5 ? 800 + mark.weight : 0;
       if (priority > 0 && spot.on) candidates.push({ tag, spot, priority, i });
       else if (tag.on) {
@@ -1483,7 +1555,7 @@ async function start() {
       const free = (box) => inside(box) && !keepOut.some((other) => overlaps(box, other)) && !accepted.some((other) => overlaps(box, { left: other.left - 6, right: other.right + 6, top: other.top - 4, bottom: other.bottom + 4 }));
       const clear = (box) => !clouds.some((other) => other.j !== i && overlaps(box, other));
       const box = pickSpot(placements, { free, clear, inside, forced: priority >= 900, keep: tag.on ? tag.slot : -1 });
-      if (box && accepted.length < limit) {
+      if (box && !(box.far && priority < 900) && accepted.length < limit) {
         accepted.push(box);
         const moved = tag.on && tag.slot !== undefined && tag.slot !== box.slot;
         tag.slot = box.slot;

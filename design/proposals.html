@@ -6,145 +6,12 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; script-src 'self'; form-action 'self' https://buttondown.com; base-uri 'self'" />
     <meta name="robots" content="noindex" />
     <title>Proposals · javi</title>
-    <meta name="description" content="Proposals to improve soyjavi.com: the name, the theme, the sky, the first view, the finder, the card, the labels, the rail and the phone header." />
+    <meta name="description" content="Proposals for soyjavi.com: ideas nobody has approved yet, each drawn against what the site does today." />
     <meta name="theme-color" content="#0c0c0b" />
     <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="../assets/brand.css" />
     <script src="../assets/theme.js"></script>
-    <style>
-      main { max-width: 1280px; margin: 0 auto; padding: 0 var(--gutter); }
-      .cover { padding: 144px 0 64px; display: grid; gap: 24px; }
-      .cover h1 { max-width: 14ch; }
-      .index { display: flex; flex-wrap: wrap; gap: 8px 20px; padding: 0 0 40px; list-style: none; }
-      .index a { font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; color: var(--soft); text-decoration: none; border-bottom: 1px solid var(--line); }
-      .index a:hover { color: var(--fg); border-color: var(--fg); }
-      .board { display: grid; gap: 28px; padding: 72px 0; border-top: 1px solid var(--line); }
-      .board header { display: grid; gap: 14px; max-width: 46rem; }
-      .board header p { color: var(--soft); }
-      .board header strong, .accept strong { font-family: var(--mono); font-size: 11px; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-right: 8px; }
-      .meta { display: flex; gap: 16px; align-items: baseline; font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
-      .meta code { color: var(--fg); letter-spacing: 0.1em; }
-      .pair { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr)); }
-      .pair.wide { grid-template-columns: 1fr; }
-      .pair.trio { grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); }
-      figure.tone-light, figure.tone-dark { --raised: var(--paper-raised); }
-      figure.tone-dark { --raised: var(--night-raised); }
-      .mock .hot { fill: var(--raised); stroke: none; }
-      .mock .box { fill: var(--bg); }
-      figure { margin: 0; border: 1px solid var(--line); background: var(--bg); min-width: 0; }
-      figcaption { padding: 10px 14px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
-      .accept { max-width: 46rem; color: var(--soft); font-size: 15px; }
-      .wm { display: grid; grid-template-columns: 1fr 1fr; }
-      .wm > div { display: grid; gap: 14px; justify-items: start; padding: 28px 32px; }
-      .wm span { font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; color: var(--muted); }
-      .wm img { height: 56px; width: auto; }
-      .tone-light { --raised: #e9e6df; --bg: #f3f1ec; --fg: #151513; --muted: #6a6963; --soft: #44433f; --line: #d6d3cb; background: var(--bg); color: var(--fg); }
-      .tone-dark { --raised: #161614; --bg: #0c0c0b; --fg: #ecebe7; --muted: #8b8a85; --soft: #b9b8b2; --line: #2a2a27; background: var(--bg); color: var(--fg); }
-      .opts { display: grid; gap: 1px; background: var(--line); grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); }
-      .opt { background: var(--bg); display: grid; align-content: start; }
-      .pair2 { display: grid; grid-template-columns: 1fr 1fr; }
-      .pair2 .w { margin: 0; padding: 28px 24px; font-family: var(--serif); font-style: italic; font-size: clamp(36px, 4.6vw, 56px); line-height: 1; white-space: nowrap; letter-spacing: -0.02em; }
-      .w i, .w .dot { font-style: normal; }
-      .opt .kicker { padding: 14px 18px 18px; text-transform: none; letter-spacing: 0.02em; font-family: var(--sans); font-size: 14px; color: var(--soft); }
-      .opt .kicker b { font-family: var(--mono); margin-right: 8px; color: var(--fg); }
-      svg.mock { display: block; width: 100%; height: auto; color: var(--fg); }
-      .mock .frame { fill: none; stroke: var(--line); }
-      .mock .ln { fill: none; stroke: var(--line); stroke-width: 1; vector-effect: non-scaling-stroke; }
-      .mock .ln.s { stroke: var(--muted); }
-      .mock .ln.f { stroke: var(--fg); }
-      .mock .ln.f.dim { stroke: var(--muted); opacity: 0.7; }
-      .mock .ln.dash { stroke: var(--muted); stroke-dasharray: 2 4; opacity: 0.6; }
-      .mock .ln.dash2 { stroke: var(--muted); stroke-dasharray: 3 5; }
-      .mock .ln.yr { stroke: var(--fg); stroke-dasharray: 1 4; opacity: 0.6; }
-      .mock .box { fill: var(--bg); }
-      .mock .dust { fill: var(--fg); opacity: 0.35; }
-      .mock .solid { fill: var(--fg); }
-      .mock .ring { fill: none; stroke: var(--fg); stroke-width: 1.2; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
-      .mock .ringbig { fill: none; stroke: var(--fg); stroke-width: 2.4; }
-      .mock .halo { fill: none; stroke: var(--muted); stroke-width: 2; }
-      .mock .sel { fill: none; stroke: var(--fg); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
-      .mock .sel.hover { stroke-dasharray: 3 2; }
-      .mock .accent { fill: none; stroke: var(--fg); stroke-width: 2; }
-      .mock .card rect { fill: var(--bg); stroke: var(--line); }
-      .mock .card rect.hot { fill: var(--raised); stroke: none; }
-      .mock .card rect.solid { fill: var(--fg); stroke: none; }
-      .mock .card.new rect { stroke: var(--fg); }
-      .mock .railbars rect { fill: var(--muted); opacity: 0.5; }
-      .mock .railticks circle { fill: var(--fg); }
-      .mock text { font-family: var(--sans); }
-      .mock .tx { fill: var(--soft); font-size: 8px; }
-      .mock .tx.new, .mock .tm.new { fill: var(--fg); }
-      .mock .tm { fill: var(--muted); font-family: var(--mono); font-size: 6.5px; letter-spacing: 0.1em; }
-      .mock .serif { fill: var(--fg); font-family: var(--serif); font-size: 16px; }
-      .mock .serif.it { font-style: italic; font-size: 11px; }
-      .mock .serif.big, .mock .serif.big.it { font-size: 20px; }
-      .mock .brand { fill: var(--fg); font-family: var(--serif); font-style: italic; font-size: 18px; }
-      @media (max-width: 560px) { .pair2, .wm { grid-template-columns: 1fr; } }
-    
-    
-    
-      .specs { display: grid; gap: 1px; background: var(--line); grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
-      .spec { background: var(--bg); display: grid; align-content: start; }
-      .spec .pair2 .w { font-size: clamp(30px, 3.4vw, 44px); padding: 22px 20px; }
-      .spec .pair2 .w.roman { font-style: normal; }
-      .spec .pair2 .w small { font-family: var(--mono); font-style: normal; font-size: 10px; letter-spacing: 0.14em; margin-left: 10px; color: var(--muted); }
-      .spec .kicker { padding: 12px 18px 16px; text-transform: none; letter-spacing: 0.02em; font-family: var(--sans); font-size: 14px; color: var(--soft); }
-      .spec .kicker b { font-family: var(--mono); margin-right: 8px; color: var(--fg); }
-      .spec .pc { display: grid; gap: 6px; padding: 0 18px 18px; font-size: 13.5px; color: var(--soft); }
-      .spec .pc p { margin: 0; }
-      .spec .pc .pro::before { content: "+ "; font-family: var(--mono); color: var(--fg); }
-      .spec .pc .con::before { content: "− "; font-family: var(--mono); color: var(--muted); }
-      .spec .score { padding: 0 18px 16px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
-      .spec .score b { color: var(--fg); font-weight: 400; }
-      .spec[data-pick="1"] { outline: 1px solid var(--fg); outline-offset: -1px; }
-      table.matrix { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-      table.matrix th, table.matrix td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
-      table.matrix th { font-family: var(--mono); font-size: 10.5px; font-weight: 400; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
-      table.matrix td:first-child { font-family: var(--mono); font-size: 12px; color: var(--fg); white-space: nowrap; }
-      table.matrix tr.pick td { color: var(--fg); }
-      table.matrix tr.pick td:first-child::before { content: "● "; }
-      .stack { display: grid; gap: 24px; padding: 20px 4px 4px; }
-      .stack > p { margin: 0; color: var(--soft); font-size: 14px; }
-      .tiles { display: grid; grid-template-columns: repeat(3, 1fr); }
-      .tile { display: grid; justify-items: center; gap: 12px; padding: 28px 12px; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
-      .tile .sq { display: grid; place-items: center; border: 1px solid var(--line); background: var(--raised); color: var(--fg); font-family: var(--serif); font-style: italic; line-height: 1; overflow: hidden; }
-      .tile .sq.s16 { width: 16px; height: 16px; font-size: 11px; }
-      .tile .sq.s32 { width: 32px; height: 32px; font-size: 22px; }
-      .tile .sq.s180 { width: 108px; height: 108px; font-size: 72px; }
-      .tile .sq.fat { -webkit-text-stroke: 0.03em currentColor; }
-      .tile .sq.s16.big { font-size: 14px; }
-      .tile .sq.s32.big { font-size: 28px; }
-      .tile .sq.s180.big { font-size: 92px; }
-      .glow { position: relative; padding: 36px 28px; background: var(--bg); display: grid; gap: 14px; justify-items: start; isolation: isolate; }
-      .glow::before { content: ""; position: absolute; inset: 0; z-index: -1; opacity: 0.22; background: radial-gradient(circle at 30% 40%, var(--fg), transparent 55%), radial-gradient(circle at 78% 70%, var(--soft), transparent 50%); }
-      .glow .t1 { font-family: var(--serif); color: var(--fg); }
-      .glow .t2 { font-family: var(--serif); color: var(--soft); }
-      .glow .t3 { font-family: var(--mono); color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
-      .glow .t2s { font-family: var(--sans); color: var(--soft); }
-      .lock { display: grid; gap: 18px; padding: 28px 28px 24px; background: var(--bg); color: var(--fg); }
-      .lock .by { display: flex; align-items: center; gap: 12px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--soft); }
-      .lock .by img { height: 22px; width: auto; }
-      .lock h4 { margin: 0; font-family: var(--serif); font-weight: 400; font-size: 34px; line-height: 1; }
-      .lock h4 em { font-style: italic; }
-      .lock p { margin: 0; color: var(--soft); font-size: 14px; max-width: 34ch; }
-      .rules { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; color: var(--soft); font-size: 14px; }
-      .code { margin: 0; padding: 14px 16px; font-family: var(--mono); font-size: 12px; line-height: 1.6; color: var(--soft); background: var(--raised); border: 1px solid var(--line); overflow-x: auto; white-space: pre; }
-    
-      .says { display: grid; gap: 1px; background: var(--line); grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
-      .say { background: var(--bg); padding: 22px 24px 24px; display: grid; gap: 10px; align-content: start; }
-      .say[data-pick="1"] { outline: 1px solid var(--fg); outline-offset: -1px; }
-      .say .k { margin: 0; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
-      .say .k b { color: var(--fg); font-weight: 400; margin-right: 8px; }
-      .say h4 { margin: 0; font-family: var(--serif); font-weight: 400; font-size: 30px; line-height: 1.05; }
-      .say h4 em { font-style: italic; }
-      .say p { margin: 0; color: var(--soft); font-size: 15px; }
-      .say .btn { justify-self: start; padding: 8px 12px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg); border: 1px solid var(--line); }
-      .say .note { font-size: 13px; color: var(--muted); }
-      .say .risk { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
-      .say .risk::before { content: "Risk · "; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; }
-      .say del { color: var(--muted); text-decoration-thickness: 1px; }
-      .say mark { background: none; color: var(--fg); border-bottom: 1px solid var(--fg); }
-    </style>
+    <link rel="stylesheet" href="proposals.css" />
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
@@ -164,7 +31,7 @@
       </defs>
     </svg>
     <header class="masthead">
-      <a class="brand" href="../index.html" aria-label="Javi">javi</a>
+      <a class="brand" href="../index.html" aria-label="Javi"><svg viewBox="-33.4 -154 325.85 209" aria-hidden="true" focusable="false"><path d="M40.80-121Q37-121 34.50-123.70Q32-126.40 32-130.20Q32-135.60 35.30-138.80Q38.60-142 42.80-142Q46.80-142 49.50-139.50Q52.20-137 52.20-133Q52.20-127.40 48.80-124.20Q45.40-121 40.80-121M-7 43Q-14 43-17.70 39.10Q-21.40 35.20-21.40 29.60Q-21.40 25.40-19.20 23.30Q-17 21.20-14.40 21.20Q-10.60 21.20-9.30 23.70Q-8 26.20-7.80 29.40Q-7.60 32.60-6.80 35.10Q-6 37.60-3.20 37.60Q-1 37.60 0.90 35Q2.80 32.40 5 22.80L29.60-82.40Q30.60-86.80 29.90-89.30Q29.20-91.80 26.20-91.80Q22.60-91.80 18.30-86.50Q14-81.20 8.60-66.40Q7.80-63.80 5.80-63.80Q2.80-63.80 4.20-67.40Q8.60-81.20 13.50-89Q18.40-96.80 23.40-100Q28.40-103.20 32.60-103.20Q39.60-103.20 42.50-98.30Q45.40-93.40 42.80-82.20L22 7.40Q18.20 24 10.50 33.50Q2.80 43-7 43M67.40 1.80Q60.20 1.80 56.20-4.40Q52.20-10.60 52.20-22.60Q52.20-34 55.40-45.50Q58.60-57 64.20-67.40Q69.80-77.80 76.90-85.80Q84-93.80 91.90-98.50Q99.80-103.20 107.60-103.20Q111.40-103.20 114.80-101.70Q118.20-100.20 120.40-97Q121.60-95.20 122.80-95.20Q124-95.20 125.20-97Q127.40-100.20 128.80-101.10Q130.20-102 131.40-102Q134-102 133.40-99.20L115.60-22.60Q112.60-9.60 119.60-9.60Q124.20-9.60 127.90-15.80Q131.60-22 135.40-35Q136-37.20 138-37.20Q139.40-37.20 139.80-36Q140.20-34.80 139.80-33.20Q136-14.40 129.60-6.30Q123.20 1.80 114.20 1.80Q106.40 1.80 103.10-4.80Q99.80-11.40 102.40-22.80L105-33.80Q105.40-35.20 104.50-35.40Q103.60-35.60 103-34.40Q92-14.20 83.50-6.20Q75 1.80 67.40 1.80M72.40-8.40Q77.20-8.40 83-14.20Q88.80-20 94.50-29.20Q100.20-38.40 105-49Q109.80-59.60 112.70-69.40Q115.60-79.20 115.60-86Q115.60-98.20 107-98.20Q101.80-98.20 96-93.50Q90.20-88.80 84.90-80.80Q79.60-72.80 75.30-62.70Q71-52.60 68.40-41.70Q65.80-30.80 65.80-20.40Q65.80-13.40 67.50-10.90Q69.20-8.40 72.40-8.40M174.60 1.80Q164.80 1.80 160-5.60Q155.20-13 158.20-24.60L173.60-82.40Q176.20-91.80 170.40-91.80Q166.20-91.80 162.10-85.80Q158-79.80 153.20-66.20Q152.40-63.80 150.40-63.80Q149.40-63.80 148.80-64.70Q148.20-65.60 148.60-67Q160.20-103.20 177.60-103.20Q184.40-103.20 186.80-97.60Q189.20-92 186.60-82.20L170.80-22.60Q168.60-14.20 170.50-9.70Q172.40-5.20 177.40-5.20Q183.20-5.20 189.70-10.80Q196.20-16.40 202-25.40Q207.80-34.40 211.40-45.20Q215-56 215-66.40Q215-74.80 213.20-79.70Q211.40-84.60 209.50-88Q207.60-91.40 207.60-95.40Q207.60-103.20 214.40-103.20Q224-103.20 224-82Q224-66.80 219.60-51.90Q215.20-37 208-24.90Q200.80-12.80 192.10-5.50Q183.40 1.80 174.60 1.80M267.60-121Q263.80-121 261.30-123.70Q258.80-126.40 258.80-130.20Q258.80-135.60 262.10-138.80Q265.40-142 269.60-142Q273.60-142 276.30-139.50Q279-137 279-133Q279-127.40 275.60-124.20Q272.20-121 267.60-121M251.20 2Q244.60 2 241.80-2.90Q239-7.80 241.60-19L256.40-82.40Q257.40-86.80 256.70-89.30Q256-91.80 253-91.80Q249.40-91.80 245.10-86.50Q240.80-81.20 235.40-66.40Q234.60-63.80 232.60-63.80Q229.60-63.80 231-67.40Q235.40-81.20 240.30-89Q245.20-96.80 250.20-100Q255.20-103.20 259.40-103.20Q266.40-103.20 269.20-98.30Q272-93.40 269.40-82.20L254.60-18.80Q253.60-14.40 254.30-11.90Q255-9.40 258-9.40Q261.60-9.40 265.90-14.70Q270.20-20 275.60-34.80Q276.40-37.40 278.40-37.40Q281.40-37.40 280-33.80Q275.80-20.20 270.70-12.30Q265.60-4.40 260.60-1.20Q255.60 2 251.20 2" fill="currentColor"/></svg></a>
       <nav aria-label="Design">
         <a href="index.html">Brand</a>
         <a href="proposals.html" aria-current="page">Proposals</a>
@@ -179,7 +46,7 @@
       <section class="cover">
         <p class="kicker"><b>Proposals</b> · soyjavi.com · nothing here ships</p>
         <h1 class="display">What would make it <em>better.</em></h1>
-        <p class="lede">Ideas nobody has approved yet, each drawn against what the site does today, from the name to the phone header. A board is the proposal: when the creator approves one it becomes a task in the ROADMAP with the same ID, and the board is deleted when the change ships.</p>
+        <p class="lede">Ideas nobody has approved yet, each drawn against what the site does today. A board is the proposal: when the creator approves one it becomes a task in the ROADMAP with the same ID, and the board is deleted when the change ships.</p>
       </section>
       <ul class="index" aria-label="Boards">
         <li><a href="#milestone-media">MILESTONE-MEDIA</a></li>
@@ -188,26 +55,6 @@
         <li><a href="#dream-arcs">DREAM-ARCS</a></li>
         <li><a href="#memory-tense">MEMORY-TENSE</a></li>
       </ul>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
       <article class="board" data-board="MILESTONE-MEDIA" id="milestone-media">
         <header>
@@ -307,7 +154,7 @@
 <text class="tm" x="48" y="238">62 MEMORIES · 26 PEOPLE</text>
 <rect class="solid" x="48" y="252" width="88" height="22"/><rect class="ln s" x="144" y="252" width="88" height="22"/></g><path class="ln f" style="stroke-dasharray: 3 3" d="M501.5 93.7Q439.9 163.9 378.3 306.1" marker-end="url(#arrow)"/><circle class="sel hover" cx="501.5" cy="93.7" r="6"/><circle class="sel" cx="378.3" cy="306.1" r="8"/><path class="ln f" style="stroke-dasharray: 3 3" d="M526 234.6Q410.9 153.4 295.8 160.3" marker-end="url(#arrow)"/><circle class="sel hover" cx="526" cy="234.6" r="6"/><circle class="sel" cx="295.8" cy="160.3" r="8"/><path class="ln f" style="stroke-dasharray: 3 3" d="M375.3 286.9Q368 239.3 360.7 295.7" marker-end="url(#arrow)"/><circle class="sel hover" cx="375.3" cy="286.9" r="6"/><circle class="sel" cx="360.7" cy="295.7" r="8"/><circle class="ring" cx="378.5" cy="66.3" r="6"/><text class="tx new" x="388.5" y="69.3">still to come</text></svg><figcaption>Proposed</figcaption></figure>
         </div>
-        <p class="accept"><strong>Accept</strong> an optional <code>wish</code> field in a memory pointing at the memory where it came true (or <code>pending</code>), only for dreams the creator makes public; arcs draw in the sky when the wish memory is open, pending ones are hollow rings like the book and the AI, and a test fails on a pointer to a memory that does not exist.</p>
+        <p class="accept"><strong>Accept</strong> an optional <code>wish</code> field in a memory pointing at the memory where it came true (or <code>pending</code>), only for dreams the creator makes public; arcs draw in the sky when the wish memory is open, pending ones are hollow rings like the book and the clone, and a test fails on a pointer to a memory that does not exist.</p>
       </article>
       <article class="board" data-board="MEMORY-TENSE" id="memory-tense">
         <header>

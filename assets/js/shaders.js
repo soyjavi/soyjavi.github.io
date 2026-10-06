@@ -9,6 +9,7 @@ export const DIRECT = { sky: 0.5, delay: 0, seconds: 1.4, card: 0 };
 export const KIND_TINT = { strength: 0.12, night: ["#ecd2b0", "#b8cdea", "#b8cdea", "#ecd2b0"], paper: ["#8a5a2b", "#2f5f99", "#2f5f99", "#8a5a2b"] };
 
 export const CLOUD = { spin: 0.07, breath: 0.05, pace: 0.5, still: 0.92 };
+export const CORE = { dim: 0.97, reach: 2.6, dust: 1.4 };
 export const POINTER = { radius: 0.2, push: 0.04, rate: 6 };
 export const HOVER = { pull: 0.1, glow: 0.3, grow: 0.12, inRate: 2.2, outRate: 1.2 };
 
@@ -30,6 +31,9 @@ export const DUST_VERTEX = `
   #define CLOUD_PACE ${CLOUD.pace.toFixed(2)}
   #define CLOUD_STILL ${CLOUD.still.toFixed(2)}
   #define ENTRANCE_FIRST ${ENTRANCE.first.toFixed(2)}
+  #define CORE_DIM ${CORE.dim.toFixed(2)}
+  #define CORE_REACH ${CORE.reach.toFixed(2)}
+  #define FAR_DUST ${CORE.dust.toFixed(2)}
   #define POINTER_RADIUS ${POINTER.radius.toFixed(2)}
   #define POINTER_PUSH ${POINTER.push.toFixed(3)}
   #define HOVER_PULL ${HOVER.pull.toFixed(3)}
@@ -129,7 +133,8 @@ export const DUST_VERTEX = `
     float haze = clamp(1.35 + mv.z / 620.0, 0.35, 1.0);
     float near = smoothstep(2.0, 7.0, -mv.z);
     float body = mix(0.5, 1.0, aKind);
-    vAlpha = mix(0.09, 0.9, level) * mix(1.0, 0.3, aAhead) * body * uGain * haze * near * (1.0 - 0.55 * uFar * aKind);
+    float core = 1.0 - smoothstep(0.0, CORE_REACH, length(off));
+    vAlpha = mix(0.09, 0.9, level) * mix(1.0, 0.3, aAhead) * body * uGain * haze * near * (1.0 - 0.55 * uFar * aKind) * (1.0 - CORE_DIM * core * aKind) * (1.0 + FAR_DUST * uFar * (1.0 - aKind));
     gl_PointSize = clamp(aSize * uScale / -mv.z * (0.8 + 0.5 * level) * (1.0 + uFar * 1.3 * aKind), 1.3, 12.0);
     vAlpha = mix(uGain * (0.2 + 0.6 * aSeed * aSeed) * near, vAlpha, m) * (1.0 - smoothstep(uReveal - 0.2, uReveal + 0.4, aU));
     gl_PointSize = mix(1.1 + 1.6 * aSeed * aSeed, gl_PointSize, m);

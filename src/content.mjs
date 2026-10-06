@@ -7,6 +7,21 @@ export const KINDS = ["personal", "professional", "product", "education"];
 export const BODY = { max: 900, paragraphs: 2 };
 export const paragraphsOf = (text) => String(text).split(/\n\s*\n/).map((part) => part.trim()).filter(Boolean);
 export const bodyProblem = (text) => (String(text).length > BODY.max ? `body is ${String(text).length} characters, the limit is ${BODY.max}` : paragraphsOf(text).length > BODY.paragraphs ? `body has ${paragraphsOf(text).length} paragraphs, the limit is ${BODY.paragraphs}` : null);
+const tally = (list) => {
+  const counts = new Map();
+  for (const memory of list) for (const id of memory.threads ?? []) counts.set(id, (counts.get(id) ?? 0) + 1);
+  return counts;
+};
+export const distinctive = (held, everything, threadOrder, count = 2) => {
+  const [mine, all] = [tally(held), tally(everything)];
+  const [inside, outside] = [[...mine.values()].reduce((sum, n) => sum + n, 0), [...all.values()].reduce((sum, n) => sum + n, 0)];
+  return [...mine]
+    .filter(([, n]) => n >= 2)
+    .map(([id, n]) => [id, n / inside / (all.get(id) / outside)])
+    .sort((a, b) => b[1] - a[1] || threadOrder.indexOf(a[0]) - threadOrder.indexOf(b[0]))
+    .slice(0, count)
+    .map(([id]) => id);
+};
 export const root = fileURLToPath(new URL("..", import.meta.url));
 export const CONTENT = new URL("../content/", import.meta.url);
 
@@ -66,7 +81,11 @@ export function loadContent(dir = CONTENT) {
           const copy = words.ages?.[id];
           if (!copy?.name || !copy.title || !copy.intro) throw new Error(`content/${lang}.json: ages.${id} needs a name, a title and an intro`);
           const span = memories.filter((memory) => memory.period === id).map((memory) => Math.floor(timeOfDate(String(memory.date))));
-          return [id, { kicker: `${String(k + 1).padStart(2, "0")} / ${copy.name} · ${Math.min(...span)}–${Math.max(...span)}`, title: copy.title, intro: copy.intro }];
+          const names = distinctive(memories.filter((memory) => memory.period === id), memories, base.threads ?? [], 2).map((thread) => (words.threads?.[thread] ?? thread).toLocaleLowerCase(lang));
+          const listed = new Intl.ListFormat(lang === "en" ? "en-GB" : lang, { style: "long", type: "conjunction" }).format(names);
+          if ((copy.hint === undefined) !== (json(`${LANGS.find((other) => other !== lang)}.json`).ages?.[id]?.hint === undefined)) throw new Error(`content/${lang}.json: ages.${id}.hint must exist in both languages or in neither`);
+          const hint = copy.hint ?? (names.length && words.ui?.explore?.mostly ? words.ui.explore.mostly.replace("{threads}", listed) : "");
+          return [id, { kicker: `${String(k + 1).padStart(2, "0")} / ${copy.name} · ${Math.min(...span)}–${Math.max(...span)}`, title: copy.title, intro: copy.intro, hint }];
         }),
       );
       ["book", "clone", "contact"].forEach((key, i) => {

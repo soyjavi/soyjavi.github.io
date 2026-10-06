@@ -324,7 +324,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
   const view = { target: [...CENTRE], distance: 700, yaw: 0, pitch: HOME_PITCH };
   const goal = { target: [...CENTRE], distance: 340, yaw: 0, pitch: HOME_PITCH };
   const inset = { x: 0, y: 0, goalX: 0, goalY: 0 };
-  const state = { reveal: null, follow: -1, idle: true, hover: -1, selection: -1, preview: -1, previewFade: 0, ringFade: 0, portrait: innerWidth / innerHeight < 1, drift: 0, touched: -1e9 };
+  const state = { reveal: null, follow: -1, idle: true, hover: -1, selection: -1, preview: -1, previewFade: 0, ringFade: 0, portrait: innerWidth / innerHeight < 1, drift: 0, turned: 0, touched: -1e9 };
 
   const extent = Math.max(...[...marks.map((mark) => mark.position), future.book, future.clone].map((point) => Math.hypot(point[0], point[1]))) + 12;
   const homeDistance = () => Math.max(160, extent * 4.3) * (state.portrait ? 1.3 : 1);
@@ -531,7 +531,8 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
     const cssScale = innerHeight / (2 * Math.tan((camera.fov * Math.PI) / 360));
     const far = smoothstep(0.35, 0.75, view.distance / homeDistance());
 
-    const turned = Math.max(0, elapsed - entrance.delay - entrance.seconds - 0.5);
+    if (elapsed - entrance.delay - entrance.seconds - 0.5 > 0) state.turned += dt * lerp(SPIN.near, 1, far);
+    const turned = state.turned;
     sky.list.forEach((galaxy, k) => {
       if (k >= SPIN.slots) return;
       spinning[k] = spinAngle(galaxy, turned);

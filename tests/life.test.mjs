@@ -448,7 +448,10 @@ test("each dot knows its galaxy, and a galaxy turns about its centre slowly, the
   assert.equal(spinTime(-4), 0);
   assert.ok(spinTime(1) < 0.1, "it starts from rest");
   assert.ok(Math.abs(spinTime(600) - (600 - SPIN.ramp)) < 1e-6, "then at a steady rate");
-  assert.ok(spinAngle(big, 60) < 0.25, "a minute turns a galaxy by a few degrees");
+  assert.ok(spinAngle(big, 60) < 0 && spinAngle(small, 60) < spinAngle(big, 60), "clockwise, so the arms trail behind the turn as in nature, and the smaller one turns faster");
+  assert.ok(Math.abs(spinAngle(big, 60)) > 0.5 && Math.abs(spinAngle(big, 60)) < 1.5, "a minute turns a galaxy by tens of degrees: seen, and calm");
+  const minutes = (galaxy) => (Math.PI * 2) / spinRate(galaxy) / 60;
+  assert.ok(minutes({ radius: 21 }) > 4 && minutes({ radius: 13 }) < 6.5, "a turn takes four to six minutes");
   const about = spun([10, 0, 3], [0, 0, 0], Math.PI / 2);
   assert.ok(Math.abs(about[0]) < 1e-9 && Math.abs(about[1] - 10) < 1e-9 && about[2] === 3, "a quarter turn, height kept");
   assert.deepEqual(spun([4, 7, 1], [4, 7, 0], 1.3).map((value) => +value.toFixed(9)), [4, 7, 1], "the centre does not move");
@@ -626,12 +629,12 @@ test("pointing at a memory moves it: the cloud draws in and glows, its name rise
   assert.ok(HOVER.inRate <= 3 && HOVER.outRate <= 2, "calm: it takes a second or more");
 });
 
-test("pressing an age frames its galaxy without opening a memory: names for the headline and a few, the card tells the age and offers its first memory", () => {
+test("pressing an age frames its galaxy without opening a memory: three names, the card tells the age and offers its first memory", () => {
   const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
   assert.match(engine, /const selectPeriod = \(k, \{ push = true \} = \{\}\) =>/);
   assert.match(engine, /if \(periodAt\.has\(id\)\) return selectPeriod\(periodAt\.get\(id\)\);/);
   assert.match(engine, /history\.replaceState\(null, "", `#period-\$\{periods\[k\]\}`\)/);
-  assert.match(engine, /if \(periodView >= 0\) priority = i === hover \? 900 : periodSet\.has\(i\) && hover < 0 \? 40 : 0;/);
+  assert.match(engine, /if \(periodView >= 0\) priority = i === hover \|\| i === preview \? 900 : 0;/);
   assert.match(engine, /\[\.\.\.clone\.children\]\.forEach\(\(child\) => child\.matches\("\.kicker, \.period-head"\) \|\| child\.remove\(\)\)/);
   assert.match(engine, /showAll \? everyone : declared\(marks, memory\)/);
 });
@@ -639,9 +642,12 @@ test("pressing an age frames its galaxy without opening a memory: names for the 
 test("in the whole-life view pointing at a memory keeps the style of that view, and an age's name steps away from its galaxy instead of sitting on it", () => {
   const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
   assert.match(engine, /priority === 900 && i === hover && selected < 0 && periodView < 0 && ratio >= 0\.6/);
-  assert.match(engine, /point\.x \+= \(dx \/ length\) \* reach;/);
+  assert.match(engine, /const crowding = \(candidate\) =>/, "a galaxy's label picks the open spot that crowds the fewest galaxies");
+  assert.match(engine, /item\.hint\.hidden = memory >= 0 \|\| !!filter;/, "the main memory shows under the label only in the whole-life view");
+  assert.match(engine, /if \(item\.kind === "galaxy" && !item\.pin && \(solid\.some/, "the label of the age in view is never hidden by what is near it");
+  assert.doesNotMatch(engine, /heads\.has\(i\) && ratio >= 0\.6 && !filter\) priority = 40/, "the main memory of an age is no longer a name of its own in the whole-life view");
   const css = readFileSync(new URL("../assets/site.css", import.meta.url), "utf8");
-  assert.match(css, /\.tag\[data-name="1"\]\[data-hot="1"\] \{\s*font-size: var\(--fs-tag\);/);
+  assert.doesNotMatch(css, /\.tag\[data-hot="1"\] \{[^}]*font-size/, "one size for every name: the one pointed at only brightens");
 });
 
 test("a marker at the edge of the screen holds on for a moment when its line flickers across the border, and fades in when it appears", () => {
@@ -684,4 +690,32 @@ test("a galaxy's outer ring is soft in the whole-life view and a little stronger
   assert.ok(close >= 1.4 && close <= 1.9, `inside an age the outer ring is ${close.toFixed(2)} times the year rings`);
   assert.ok(outer * base <= 0.35, "from far away it is as soft as the routes or softer");
   assert.match(scene, /outerGrow = 1 \+ 0\.3 \* \(1 - far\)/, "and its dots are a touch larger only up close");
+});
+
+test("the centre of a memory's cloud is dimmer than its edge so its dots stay apart, and the dust between memories brightens when the camera pulls back", async () => {
+  const { CORE, DUST_VERTEX } = await import("../assets/js/shaders.js");
+  assert.ok(CORE.dim >= 0.9 && CORE.dim < 1, "the centre keeps a trace of light, never a hole");
+  assert.ok(CORE.reach >= 2 && CORE.reach <= 3.5, "the dimming reaches past the middle of the biggest cloud");
+  assert.ok(CORE.dust > 0 && CORE.dust <= 2, "the dust gains at a distance without drowning the clouds");
+  for (const name of ["CORE_DIM", "CORE_REACH", "FAR_DUST"]) assert.match(DUST_VERTEX, new RegExp(`#define ${name} `));
+  assert.match(DUST_VERTEX, /float core = 1\.0 - smoothstep\(0\.0, CORE_REACH, length\(off\)\);/);
+  assert.match(DUST_VERTEX, /\(1\.0 - CORE_DIM \* core \* aKind\) \* \(1\.0 \+ FAR_DUST \* uFar \* \(1\.0 - aKind\)\)/);
+});
+
+test("the year labels are quiet, the label of the year in view keeps its strength, and the galaxy labels stand off with a hairline instead of lying on the clouds", () => {
+  const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
+  assert.match(engine, /const YEAR_LABEL = \{ quiet: 0\.4, current: 0\.9 \};/);
+  assert.match(engine, /item\.base = memory >= 0 && ring\.year === Math\.floor\(marks\[memory\]\.year\) \? YEAR_LABEL\.current : YEAR_LABEL\.quiet;/);
+  assert.match(engine, /\[1, 1\.5, 2\.1, 2\.8\]\.flatMap/, "a galaxy label may stand off at four distances");
+  assert.match(engine, /item\.node\.dataset\.leader = away && away\.length > 10 && !item\.pin \? "1" : "";/);
+  assert.match(engine, /item\.node\.style\.setProperty\("--r", out\.toFixed\(0\)\);/);
+  const css = readFileSync(new URL("../assets/site.css", import.meta.url), "utf8");
+  assert.match(css, /\.galaxy\[data-leader="1"\] \.leader \{\s*display: block;/);
+  assert.match(css, /@media \(max-width: 1500px\) \{\s*\.galaxy-years \{\s*display: block;/, "a narrow window puts the years on their own line");
+});
+
+test("zoomed into an age the galaxies turn slower than in the whole-life view", () => {
+  assert.ok(SPIN.near > 0 && SPIN.near < 1);
+  const scene = readFileSync(new URL("../assets/js/scene.js", import.meta.url), "utf8");
+  assert.match(scene, /state\.turned \+= dt \* lerp\(SPIN\.near, 1, far\);/);
 });

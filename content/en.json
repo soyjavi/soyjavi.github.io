@@ -40,6 +40,7 @@
     "today": "Today",
     "explore": {
       "label": "Explore the memories",
+      "mostly": "Marked by {threads}",
       "threads": "Threads",
       "find": "Find",
       "findLabel": "Find a memory",

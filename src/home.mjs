@@ -77,7 +77,7 @@ const milestone = (d, life, entry, head) => {
 
 const period = (d, life, id) => {
   const items = life.milestones.filter((entry) => entry.period === id).map((entry, index) => milestone(d, life, entry, index === 0));
-  return `<section class="chapter period" id="period-${id}">
+  return `<section class="chapter period" id="period-${id}"${d.periods[id].hint ? ` data-hint="${esc(d.periods[id].hint)}"` : ""}>
         <ol class="milestones">
           ${items.join("\n          ")}
         </ol>

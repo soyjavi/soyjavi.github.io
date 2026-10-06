@@ -116,6 +116,9 @@ no ROADMAP entry or is malformed.
   ahead are the book and the clone. The form is clear and the memories are diffuse; the name is never spelled with dots.
   Nothing is only reachable in order: clicking, the rail, the finder, Surprise me, related memories and the keyboard
   all get there, and Earlier and Later are one way among them.
+- The words of the sky are fixed (SPEC, "The sky and its words"): the life is the sky, an age is a galaxy, a memory a
+  cloud, a thread a constellation, a year a ring, the book and the clone hollow rings. Use each for one thing and keep
+  the pages, the code and the documents in step with it.
 - The sky moves like film: it is drawn at 24 frames a second and never faster, on any screen, and a hidden tab draws at
   one frame a second. This is an art decision of the creator, not a performance setting: a change to `CADENCE`
   needs his approval, and the tests count the draws.

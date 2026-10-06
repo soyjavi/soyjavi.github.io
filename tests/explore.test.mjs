@@ -434,7 +434,7 @@ test("only the links he declared are named when a memory is open, never a neighb
   assert.equal(declared(crowded, 0).length, STRONG, "at most three are named");
 });
 
-test("an age names its heaviest memory first and at most four, the earliest among equals", () => {
+test("an age names its heaviest memory first and at most three, the earliest among equals", () => {
   const marks = [
     { period: 0, weight: 1, year: 1 },
     { period: 0, weight: 3, year: 4 },
@@ -444,8 +444,10 @@ test("an age names its heaviest memory first and at most four, the earliest amon
     { period: 0, weight: 2, year: 5 },
     { period: 0, weight: 1, year: 6 },
   ];
-  assert.deepEqual(periodNames(marks, 0), [2, 1, 4, 5]);
+  assert.deepEqual(periodNames(marks, 0), [2, 1, 4], "the three heaviest, the earliest first among equals");
   assert.equal(periodNames(marks, 0)[0], headlines(marks)[0], "the first one is the headline of the age");
+  const near = marks.map((mark, i) => ({ ...mark, position: i === 1 ? [20.5, 0, 0] : [i * 10, 0, 0] }));
+  assert.deepEqual(periodNames(near, 0), [2, 4, 5], "one that sits on a heavier one's cloud gives way to the next");
   assert.deepEqual(periodNames(marks, 1), [3]);
   assert.deepEqual(periodNames(marks, 7), []);
 });

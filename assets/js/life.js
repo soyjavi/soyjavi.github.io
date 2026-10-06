@@ -440,13 +440,13 @@ export const playElapsed = (year, to, from = START, seconds = PLAY.seconds) => c
 
 export const railPercent = (year) => ((year - RAIL.start) / (RAIL.end - RAIL.start)) * 100;
 
-export const SPIN = { rate: 0.004, ramp: 6, slots: 16 };
+export const SPIN = { rate: 0.05, ramp: 6, slots: 16, near: 0.2 };
 
 export const spinRate = (galaxy) => (SPIN.rate * 12) / (galaxy.radius + 12);
 
 export const spinTime = (seconds) => (seconds <= 0 ? 0 : seconds - SPIN.ramp * (1 - Math.exp(-seconds / SPIN.ramp)));
 
-export const spinAngle = (galaxy, seconds) => spinRate(galaxy) * spinTime(seconds);
+export const spinAngle = (galaxy, seconds) => -spinRate(galaxy) * spinTime(seconds);
 
 export function spun(point, pivot, angle) {
   const [dx, dy] = [point[0] - pivot[0], point[1] - pivot[1]];

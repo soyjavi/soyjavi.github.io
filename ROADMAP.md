@@ -107,10 +107,11 @@ _None._
   `decision · creator · low`
   The previous page listed one; the new site shows only `hello@soyjavi.com` and X.
 
-- **AGES-COPY** — Write the intro of each age in his own words
+- **AGES-COPY** — Write the intro and the hint of each age in his own words
   `content · creator · normal`
   Each age of the sky carries a title and a one-line intro (`ages` in `content/en.json` and `es.json`); today they say only the ages ("From seven to fourteen."). The creator or his biographer writes them as public text in his voice, in both languages, and decides which ages deserve a poetic title (Shakespeare's seven, from the infant to second childhood, are a source). No memory is moved by hand: its age decides.
-  accept: every age has a title and an intro of his in both languages; the voice rules and `npm test` hold.
+  The hint under the age in the whole-life view says today which threads mark the age against the rest of the life ("Marked by body and family"); an own line per age in `ages.<id>.hint`, in both languages, replaces it.
+  accept: every age has a title, an intro and a hint of his in both languages; the voice rules and `npm test` hold.
 
 ### Checks on real services and devices
 
@@ -161,6 +162,10 @@ Ordered by what must be decided or applied first; each group names what it waits
   Historic present or past for all the memories in both languages, and the guide sentence about what changed and mattered.
 
 ### 2. Review
+
+- **SKY-LABEL-EDGE** — Keep related memory labels inside the phone viewport
+  `bug · agent · high`
+  accept: reproduce and fix the related label cut by the edge on the phone view of `m-tapquo`; the existing browser test “the memory in view is named beside its cloud and no label touches another, the card, the controls or the edge” passes, including its phone case. Keep the label readable and its memory reachable; the full suite passes.
 
 - **PERF-CPU** — Stop the per-frame garbage and DOM churn
   `chore · agent · normal`

@@ -571,6 +571,82 @@ test("the sky is drawn at the pace of film, never faster, and a hidden tab draws
   await close();
 });
 
+test("each galaxy's label carries a hint of what marks its age beneath it, and the label of the age in view is always shown", async () => {
+  const { page, close } = await open("/");
+  await immersive(page);
+  await settled(page);
+  const hints = await page.locator(".galaxy .galaxy-hint").evaluateAll((nodes) => nodes.map((node) => node.textContent));
+  assert.ok(hints.length >= 3 && hints.every(Boolean), "a hint under every label");
+  assert.equal(await page.evaluate(() => [...document.querySelectorAll(".tag")].filter((tag) => tag.dataset.on === "1" && tag.dataset.name === "1").length), 0, "no other name competes with the labels in the whole-life view");
+  for (const id of content.life.periods) {
+    await goTo(page, `period-${id}`);
+    await page.waitForTimeout(2500);
+    const label = page.locator(`.galaxy[data-go="period-${id}"]`);
+    assert.equal(await label.evaluate((node) => getComputedStyle(node).visibility === "visible" && Number(node.style.opacity) > 0.5), true, `${id}: its label is there to go back`);
+    assert.equal(await label.locator(".galaxy-hint").isVisible(), true, `${id}: the hint stays under the label in the age view`);
+    assert.equal(await page.evaluate(() => [...document.querySelectorAll(".tag")].filter((tag) => tag.dataset.on === "1").length), 0, `${id}: no name until one is pointed at`);
+    const listed = await page.locator(".card .related .peer").count();
+    assert.equal(listed, content.life.milestones.filter((entry) => entry.period === id).length, `${id}: the card lists every memory of the age`);
+  }
+  await close();
+});
+
+test("the labels of the galaxies sit beside their galaxy, joined by a hairline when they stand off, and none touches another label or lies on a galaxy", async () => {
+  for (const [width, height, depth] of [[1920, 1080, 0], [1280, 800, 32]]) {
+    const { page, close } = await open("/", { viewport: { width, height } });
+    await immersive(page);
+    await settled(page);
+    await page.waitForTimeout(4000);
+    const found = await page.evaluate(() => {
+      const labels = [...document.querySelectorAll(".galaxy")].filter((node) => Number(node.style.opacity) > 0.2).map((node) => {
+        const box = node.getBoundingClientRect();
+        return { name: node.textContent.slice(0, 2), box: [box.left, box.top, box.right, box.bottom], mass: ["--cx", "--cy", "--r"].map((property) => Number(node.style.getPropertyValue(property))), leader: node.dataset.leader };
+      });
+      const depth = (box, [x, y, r]) => Math.max(0, r - Math.hypot(Math.min(Math.max(x, box[0]), box[2]) - x, Math.min(Math.max(y, box[1]), box[3]) - y));
+      return {
+        count: labels.length,
+        deepest: Math.max(...labels.flatMap((label) => labels.map((other) => depth(label.box, other.mass)))),
+        touching: labels.flatMap((label) => labels.filter((other) => other !== label && label.box[0] < other.box[2] && label.box[2] > other.box[0] && label.box[1] < other.box[3] && label.box[3] > other.box[1]).map((other) => `${label.name} ${other.name}`)),
+        inside: labels.every((label) => label.box[0] >= 0 && label.box[2] <= innerWidth && label.box[1] >= 0 && label.box[3] <= innerHeight),
+      };
+    });
+    assert.ok(found.count >= content.life.periods.length - 1, `${width}: the galaxies are named`);
+    assert.deepEqual(found.touching, [], `${width}: no label touches another`);
+    assert.ok(found.inside, `${width}: inside the window`);
+    assert.ok(found.deepest <= depth, `${width}: a label reaches ${Math.round(found.deepest)} px into a galaxy, at most ${depth}`);
+    await close();
+  }
+});
+
+test("the year labels sit quietly behind the sky, and only the year of the memory in view keeps its strength", async () => {
+  const { page, close } = await open(`/#period-${content.life.periods[1]}`);
+  await immersive(page);
+  await settled(page);
+  await page.waitForTimeout(3000);
+  const strength = () => page.evaluate(() => [...document.querySelectorAll(".ring-year")].filter((node) => node.textContent.trim() && node.style.visibility === "visible").map((node) => [Number(node.textContent), Number(node.style.opacity)]));
+  const quiet = await strength();
+  assert.ok(quiet.length >= 2, "the age shows some years");
+  assert.ok(quiet.every(([, opacity]) => opacity <= 0.45), `every year is quiet in the age view: ${JSON.stringify(quiet)}`);
+  let seen = false;
+  for (const entry of content.life.milestones.filter((candidate) => candidate.period === content.life.periods[1])) {
+    await goTo(page, `m-${entry.id}`);
+    await page.mouse.move(700, 300);
+    await page.mouse.move(900, 500);
+    await page.waitForTimeout(2500);
+    const labels = await strength();
+    const year = Math.floor(+entry.date.slice(0, 4));
+    const current = labels.find(([label]) => label === year);
+    assert.ok(labels.filter(([label]) => label !== year).every(([, opacity]) => opacity <= 0.45), `the others stay quiet: ${JSON.stringify(labels)}`);
+    if (current) {
+      assert.ok(current[1] >= 0.85, `the year of ${entry.id} is at strength: ${current[1]}`);
+      seen = true;
+      break;
+    }
+  }
+  assert.ok(seen, "some memory of the age shows its own year");
+  await close();
+});
+
 test("going back to the whole life lets go of a filter chosen from a card, so no jump lines or counts are left behind", async () => {
   const { page, close } = await open("/#m-tapquo");
   await hud(page, TAPQUO);
@@ -2228,9 +2304,9 @@ test("the galaxies turn slowly after the opening, the memory in view follows its
   const ring = await page.locator("#scene").getAttribute("data-ring");
   await page.waitForTimeout(4000);
   const second = await spin();
-  assert.ok(first > 0, "it has started");
-  assert.ok(second > first, `it keeps turning: ${first} then ${second}`);
-  assert.ok(second < 0.2, "slowly");
+  assert.ok(first < 0, "it has started, clockwise");
+  assert.ok(second < first, `it keeps turning: ${first} then ${second}`);
+  assert.ok(second > -0.6, "slowly");
   assert.notEqual(await page.locator("#scene").getAttribute("data-ring"), ring, "the ring on the memory in view moves with its cloud");
   assert.equal(await page.locator("#scene").getAttribute("data-quality"), "0", "tests ask for the full life");
   assert.deepEqual(errors, []);
