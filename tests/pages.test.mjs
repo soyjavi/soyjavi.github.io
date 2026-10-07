@@ -53,7 +53,7 @@ for (const page of pages) {
   test(`${page} declares its language and one h1`, () => {
     const lang = page.startsWith("es/") ? "es" : page === "404.html" ? "en" : "en";
     assert.match(html, new RegExp(`<html lang="${lang}">`));
-    assert.equal((html.match(/<h1[\s>]/g) ?? []).length, page === "404.html" ? 2 : 1);
+    assert.equal((html.match(/<h1[\s>]/g) ?? []).length, 1);
     assert.equal(new Set(ids(html)).size, ids(html).length, "duplicate ids");
     assert.ok(ids(html).includes("main"), "skip link target");
   });
@@ -174,7 +174,8 @@ test("the theme and the language stay on the flat page, and nothing else of the 
 
 test("the hero counts what the life holds and carries no instruction to drag", () => {
   const total = (key) => Math.max(content.life.totals?.[key] ?? 0, key === "memories" ? content.life.milestones.length : content.life[key].length);
-  const line = (lang) => ["memories", "people", "places"].map((key) => content.dict[lang].ui.count[key].replace("{n}", total(key))).join(" · ");
+  const over = (key) => key === "memories" && (content.life.totals?.memories ?? 0) > content.life.milestones.length;
+  const line = (lang) => ["memories", "people", "places"].map((key) => content.dict[lang].ui.count[over(key) ? "over" : key].replace("{n}", total(key))).join(" · ");
   const counts = { en: line("en"), es: line("es") };
   for (const lang of ["en", "es"]) {
     const html = read(homes[lang]);
@@ -441,7 +442,17 @@ test("the 404 page is noindexed and offers both languages", () => {
   const html = files.get("404.html");
   assert.match(html, /<meta name="robots" content="noindex"/);
   assert.match(html, /<section lang="en">/);
-  assert.match(html, /<section lang="es">/);
+  assert.match(html, /<section lang="es"[ >]/);
+});
+
+test("the 404 is one star that leads back to the start, with no script and nothing from outside", () => {
+  const html = files.get("404.html");
+  assert.match(html, /<a class="first-star" href="\/" aria-label="[^"]+"><svg viewBox="0 0 120 120" aria-hidden="true" focusable="false">/);
+  assert.ok(html.includes(content.dict.en.notFound.star) && html.includes(content.dict.es.notFound.star), "the line in both languages");
+  assert.match(html, /<a class="link" href="\/es\/">/, "the Spanish reader has a way home in Spanish");
+  assert.deepEqual([...html.matchAll(/<script\b([^>]*)>/g)].map((m) => m[1]).filter((attributes) => !/src="\/assets\/(theme|lang)\.js"/.test(attributes) && !/application\/ld\+json/.test(attributes)), []);
+  const css = read("assets/page.css");
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\) \{\s*\.first-star \.halo \{\s*animation: none;/);
 });
 
 test("the name is Javi, the handle is only an alternate name, in the structured data and the author meta of both languages", () => {
@@ -516,4 +527,12 @@ test("the book's card and the clone's card carry the same lockup under the title
     });
     assert.match(panels[1], new RegExp(`<p class="note">${lang === "en" ? "It is a program built from what I wrote; it is not me\\." : "Es un programa hecho a partir de lo que escribí; no soy yo\\."}</p>`));
   }
+});
+
+test("a total of memories above what the sky draws is said as a floor in both languages", () => {
+  const withTotal = renderSite({ ...content, life: { ...content.life, totals: { memories: 500 } } });
+  assert.match(withTotal.get(homes.en), /<p class="stats kicker">Over 500 memories · /);
+  assert.match(withTotal.get(homes.es), /<p class="stats kicker">Más de 500 recuerdos · /);
+  const without = renderSite({ ...content, life: { ...content.life, totals: {} } });
+  assert.match(without.get(homes.en), new RegExp(`<p class="stats kicker">${content.life.milestones.length} memories · `));
 });

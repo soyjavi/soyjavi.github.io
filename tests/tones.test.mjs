@@ -125,3 +125,19 @@ test("a note that follows the camera into another galaxy waits for it only brief
   const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
   assert.match(engine, /sound\.memory\(\{ \.\.\.marks\[first\], period: -1 \}\)/);
 });
+
+test("each age holds its own chord of the bed, and the whole life wanders from the home chord", async () => {
+  const { chordOfAge, nextChord } = await import("../assets/js/tones.js");
+  const { readFileSync } = await import("node:fs");
+  assert.equal(TONES.change >= 2 && TONES.change <= 4, true, "the bed glides to an age in two to four seconds");
+  assert.equal(chordOfAge(-1), 0, "the whole life starts from the home chord");
+  assert.deepEqual([0, 1, 2, 3, 4].map(chordOfAge), [0, 1, 2, 3, 4], "five ages, five chords");
+  assert.equal(chordOfAge(5), 0);
+  assert.equal(nextChord(3, 1, 0.9), 3, "inside an age the bed keeps its chord");
+  assert.notEqual(nextChord(null, 1, 0.9), 1, "the whole life keeps wandering");
+  const sound = readFileSync(new URL("../assets/js/sound.js", import.meta.url), "utf8");
+  assert.match(sound, /buses\.forEach\(\(bus\) => bus\.gain\.setTargetAtTime\(0, now, TONES\.change \/ 3\)\)/, "the old chord fades on its own bus as the new one rises, without touching its envelopes");
+  assert.match(sound, /graph\.age\(state\.age\);/, "an age chosen before the sound starts is kept");
+  const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
+  assert.match(engine, /sound\.age\(viewed\);/);
+});

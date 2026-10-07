@@ -256,14 +256,21 @@ export const pace = (clock, now, fps = CADENCE.fps) => {
 
 export const worked = (frameMs, fps = CADENCE.fps) => Math.max(0, frameMs - 1000 / fps) + 1000 / 60;
 
+export const FRESH = { days: 45 };
+
+export const isFresh = (added, today = new Date()) => {
+  if (!/^\d{4}-\d{2}$/.test(added ?? "")) return false;
+  const since = (today - new Date(+added.slice(0, 4), +added.slice(5, 7) - 1, 1)) / 86400000;
+  return since >= 0 && since < FRESH.days;
+};
+
 export const averageMs = (samples) => (samples.length ? samples.reduce((sum, value) => sum + value, 0) / samples.length : 0);
 
 export const nextQuality = (tier, frameMs) => (frameMs > QUALITY.slow && tier < QUALITY.tiers.length - 1 ? tier + 1 : tier);
 
-export function tourPlan(marks, length = 5) {
-  const picks = headlines(marks);
-  if (picks.length <= length) return picks;
-  return Array.from({ length }, (_, k) => picks[Math.floor((k * picks.length) / length)]);
+export function tourPlan(marks) {
+  const ages = [...new Set(marks.map((mark) => mark.period).filter((period) => period >= 0))].sort((a, b) => a - b);
+  return [...ages.map((age) => ({ age })), { ahead: "book" }, { ahead: "clone" }];
 }
 
 export function tourTick(state, { now, idleSince, eligible, plan }, { wait = 20, hold = 6 } = {}) {

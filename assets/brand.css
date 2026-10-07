@@ -270,7 +270,7 @@ canvas {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px 40px;
+  gap: 12px 36px;
   padding: 22px var(--gutter);
   pointer-events: none;
 }
@@ -287,14 +287,13 @@ canvas {
 }
 
 .brand {
-  --brand-height: 28px;
+  --brand-height: 38px;
 }
 
 .brand svg {
   display: block;
   width: auto;
   height: var(--brand-height);
-  transform: translateY(calc(var(--brand-height) * -0.085));
 }
 
 .masthead nav {

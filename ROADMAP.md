@@ -35,7 +35,10 @@ unless the task names it.
 
 ## Queue
 
-_None._
+- **CLOSED-MEMORIES** — Say how much more there is, with a number
+  `feature · agent · high` · depends: the creator's figures
+  board: CLOSED-MEMORIES
+  The sky draws only open memories and nothing private is in the repository, not even as a stub. What the site can add is a number: how many memories are closed in each age and in total, shown in the label of each galaxy and in the hero, so the visitor feels the depth of the book and the clone. The hero already reads `totals` from `life.json` and says "Over 500 memories" / "Más de 500 recuerdos" with the creator's provisional figure; what is left is the count per age, once he gives it. The creator gives those figures and decides whether each galaxy label also carries its count per age; agent work follows: the field and its test, the labels, the hero and the flat page.
 
 ## In progress
 
@@ -154,18 +157,7 @@ does not want the word AI on the site). Nothing here is approved.
 
 Ordered by what must be decided or applied first; each group names what it waits on.
 
-### 1. Copy — the voice rules are in `design/index.html` and tested
-
-- **MEMORY-TENSE** — One tense for every memory, and one sentence to confirm
-  `decision · creator · normal`
-  board: MEMORY-TENSE
-  Historic present or past for all the memories in both languages, and the guide sentence about what changed and mattered.
-
 ### 2. Review
-
-- **SKY-LABEL-EDGE** — Keep related memory labels inside the phone viewport
-  `bug · agent · high`
-  accept: reproduce and fix the related label cut by the edge on the phone view of `m-tapquo`; the existing browser test “the memory in view is named beside its cloud and no label touches another, the card, the controls or the edge” passes, including its phone case. Keep the label readable and its memory reachable; the full suite passes.
 
 - **PERF-CPU** — Stop the per-frame garbage and DOM churn
   `chore · agent · normal`
@@ -186,25 +178,8 @@ Ordered by what must be decided or applied first; each group names what it waits
   `decision · creator · low`
   Capping at 1.5 saves about 22% of the GPU frame and slightly fades the dotted outlines and enlarges the selection ring; the clouds look the same. Only the creator's eye can say.
 
-- **ART-REVIEW** — An art review by an expert subagent, with screenshots of every screen
-  `chore · agent · normal`
-  A read-only subagent with an art and interface direction brief goes through the site screen by screen (the opening, the whole-life view, a galaxy, a memory open, the finder, the guide, the book and the clone cards, the contact, the flat page, the light theme, 1280×640 and 390×844 and a large screen) and returns ranked, evidence-backed findings on composition, hierarchy, motion, type, colour, the dots and the glass. It needs screenshots, so it launches a browser: the creator has asked that no browser is started without his word, so this task waits for his explicit go-ahead and for the screenshots to be kept in the scratchpad, never in the repository.
-  The way to drive the site, the states to capture and the format of the report are in SPEC, "Reviewing the interface".
-  accept: a ranked report with one screenshot per finding; the creator turns what he approves into tasks.
-
 ### 3. Depth and the book — need content or approvals from the creator
 
 - **MILESTONE-MEDIA** — A photo or a sound at a milestone
   board: MILESTONE-MEDIA
   Optional media for a milestone, shown in its card, only where the creator has approved it.
-- **CLOSED-MEMORIES** — Say how much more there is, with a number
-  `decision · creator · high`
-  board: CLOSED-MEMORIES
-  The sky draws only open memories and nothing private is in the repository, not even as a stub. What the site can add is a number: how many memories are closed in each age and in total, shown in the label of each galaxy and in the hero, so the visitor feels the depth of the book and the clone. The hero already reads `totals` from `life.json` (memories, people, places, open and closed together); until he gives the figures it shows only what the site draws. The creator gives those figures and decides whether each galaxy label also carries its count per age; agent work follows: the field and its test, the labels, the hero and the flat page.
-- **BOOK-CHAPTERS** — The book as nodes
-  board: BOOK-CHAPTERS
-  Chapters of the book as hollow rings that open a card with their blurb and the memories they draw on.
-- **DREAM-ARCS** — What was wished for, done and let go
-  board: DREAM-ARCS
-  An arc from the memory where something was wished for to the one where it came true; what is still pending is a hollow
-  ring ahead, like the book and the clone. Needs the dreams the creator is willing to make public.

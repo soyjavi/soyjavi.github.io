@@ -3,7 +3,7 @@
   "locale": "en_US",
   "meta": {
     "title": "Javi · A life in milestones",
-    "description": "Javi's life from 1980 to today as a sky of memories, with a book for his children and a clone to keep talking with him. Join a waitlist."
+    "description": "Javi's life from 1980 to today as a sky of memories, with a book for his children and the Echo to keep talking with him. Join a waitlist."
   },
   "ui": {
     "skip": "Skip to content",
@@ -13,7 +13,7 @@
     "nav": {
       "life": "Life",
       "book": "The book",
-      "clone": "My clone",
+      "clone": "The Echo",
       "contact": "Contact"
     },
     "theme": {
@@ -60,8 +60,10 @@
       "lit": "{n} memories light up: {names}",
       "all": "All related ({n})",
       "fewer": "Fewer",
+      "continues": "↓ more",
+      "fresh": "New",
       "nudgebook": "Hear about the book →",
-      "nudgeclone": "Hear about my clone →",
+      "nudgeclone": "Hear about the Echo →",
       "nudgeclose": "Close",
       "periodstart": "Start with {title}",
       "with": "With",
@@ -71,6 +73,7 @@
     },
     "count": {
       "memories": "{n} memories",
+      "over": "Over {n} memories",
       "people": "{n} people",
       "places": "{n} places"
     },
@@ -80,7 +83,7 @@
       "cloud": "A cloud is a memory; the bigger it is, the more it changed",
       "galaxy": "A dotted circle is one age of my life, cut at {ages}; time runs from its core to its rim",
       "line": "A line joins related memories",
-      "ring": "A hollow ring is still ahead: the book and my clone",
+      "ring": "A hollow ring is still ahead: the book and the Echo",
       "today": "Today",
       "dust": "The fine dust is the days, thicker where more happened",
       "keys": "/ find · ? this guide · H only the sky · Esc back"
@@ -99,10 +102,10 @@
   "hero": {
     "kicker": "javi · 1980 – today",
     "title": "A life, <em>in milestones.</em>",
-    "lede": "I'm Javi. This is my life from 1980 to today: a cloud of dots per memory, a galaxy per age. Explore it as you like. Ahead: a book for my children, and my clone, for those who want to keep talking with me.",
+    "lede": "I'm Javi. This is my life from 1980 to today: a cloud of dots per memory, a galaxy per age. Explore it as you like. Ahead: a book for my children, and the Echo, my voice for those who want to keep talking with me.",
     "primary": "Join the book's waitlist",
     "secondary": "Travel through it",
-    "clone": "About my clone →",
+    "clone": "About the Echo →",
     "region": "Join the book's waitlist"
   },
   "ages": {
@@ -143,6 +146,7 @@
     }
   },
   "book": {
+    "hint": "Everything I learned, written down for my children. Not out yet.",
     "kicker": "07 / The book",
     "expected": "Aiming for",
     "title": "A book <em>for my children.</em>",
@@ -158,21 +162,22 @@
     }
   },
   "clone": {
+    "hint": "My answers, in my own words, for when I can't give them. Not ready yet.",
     "disclosure": "It is a program built from what I wrote; it is not me.",
-    "kicker": "08 / My clone",
+    "kicker": "08 / The Echo",
     "ask": {
-      "label": "Questions for my clone",
+      "label": "Questions for the Echo",
       "title": "Ask, and see what it would draw on",
       "draws": "Draws on:"
     },
     "title": "A place to <em>keep talking.</em>",
-    "body": "I'm building my clone, a version of me for whoever wants to keep talking with me when I'm no longer here, especially those who knew me. It isn't ready yet.",
+    "body": "I'm building the Echo, a version of me for whoever wants to keep talking with me when I'm no longer here, especially those who knew me. It isn't ready yet.",
     "form": {
       "label": "Your email",
       "placeholder": "you@example.com",
       "button": "Tell me when it's ready",
-      "region": "Waitlist for my clone",
-      "note": "I'll only write to you about my clone. Unsubscribe anytime.",
+      "region": "Waitlist for the Echo",
+      "note": "I'll only write to you about the Echo. Unsubscribe anytime.",
       "opened": "Buttondown opened in a new tab to finish your signup.",
       "soon": "The waitlist isn't open yet."
     }
@@ -187,7 +192,8 @@
   "notFound": {
     "title": "Not found · Javi",
     "heading": "This page isn't in the sky.",
-    "body": "The page you wanted doesn't exist, or it moved.",
-    "home": "Back to the sky"
+    "home": "Back to the sky",
+    "star": "Press the first star, April 1980, and the life starts again.",
+    "starLabel": "The first star: back to the start of the sky"
   }
 }

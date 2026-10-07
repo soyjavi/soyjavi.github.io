@@ -18,6 +18,7 @@ export const TONES = {
   soften: 2200,
   floor: 30,
   fade: 9,
+  change: 3,
   chordFrom: 24,
   chordTo: 38,
   detune: 4,
@@ -89,6 +90,10 @@ export function chordAfter(index, roll) {
   const others = CHORDS.map((_, k) => k).filter((k) => k !== index);
   return others[Math.min(others.length - 1, Math.floor(clamp01(roll) * others.length))];
 }
+
+export const chordOfAge = (age) => (age < 0 ? 0 : age % CHORDS.length);
+
+export const nextChord = (hold, index, roll) => (hold === null ? chordAfter(index, roll) : chordOfAge(hold));
 
 export const spanOf = (roll) => TONES.chordFrom + clamp01(roll) * (TONES.chordTo - TONES.chordFrom);
 

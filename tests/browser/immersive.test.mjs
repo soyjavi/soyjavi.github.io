@@ -2331,7 +2331,7 @@ test("the galaxies turn slowly after the opening, the memory in view follows its
   await auto.close();
 });
 
-test("after a pause nobody touches the sky tours a few memories, a touch ends it where the reader is, and it never starts at a memory or with something open", async () => {
+test("after a pause nobody touches the sky tours the ages one by one, a touch ends it where the reader is, and it never starts at a memory or with something open", async () => {
   const { page, errors, close } = await open("/");
   await immersive(page);
   await page.waitForTimeout(1500);
@@ -2347,7 +2347,8 @@ test("after a pause nobody touches the sky tours a few memories, a touch ends it
     if (label !== "javi") names.add(label);
   }
   assert.ok(names.size >= 2, `the tour opened ${[...names].join(" | ")}`);
-  assert.ok([...names].every((label) => /^0\d \//.test(label)), "memories, one after another");
+  assert.ok([...names].every((label) => /^0\d \//.test(label)), "ages, one after another");
+  assert.equal(await page.locator('.card[data-kind="period"]').count(), 1, "each stop is an age with its card");
   assert.equal(await page.evaluate(() => location.hash), "", "the address is left alone");
   await page.mouse.move(600, 300);
   await page.mouse.down();
@@ -2854,4 +2855,151 @@ test("a memory whose relations are all shown has no expander and keeps every chi
   const lists = await page.locator(".card .facets").evaluateAll((nodes) => nodes.filter((node) => getComputedStyle(node).display !== "none").length);
   assert.equal(lists, await page.locator(".card .facets").count(), "no chip row is hidden");
   await close();
+});
+
+test("the wordmark is centred on the line of the sections, 38 px tall, and keeps its place beside the controls on a phone", async () => {
+  for (const [width, height] of [[1280, 800], [1920, 1080]]) {
+    const { page, close } = await open("/", { viewport: { width, height } });
+    await immersive(page);
+    const found = await page.evaluate(() => {
+      const svg = document.querySelector(".brand svg").getBoundingClientRect();
+      const range = document.createRange();
+      range.selectNodeContents(document.querySelector(".masthead nav a"));
+      const text = range.getBoundingClientRect();
+      return { height: svg.height, drift: Math.abs(svg.top + svg.height / 2 - (text.top + text.height / 2)) };
+    });
+    assert.equal(Math.round(found.height), 38, `${width}: the wordmark is 38 px`);
+    assert.ok(found.drift <= 1.5, `${width}: ${found.drift} px off the centre of the sections`);
+    await close();
+  }
+  const phone = await open("/", PHONE);
+  await immersive(phone.page);
+  const small = await phone.page.evaluate(() => document.querySelector(".brand svg").getBoundingClientRect().height);
+  assert.equal(Math.round(small), 24, "the phone keeps its 24 px wordmark");
+  await phone.close();
+});
+
+test("a related memory whose cloud is in view is named once, never also as a marker at the edge", async () => {
+  const { page, close } = await open("/#m-tapquo", PHONE);
+  await immersive(page);
+  await settled(page);
+  await page.waitForTimeout(2500);
+  const twice = await page.evaluate(() => {
+    const tagged = [...document.querySelectorAll(".tag")].filter((tag) => tag.dataset.on === "1").map((tag) => tag.querySelector("span").textContent);
+    const marked = [...document.querySelectorAll(".edge-mark:not([hidden])")].map((mark) => mark.textContent);
+    return marked.filter((text) => tagged.some((title) => text.includes(title)));
+  });
+  assert.deepEqual(twice, []);
+  await close();
+});
+
+test("with the book or the Echo open the labels of the galaxies step aside", async () => {
+  for (const id of ["book", "clone"]) {
+    const { page, close } = await open(`/#${id}`);
+    await immersive(page);
+    await settled(page);
+    await page.waitForTimeout(2500);
+    const shown = await page.evaluate(() => [...document.querySelectorAll(".galaxy")].filter((node) => Number(node.style.opacity) > 0.05).length);
+    assert.equal(shown, 0, `${id}: no age label floats beside the ring`);
+    await close();
+  }
+});
+
+test("a galaxy's count under a filter sits beside its name, not alone on a line", async () => {
+  const { page, close } = await open("/#m-running");
+  await immersive(page);
+  await page.locator(".card .chip").first().click();
+  await page.waitForTimeout(1500);
+  const order = await page.evaluate(() => [...document.querySelector(".galaxy").children].map((node) => node.className || "name"));
+  assert.deepEqual(order.slice(0, 3), ["galaxy-title", "galaxy-count", "galaxy-years"]);
+  await close();
+});
+
+test("the finder also finds a memory by the words of the other language", async () => {
+  const { page, close } = await open("/");
+  await immersive(page);
+  await page.locator("[data-find]").click();
+  await page.keyboard.type("hermano");
+  await page.waitForTimeout(500);
+  assert.ok((await page.locator(".finder .results .peer").count()) > 0, "hermano finds the memories of my brother on the English page");
+  await close();
+});
+
+test("pointing at a hollow ring, or at its section in the header, lights it and says in one line what it is", async () => {
+  const { page, close } = await open("/");
+  await immersive(page);
+  await settled(page);
+  await page.waitForTimeout(3000);
+  const book = page.locator(".ahead", { hasText: content.dict.en.ui.nav.book });
+  assert.equal(await book.getAttribute("data-hot"), null, "quiet until pointed at");
+  const at = await book.evaluate((node) => [Number(node.style.getPropertyValue("--cx")), Number(node.style.getPropertyValue("--cy"))]);
+  await page.mouse.move(at[0], at[1]);
+  await page.waitForFunction(() => [...document.querySelectorAll(".ahead")].some((node) => node.dataset.hot === "1"), null, { timeout: 5000 });
+  assert.equal(await book.getAttribute("data-hot"), "1");
+  assert.equal(await book.locator(".ahead-hint").textContent(), content.dict.en.book.hint);
+  await page.mouse.move(20, 400);
+  await page.waitForFunction(() => ![...document.querySelectorAll(".ahead")].some((node) => node.dataset.hot === "1"), null, { timeout: 5000 });
+  await page.locator('.masthead nav a[data-go="clone"]').hover();
+  const echo = page.locator(".ahead", { hasText: content.dict.en.ui.nav.clone });
+  assert.equal(await echo.getAttribute("data-hot"), "1", "the header's section lights its ring too");
+  assert.equal(await echo.locator(".ahead-hint").textContent(), content.dict.en.clone.hint);
+  await close();
+});
+
+test("with a memory open its related memories are named only when their row or their cloud is pointed at", async () => {
+  const { page, close } = await open("/#m-tapquo");
+  await immersive(page);
+  await settled(page);
+  await page.waitForTimeout(2000);
+  const named = () => page.evaluate(() => [...document.querySelectorAll(".tag")].filter((tag) => tag.dataset.on === "1").map((tag) => tag.querySelector("span").textContent));
+  const self = content.dict.en.life.tapquo.title;
+  assert.deepEqual((await named()).filter((title) => title !== self), [], "only the memory in view is named");
+  const row = page.locator(".card .related .peer").first();
+  const title = await row.locator("span").textContent();
+  await row.hover();
+  await page.waitForTimeout(1500);
+  assert.ok((await named()).includes(title), "pointing at its row names it in the sky");
+  await close();
+});
+
+test("under a filter no marker at the edge sends arrows across the sky", async () => {
+  const { page, close } = await open("/#m-running");
+  await immersive(page);
+  await page.locator(".card .chip").first().click();
+  await page.waitForTimeout(2500);
+  assert.equal(await page.locator(".edge-mark:not([hidden])").count(), 0);
+  await close();
+});
+
+test("on a phone the whole-life view names each age by its number, and the age in view keeps its name", async () => {
+  const { page, close } = await open("/", PHONE);
+  await immersive(page);
+  await settled(page);
+  await page.waitForTimeout(2500);
+  const labels = await page.evaluate(() => [...document.querySelectorAll(".galaxy")].filter((node) => Number(node.style.opacity) > 0.2).map((node) => node.innerText.trim()));
+  assert.ok(labels.length >= 3);
+  for (const label of labels) assert.match(label, /^\d\d$/, `${label} is a number`);
+  await goTo(page, `period-${content.life.periods[0]}`);
+  await page.waitForTimeout(2500);
+  const pinned = await page.locator('.galaxy[data-pin="1"]').innerText();
+  assert.match(pinned, /^01 \/ /, "the age in view keeps number and name");
+  await close();
+});
+
+test("a card with more than it shows fades at its foot and says so, and stops saying it at the end", async () => {
+  const { page, close } = await open("/#m-tapquo", { viewport: { width: 1280, height: 640 } });
+  await immersive(page);
+  await page.waitForTimeout(2500);
+  assert.equal(await page.locator(".card").getAttribute("data-overflow"), "1");
+  assert.equal(await page.locator(".card .more-cue").isVisible(), true);
+  assert.equal(await page.locator(".card .more-cue").textContent(), content.dict.en.ui.explore.continues);
+  await page.locator(".card .card-body").evaluate((node) => (node.scrollTop = node.scrollHeight));
+  await page.waitForTimeout(300);
+  assert.equal(await page.locator(".card").getAttribute("data-overflow"), "");
+  await close();
+  const tall = await open("/#m-arca", { viewport: { width: 1280, height: 1000 } });
+  await immersive(tall.page);
+  await tall.page.waitForTimeout(2500);
+  assert.notEqual(await tall.page.locator(".card").getAttribute("data-overflow"), "1", "nothing when everything fits");
+  await tall.close();
 });

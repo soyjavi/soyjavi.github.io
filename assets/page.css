@@ -21,3 +21,78 @@
     padding-top: 120px;
   }
 }
+
+.lost .sky-404 {
+  min-height: 100vh;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 28px;
+  padding: 120px var(--gutter) 64px;
+  text-align: center;
+}
+
+.lost .sky-404 section {
+  display: grid;
+  gap: 14px;
+  justify-items: center;
+  max-width: 34rem;
+}
+
+.lost .sky-404 .other {
+  margin-top: 28px;
+  color: var(--muted);
+}
+
+.lost .sky-404 .other p {
+  color: var(--muted);
+}
+
+.first-star {
+  display: block;
+  width: 120px;
+  height: 120px;
+  color: var(--fg);
+}
+
+.first-star svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.first-star .core {
+  fill: currentColor;
+}
+
+.first-star .glow {
+  fill: currentColor;
+  opacity: 0.12;
+}
+
+.first-star .halo {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+  opacity: 0.35;
+  transform-origin: 60px 60px;
+  animation: breathe 5s ease-in-out infinite;
+}
+
+.first-star:hover .halo,
+.first-star:focus-visible .halo {
+  opacity: 0.8;
+}
+
+@keyframes breathe {
+  50% {
+    transform: scale(1.12);
+    opacity: 0.15;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .first-star .halo {
+    animation: none;
+  }
+}

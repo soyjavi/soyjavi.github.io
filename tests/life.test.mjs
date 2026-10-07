@@ -719,3 +719,19 @@ test("zoomed into an age the galaxies turn slower than in the whole-life view", 
   const scene = readFileSync(new URL("../assets/js/scene.js", import.meta.url), "utf8");
   assert.match(scene, /state\.turned \+= dt \* lerp\(SPIN\.near, 1, far\);/);
 });
+
+test("on paper the clouds are an ink wash: less ink per dot and a softer edge, and night is untouched", async () => {
+  const { PAPER, DUST_FRAGMENT } = await import("../assets/js/shaders.js");
+  assert.ok(PAPER.ink > 0.3 && PAPER.ink < 0.6, "much less ink than the light of night, never invisible");
+  assert.ok(PAPER.edge < 0.3, "a softer edge than night's");
+  assert.match(DUST_FRAGMENT, /vAlpha \* mix\(1\.0, PAPER_INK, uPaper\)/);
+  const scene = readFileSync(new URL("../assets/js/scene.js", import.meta.url), "utf8");
+  assert.match(scene, /dustUniforms\.uPaper\.value = night \? 0 : 1;/);
+});
+
+test("a new memory breathes brighter in the sky", () => {
+  const scene = readFileSync(new URL("../assets/js/scene.js", import.meta.url), "utf8");
+  assert.match(scene, /for \(const i of fresh\) levelNow\[i\] = levelGoal\[i\] \* \(1 \+ FRESH_GLOW \*/);
+  const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
+  assert.match(engine, /scene\.setFresh\(freshMarks\);/);
+});

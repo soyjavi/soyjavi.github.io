@@ -3,7 +3,7 @@
   "locale": "es_ES",
   "meta": {
     "title": "Javi · Una vida en hitos",
-    "description": "La vida de Javi de 1980 a hoy como un cielo de recuerdos, un libro para sus hijos y un clon para seguir hablando con él. Apúntate a una lista de espera."
+    "description": "La vida de Javi de 1980 a hoy como un cielo de recuerdos, un libro para sus hijos y el Eco para seguir hablando con él. Apúntate a una lista de espera."
   },
   "ui": {
     "skip": "Saltar al contenido",
@@ -13,7 +13,7 @@
     "nav": {
       "life": "Vida",
       "book": "El libro",
-      "clone": "Mi clon",
+      "clone": "El Eco",
       "contact": "Contacto"
     },
     "theme": {
@@ -60,8 +60,10 @@
       "lit": "Se iluminan {n} recuerdos: {names}",
       "all": "Todos los relacionados ({n})",
       "fewer": "Menos",
+      "continues": "↓ más",
+      "fresh": "Nuevo",
       "nudgebook": "Entérate del libro →",
-      "nudgeclone": "Entérate de mi clon →",
+      "nudgeclone": "Entérate del Eco →",
       "nudgeclose": "Cerrar",
       "periodstart": "Empieza por {title}",
       "with": "Con",
@@ -71,6 +73,7 @@
     },
     "count": {
       "memories": "{n} recuerdos",
+      "over": "Más de {n} recuerdos",
       "people": "{n} personas",
       "places": "{n} lugares"
     },
@@ -80,7 +83,7 @@
       "cloud": "Una nube es un recuerdo; cuanto más grande, más cambió",
       "galaxy": "Un círculo de puntos es una edad de mi vida, cortada a los {ages} años; el tiempo va del núcleo al borde",
       "line": "Una línea une recuerdos relacionados",
-      "ring": "Un anillo hueco está por llegar: el libro y mi clon",
+      "ring": "Un anillo hueco está por llegar: el libro y el Eco",
       "today": "Hoy",
       "dust": "El polvo fino son los días, más denso donde pasó más",
       "keys": "/ buscar · ? esta guía · H solo el cielo · Esc volver"
@@ -99,10 +102,10 @@
   "hero": {
     "kicker": "javi · 1980 – hoy",
     "title": "Una vida, <em>en hitos.</em>",
-    "lede": "Soy Javi. Esta es mi vida de 1980 a hoy: una nube de puntos por cada recuerdo y una galaxia por cada edad. Recórrela como quieras. Lo que viene: un libro para mis hijos y mi clon, para quien quiera seguir hablando conmigo.",
+    "lede": "Soy Javi. Esta es mi vida de 1980 a hoy: una nube de puntos por cada recuerdo y una galaxia por cada edad. Recórrela como quieras. Lo que viene: un libro para mis hijos y el Eco, mi voz para quien quiera seguir hablando conmigo.",
     "primary": "Apúntate a la lista del libro",
     "secondary": "Recórrelo",
-    "clone": "Sobre mi clon →",
+    "clone": "Sobre el Eco →",
     "region": "Apúntate a la lista del libro"
   },
   "ages": {
@@ -143,6 +146,7 @@
     }
   },
   "book": {
+    "hint": "Todo lo que aprendí, escrito para mis hijos. Aún no ha salido.",
     "kicker": "07 / El libro",
     "expected": "Apunto a",
     "title": "Un libro <em>para mis hijos.</em>",
@@ -158,21 +162,22 @@
     }
   },
   "clone": {
+    "hint": "Mis respuestas, con mis palabras, para cuando yo no pueda darlas. Aún no está listo.",
     "disclosure": "Es un programa hecho a partir de lo que escribí; no soy yo.",
-    "kicker": "08 / Mi clon",
+    "kicker": "08 / El Eco",
     "ask": {
-      "label": "Preguntas para mi clon",
+      "label": "Preguntas para el Eco",
       "title": "Pregunta y mira de qué bebería",
       "draws": "Se apoya en:"
     },
     "title": "Un sitio donde <em>seguir hablando.</em>",
-    "body": "Estoy construyendo mi clon, una versión de mí para quien quiera seguir hablando conmigo cuando ya no esté, sobre todo quienes me conocieron. Todavía no está listo.",
+    "body": "Estoy construyendo el Eco, una versión de mí para quien quiera seguir hablando conmigo cuando ya no esté, sobre todo quienes me conocieron. Todavía no está listo.",
     "form": {
       "label": "Tu email",
       "placeholder": "tu@ejemplo.com",
       "button": "Avísame cuando esté listo",
-      "region": "Lista de espera de mi clon",
-      "note": "Solo te escribiré sobre mi clon. Puedes darte de baja cuando quieras.",
+      "region": "Lista de espera del Eco",
+      "note": "Solo te escribiré sobre el Eco. Puedes darte de baja cuando quieras.",
       "opened": "Se ha abierto Buttondown en una pestaña nueva para terminar tu suscripción.",
       "soon": "La lista de espera aún no está abierta."
     }
@@ -187,7 +192,8 @@
   "notFound": {
     "title": "No encontrada · Javi",
     "heading": "Esta página no está en el cielo.",
-    "body": "La página que buscas no existe o ha cambiado de sitio.",
-    "home": "Volver al cielo"
+    "home": "Volver al cielo",
+    "star": "Pulsa la primera estrella, abril de 1980, y la vida empieza otra vez.",
+    "starLabel": "La primera estrella: volver al principio del cielo"
   }
 }

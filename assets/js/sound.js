@@ -1,4 +1,4 @@
-import { TONES, chordAfter, chordOf, crowdOf, impulseOf, lengthOf, noiseOf, noteOf, peakOf, spanOf, swellOf, tickDue } from "./tones.js";
+import { TONES, chordOf, chordOfAge, nextChord, crowdOf, impulseOf, lengthOf, noiseOf, noteOf, peakOf, spanOf, swellOf, tickDue } from "./tones.js";
 
 const BELL = [[1, 1, 1], [2, 0.22, 0.5], [3, 0.08, 0.3], [4.07, 0.03, 0.2]];
 const SWELL = [[1, 1, 1], [1.5, 0.25, 1.2]];
@@ -6,7 +6,7 @@ const HOVER = [[1, 1, 1]];
 
 export function createGraph(context, random = Math.random) {
   const rate = context.sampleRate;
-  const state = { at: context.currentTime + 0.05, chord: 0, lastNote: -Infinity, lastTick: -Infinity, period: -1, year: 0, voices: [] };
+  const state = { at: context.currentTime + 0.05, chord: 0, lastNote: -Infinity, lastTick: -Infinity, period: -1, year: 0, voices: [], layers: [], hold: null };
 
   const gain = (value = 0) => {
     const node = context.createGain();
@@ -97,17 +97,30 @@ export function createGraph(context, random = Math.random) {
 
   const sweepOf = (nodes) => () => nodes.forEach((node) => node.disconnect());
 
-  const chordAt = (index, start, span) => {
+  const chordAt = (index, start, span, rise = TONES.fade) => {
     const { sub, pad, shimmer } = chordOf(index);
     const end = start + span + TONES.fade;
+    state.layers = state.layers.filter((layer) => layer.end > context.currentTime);
+    const buses = new Map();
+    const busOf = (output) => {
+      if (!buses.has(output)) {
+        const bus = gain(1);
+        bus.connect(output);
+        buses.set(output, bus);
+      }
+      return buses.get(output);
+    };
+    const chord = { buses, oscillators: [], end };
+    state.layers.push(chord);
     const layer = (oscillator, level, output) => {
       const envelope = gain(0);
+      chord.oscillators.push(oscillator);
       envelope.gain.setValueAtTime(0, start);
-      envelope.gain.linearRampToValueAtTime(level, start + TONES.fade);
+      envelope.gain.linearRampToValueAtTime(level, start + rise);
       envelope.gain.setValueAtTime(level, end - TONES.fade);
       envelope.gain.linearRampToValueAtTime(0, end);
       oscillator.connect(envelope);
-      envelope.connect(output);
+      envelope.connect(busOf(output));
       oscillator.start(start);
       oscillator.stop(end + 0.1);
       oscillator.onended = sweepOf([oscillator, envelope]);
@@ -180,8 +193,29 @@ export function createGraph(context, random = Math.random) {
         const span = spanOf(random());
         chordAt(state.chord, state.at, span);
         state.at += span;
-        state.chord = chordAfter(state.chord, random());
+        state.chord = nextChord(state.hold, state.chord, random());
       }
+    },
+    age(age) {
+      const hold = age < 0 ? null : age;
+      if (hold === state.hold) return;
+      state.hold = hold;
+      const now = context.currentTime;
+      state.layers.forEach(({ buses, oscillators, end }) => {
+        if (end <= now) return;
+        buses.forEach((bus) => bus.gain.setTargetAtTime(0, now, TONES.change / 3));
+        oscillators.forEach((oscillator) => {
+          try {
+            oscillator.stop(now + TONES.change * 2);
+          } catch {}
+        });
+      });
+      state.layers = [];
+      state.chord = chordOfAge(age);
+      const span = spanOf(random());
+      chordAt(state.chord, now, span, TONES.change);
+      state.at = now + span;
+      state.chord = nextChord(state.hold, state.chord, random());
     },
     fade(on) {
       const now = context.currentTime;
@@ -213,8 +247,8 @@ export function createGraph(context, random = Math.random) {
 
 export function createSound() {
   const Context = globalThis.AudioContext ?? globalThis.webkitAudioContext;
-  const state = { context: null, graph: null, on: true, timer: 0, stopTimer: 0 };
-  if (!Context) return { supported: false, toggle: () => false, start: () => false, running: () => false, isOn: () => false, memory() {}, swell() {}, tick() {}, travel() {}, pause() {}, close() {} };
+  const state = { context: null, graph: null, on: true, timer: 0, stopTimer: 0, age: -1 };
+  if (!Context) return { supported: false, toggle: () => false, start: () => false, running: () => false, isOn: () => false, memory() {}, age() {}, swell() {}, tick() {}, travel() {}, pause() {}, close() {} };
 
   const ready = () => state.on && state.graph;
   const begin = () => {
@@ -227,6 +261,7 @@ export function createSound() {
     clearInterval(state.timer);
     graph.fade(true);
     context.resume?.();
+    graph.age(state.age);
     graph.run();
     state.timer = setInterval(() => graph.run(), TONES.interval);
   };
@@ -259,6 +294,10 @@ export function createSound() {
     },
     swell(kind) {
       if (ready()) state.graph.swell(kind);
+    },
+    age(age) {
+      state.age = age;
+      if (ready()) state.graph.age(age);
     },
     tick() {
       if (ready()) state.graph.tick();

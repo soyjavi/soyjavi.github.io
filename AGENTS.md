@@ -90,7 +90,7 @@ Rules of the loop:
 Every sentence on the site and in the documents follows the twelve rules in the voice section of `design/index.html`,
 and `tests/voice.test.mjs` enforces the mechanical ones. The four that were broken before:
 
-- The offer is "my clone" / "mi clon" on the site and "the clone" in documents; the words the test bans never appear
+- The offer is "The Echo" / "El Eco" on the site and "the clone" in documents; the words the test bans never appear
   anywhere, tests aside, and the list lives only in the test.
 - No promise of time or of ability: say the state ("isn't open yet"), what it is for, and that it is not ready.
 - The site is "I" and the reader "you" / "tú"; one word per thing (memory, cloud, galaxy, stage, thread, hollow ring).

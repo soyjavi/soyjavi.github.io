@@ -22,7 +22,7 @@ field of stars.
 | URL | Page |
 | --- | --- |
 | `/`, `/es/` | Home in English and in Spanish |
-| `/404.html` | Not found, in both languages, `noindex` |
+| `/404.html` | Not found, `noindex`: one star on the sky, the first memory (April 1980), that leads back to the start; the line in English and, small, in Spanish; no script of its own |
 | `/sitemap.xml`, `/robots.txt` | Every page with its `hreflang` alternates |
 | `/design/`, `/design/proposals.html` | The brand and the design proposals, `noindex`, not linked from the site |
 
@@ -62,7 +62,7 @@ The home pages declare `rel=canonical`, `hreflang` for `en`, `es` and `x-default
   chips and the finder offers them as filters.
 - `content/<lang>.json`: every other sentence, keyed by section; the copy of an age is `ages.<id>.{name, title, intro}`, from which `periods.<id>.{kicker, title, intro}` is built (the kicker numbers the age and gives the years of its first and last memory)
   and the kicker carries the number and the years (`01 / Early years · 1980–1987`); the names of the threads are
-  `threads.<id>`; the controls are `ui.explore.*` and the counts `ui.count.*`. The hero counts memories, people and places, never threads; `life.json` may carry `totals` (`memories`, `people`, `places`) with everything he holds, open and closed, and the hero shows the larger of the total and what the site draws, while the sky draws open memories only.
+  `threads.<id>`; the controls are `ui.explore.*` and the counts `ui.count.*`. The hero counts memories, people and places, never threads; `life.json` may carry `totals` (`memories`, `people`, `places`) with everything he holds, open and closed, and the hero shows the larger of the total and what the site draws (a memory total above what is drawn is a floor, read as "Over 500 memories" / "Más de 500 recuerdos", `ui.count.over`), while the sky draws open memories only.
 - `npm run import -- <file>` (`tools/import.mjs`) merges an archive, `{ "threads": [...], "ahead": {...},
   "memories": [...], "people": {...}, "places": {...} }` (every block optional; the schema is `tools/archive.schema.json` and a
   template `tools/archive.example.json`) or a bare list of memories, into these files; `threads` replace the
@@ -183,7 +183,7 @@ its memory at its own very slow pace (`CLOUD`: at most 0.07 rad/s) and breathes 
 from a one-row float texture with one level per memory (`levels` in `explore.js`: 1 normal; with a memory in view 1 for
 it, 0.85 for its strongest relations (all of them once the card's list is expanded), 0.5 for its weaker ones and 0.3 for the rest; with a filter 0.1 for what is outside it) and eased on the CPU. A
 trail dot's brightness follows the filter and, with a memory in view, a window of years around it. `uReveal` hides
-every dot after a year while the life plays. The centre of a cloud is dimmer than its edge (`CORE`: its dots lose up to 97% of their light at the middle, fading out by 2.6 units from it), so a cloud shows its dots instead of one white patch; the dust between memories gains up to 140% of its light as the camera pulls out (`CORE.dust`, `uFar`), so the structure of each galaxy stays visible from afar. Alpha falls with
+every dot after a year while the life plays. On paper a cloud is an ink wash rather than ink: each dot keeps 42% of its ink and a soft edge to its centre (`PAPER`, `uPaper`), so overlapping dots never add up to a black stain; night is untouched. A memory added in the last weeks (`added`, the month the importer wrote it; new for 45 days from the first of that month, `isFresh`) breathes brighter (`FRESH_GLOW`) and its card says "New" / "Nuevo" beside its date. The centre of a cloud is dimmer than its edge (`CORE`: its dots lose up to 97% of their light at the middle, fading out by 2.6 units from it), so a cloud shows its dots instead of one white patch; the dust between memories gains up to 140% of its light as the camera pulls out (`CORE.dust`, `uFar`), so the structure of each galaxy stays visible from afar. Alpha falls with
 distance and fades when closer than a few units to the camera; trail dots are fainter, ahead dots 30%. Zoomed out, cloud dots are drawn dimmer and larger so the clouds stay soft and do not burn out. The marks are today, its pulse, the two rings and a thin ring
 on the memory in view; `data-ring` on `#scene` carries the ring's position, `data-view` the camera's yaw, pitch and
 distance, `data-links` the number of lines drawn and `data-jumps` the number of jumps a filter draws in the sky, for
@@ -218,6 +218,9 @@ left, between the top bar and the rail; on a phone at the bottom with at most 44
 their text does not fit, the engine drops the introduction, then the counts and the hint and shrinks the title and,
 at level 3, hides the form's note, makes its label visually hidden and tightens the spacing
 (`data-fit` 1, 2 and 3), and measures again on resize and when the fonts load.
+
+- **More below.** The card has a fixed height so Earlier and Later never move; when its content is taller, its foot
+  fades and a small "↓ more" / "↓ más" sits above the steps (`data-overflow`), until the card is scrolled to its end.
 
 ### The backdrop
 
@@ -263,7 +266,7 @@ Two and a half seconds after the last touch, wherever it is (the hero, a memory,
   ignored), a focus on the real document, or Earlier and Later. The address follows the memory in view with
   `history.replaceState`. A `data-go` link to the book or the clone also puts the cursor in its waitlist field.
 - **Pointing.** The nearest cloud within its reach is named and the cursor changes. A drag never opens anything. The
-  book and the clone rings answer the pointer and open their cards like a cloud.
+  book and the clone rings answer the pointer and open their cards like a cloud: pointed at, or with their section of the header pointed at or focused, a ring brightens and grows a little with the easing of a cloud (`RING_GLOW`), its name comes to full ink and one line of the creator's says what it is (`book.hint`, `clone.hint`), placed under the name without moving it.
 - **Controls.** Find, Surprise me and a More button (`aria-expanded`) share the top line with the brand and the sections (left); the
   sheet that More drops down holds Filter, Sound, the guide, the theme and the language at every width (from the top
   right on a laptop, under a header of one row of 56 px on a stacked layout: up to 900 px wide, or portrait). The theme
@@ -271,7 +274,7 @@ Two and a half seconds after the last touch, wherever it is (the hero, a memory,
   flat page, which hides everything else of the controls, still shows them. Escape, a press elsewhere, choosing something or
   tabbing out of the sheet closes it, and the focus goes back to the More button (to the first thread after Filter); a
   filter in force is shown by a dot on More and in its accessible name. The thread legend, the guide and the finder open as
-  panels under that row. In the sections, The book and My clone carry `.cta`: full ink, underlined and a 44 px
+  panels under that row. In the sections, The book and The Echo carry `.cta`: full ink, underlined and a 44 px
   target, because they are what the site offers; no control is drawn inverted unless the visitor pressed it, and Sound
   shows its state by the waves or the slash of its icon, never by a fill.
 - **Relations.** The relations of a memory are its explicit links in both directions and its neighbours in time inside each of
@@ -294,7 +297,7 @@ Two and a half seconds after the last touch, wherever it is (the hero, a memory,
   turns it off instead. The choice is not stored and nothing is fetched. Everything is synthesised (`tones.js` holds the maths, `sound.js`
   the Web Audio, `createGraph(context)` builds it on any context so it can be rendered offline) and it is meant to calm.
   The bed is slow chords in D major without its leading tone, tuned on 432: five open voicings of stacked fifths and
-  fourths (Dmaj9, Gmaj9, Bm, Asus2, Em7), each 24 to 38 s long and melting into a random different next one over 9 s,
+  fourths (Dmaj9, Gmaj9, Bm, Asus2, Em7), each 24 to 38 s long and melting into a random different next one over 9 s in the whole-life view; with an age in view (its age view or one of its memories) the bed holds that age's chord (`chordOfAge`, the age's index in the five) and the old chord fades as the new one rises over three seconds (`TONES.change`), and going back to the whole life starts again from the home chord,
   made of detuned triangle pairs under a low-pass that breathes, a few soft sines an octave above for shimmer, a little
   dark noise for air and a dry sine sub between 36 and 61 Hz. Everything but the sub goes through one generated
   convolution reverb (stereo, five seconds, darkened). The master chain is a 2.2 kHz low-pass, a 30 Hz high-pass and a
@@ -322,8 +325,8 @@ Two and a half seconds after the last touch, wherever it is (the hero, a memory,
   the shader, and in the same turn the constellation lines, the clouds' positions for labels, rings and links, and the
   minimap (`data-spin` carries the first galaxy's angle). After 20 s without a pointer move of more than 6 px, a press,
   a key, the wheel or a touch, and only on the opening shot with nothing open (no finder, sheet, guide, filter, play or
-  focus, nor with the focus on a control, the header or the rail, nor the pointer over the card), a tour opens up to five
-  memories (the heaviest of spread periods) for six seconds each, without touching the address and without anything
+  focus, nor with the focus on a control, the header or the rail, nor the pointer over the card), a tour visits every age
+  in order, each in its age view with its card (number, title and intro), and then the book and the clone, six seconds each, without touching the address and without anything
   announced to a screen reader, then returns to the whole life (`tourPlan`, `tourTick`). It runs once per visit: any
   interaction ends it where the reader is, and for good.
 - **Filtering.** A chip in a card, a filter offered by the finder or a thread in the legend dims everything outside it;
@@ -333,8 +336,8 @@ Two and a half seconds after the last touch, wherever it is (the hero, a memory,
   along the filter while it is on.
 - **Finding.** `/` or the Find button opens the finder. Empty, it is an index of every memory grouped by period. With
   words, it first offers up to three threads, people or places whose name matches, each with its number of memories, to
-  filter by (`filtersFor`), then up to eight memories matched without case or accents against the title, the text, the
-  date and the names of their threads, people and places, the best title first. The finder is a wide palette, 640 px
+  filter by (`filtersFor`), then up to eight memories matched without case or accents against the title, the text (both paragraphs), the
+  date, the names of their threads, people and places, and the words of the same memory in the other language (`data-alt` on each memory, so «hermano» finds my brother on the English page), the best title first. The finder is a wide palette, 640 px
   (full width on a phone), of one-line rows beside a preview of the highlighted memory (its date, title and first
   sentence); the arrows move the highlight, which rings that memory in the scene, Enter opens it and Escape closes it.
   It opens above the card, never over the controls.
@@ -355,15 +358,17 @@ heaviest, and only once the camera is in a galaxy). They are placed greedily
 (`tagSpots`, `pickSpot`): first on the right, left, below or above the cloud, then at its four corners, then in up to
 three rings further out, taking the first place that touches no other cloud's disc, no other label, no date or galaxy
 label, no edge marker, not the card, the controls, the minimap, the rail or the edge, and otherwise the first that only
-touches clouds. A tag that had to move out to a ring is joined to its cloud by a hairline that starts at the tag and
-stops at the cloud's edge (`leaderOf`). At most 24 are shown (14 while the whole life is in view, 8 on a phone); the
-memory in view and the one pointed at are always named. In the whole-life view, with nothing open and no filter, the
+touches clouds. A name that cannot sit beside its cloud is not shown (only the one pointed at may stand off, joined by a hairline,
+`leaderOf`). At most 24 are shown (14 while the whole life is in view, 8 on a phone); the
+memory in view and the one pointed at are always named. With a memory open its related memories are not named in the
+sky: their lines and the card's list say them, and pointing at a row or at a cloud names that one and lights its row
+(`data-lit`), as in the age view. In the whole-life view, with nothing open and no filter, the
 age's hint (see below) is written in italics under the galaxy's label, so a name never sits on the label (`.galaxy-hint`; hidden with a memory open and with a filter). A tag fades in over most of a second, rising a few pixels out of a blur, and the one in
 view or pointed at floats gently. In the whole-life view, pointing at a memory keeps that view's style: the same italic name, without its date, at the same size and brighter. An age's name stands outside its galaxy with its near edge at the point, so it never sits on the clouds. Pointing at a memory is eased, never a jump: its cloud draws in about 10% and glows (`HOVER`, quicker in than out), its name comes up out of a soft blur over 1.6 s and glides from where it stood (a tag that has to change side glides there too, never jumps), and on release it lingers for 1.4 s; nothing is quick. Tags publish the screen position of their cloud as `--cx` and `--cy`.
 
-Every label speaks in two tiers. Every memory name is the same italic serif at 15 px (16 on a phone), and the open or pointed one only brightens to full ink; it never changes size. A name that cannot sit beside its cloud is not shown, and no hairline joins a name to its cloud. The edge markers are serif at 14 px on a phone and 15 px otherwise; the anchors (a galaxy's name, the year
+Every label speaks in two tiers. Every memory name is the same italic serif at 15 px (16 on a phone), and the open or pointed one only brightens to full ink; it never changes size. A name that cannot sit beside its cloud is not shown; only the one pointed at may stand off, joined by a hairline. The edge markers are serif at 14 px on a phone and 15 px otherwise; the anchors (a galaxy's name, the year
 rings, today and the countdown) are small mono capitals at 10 px in the muted ink, never brighter than the relations; the date of a year ring is the quietest of them, at 40% of that ink, except the year of the memory in view, at 90% (`YEAR_LABEL`), so the ring that matters is found without reading the others.
-Each galaxy is named by its period's kicker beside the visible mass of the galaxy (only the number and name on a phone, where the hint shows only under the label of the age in view), with the age's hint under it; the hints are decorative, like the labels, and the cards and the flat page say the same in words. The hint is `ages.<id>.hint` when the creator has written one, and otherwise the two threads that mark the age most against the rest of the life (`distinctive`: the share of the thread among the memories of the age over its share in the whole life, with at least two memories), as "Marked by body and family" (`ui.explore.mostly`); it is data, never an invented summary, and `data-hint` on the period section carries it. Among sixty-four places (sixteen directions at four distances from the galaxy's visible mass; the one it holds is kept while it crowds nothing) it takes the one that touches no card, control, rail, minimap, edge marker or other label and crowds the least: a galaxy's mass counts (its own less), today and the two rings count more, and each step away from the galaxy costs, so it stays beside it unless that is crowded. A label that stands off is joined to its galaxy by a hairline (`data-leader`), and it is kept inside the window; where nothing is free it is hidden. Under 1500 px wide the years go on their own line so the label is narrow. Each label publishes its galaxy's centre and visible radius as `--cx`, `--cy` and `--r`. With a memory open or in an age only that galaxy's label is shown, and it is never hidden: it is the way back to the whole-life view, a little brighter, with the title "Back to the whole life", and it moves to the nearest free place instead. Today
+Each galaxy is named by its period's kicker beside the visible mass of the galaxy (only the number on a phone, `.galaxy-number`; the age in view keeps its number and name, `.galaxy-name`, with its hint), with the age's hint under it; the hints are decorative, like the labels, and the cards and the flat page say the same in words. The hint is `ages.<id>.hint` when the creator has written one, and otherwise the two threads that mark the age most against the rest of the life (`distinctive`: the share of the thread among the memories of the age over its share in the whole life, with at least two memories), as "Marked by body and family" (`ui.explore.mostly`); it is data, never an invented summary, and `data-hint` on the period section carries it. Among sixty-four places (sixteen directions at four distances from the galaxy's visible mass; the one it holds is kept while it crowds nothing) it takes the one that touches no card, control, rail, minimap, edge marker or other label and crowds the least: a galaxy's mass counts (its own less), today and the two rings count more, and each step away from the galaxy costs, so it stays beside it unless that is crowded. A label that stands off is joined to its galaxy by a hairline (`data-leader`), and it is kept inside the window; where nothing is free it is hidden. Under 1500 px wide the years go on their own line so the label is narrow. Each label publishes its galaxy's centre and visible radius as `--cx`, `--cy` and `--r`. With the book or the clone open no galaxy is named (the camera is beside the rings and the ages are off to one side). With a memory open or in an age only that galaxy's label is shown, and it is never hidden: it is the way back to the whole-life view, a little brighter, with the title "Back to the whole life", and it moves to the nearest free place instead. Today
 and the book and the clone are named beside their marks (the nav's own words; the book and the clone in italic serif at 15 px, today as an anchor), at the first
 of sixteen places around the mark that touches nothing, starting a clearance of 8 px beyond the mark's drawn radius
 (`ringClearance`, capped where the shader caps a mark at 140 px across), so the ring never covers the first letters at
@@ -375,7 +380,7 @@ year sits from the core (`yearRings`: the integer years inside the period, every
 spans more than eight), each labelled in mono along one ray, hidden where they would touch the card or the controls and
 absent from the whole-life view and during the gentle first look; `data-rings` on `#scene` carries how many show.
 
-**Edge markers.** The free area is the window minus the card, the controls and the rail, and no line reaches further than
+**Edge markers.** None is drawn while a filter is on: the jumps and the counts beside each galaxy say where the thread goes. A related memory whose cloud is on screen and not under the card gets no marker: its line already leads to it, and pointing at it names it. The free area is the window minus the card, the controls and the rail, and no line reaches further than
 half the window's shorter side from the memory in view. A line from the memory in view to one of its strong relations
 that leaves that area ends where it does, when its marker fits (a line whose marker does not fit stays whole)
 (`edgeExit`, sampled along the same arc the scene draws), in a small arrow and a label with the memory's title and date
@@ -499,7 +504,7 @@ Hooks that do not change: `.hud` (the label of where you are), `#card`, `.card-c
   first, the legend behind Filter) and the counts, the rail's structure and its play button, `lang.js` and `theme.js` in a sandbox, the two Buttondown forms and the sitemap.
 - `voice.test.mjs`: the voice rules that can be checked: the words banned for the offer (the list lives only there) in the
   content, the sources, the documents and the built pages; no time promise and no exclamation in the copy; Spanish with no
-  *usted*, *ratón*, *Saluda* or *anillo vacío*, « » in Spanish and “ ” in English; the offer named *my clone* / *mi clon*.
+  *usted*, *ratón*, *Saluda* or *anillo vacío*, « » in Spanish and “ ” in English; the offer named *The Echo* / *El Eco*.
 - `design.test.mjs`: the brand page against `brand.css` (twelve neutral tokens, true contrast ratios, no stray colour in
   any stylesheet), the stations table, the interface controls and the sky numbers and figure against the home page and the code, the
   proposal boards against the ROADMAP, the absence of a blog, the outlined brand files and the type scale (every size and

@@ -333,10 +333,9 @@ test("the quality steps down one tier when the frames are slow and never past th
   assert.equal(averageMs([]), 0);
 });
 
-test("the tour waits for a pause, opens a few memories one after another, stops at the first touch and goes back to the whole life when it ends", () => {
+test("the tour waits for a pause, visits each age and then the book and the Echo, stops at the first touch and goes back to the whole life when it ends", () => {
   const plan = tourPlan(layout(life.milestones, { threads: life.threads }, { periods: life.periods }));
-  assert.ok(plan.length >= 2 && plan.length <= 5, `${plan.length} stops`);
-  assert.equal(new Set(plan).size, plan.length);
+  assert.deepEqual(plan, [...life.periods.map((_, age) => ({ age })), { ahead: "book" }, { ahead: "clone" }], "every age in order, then what is ahead");
   const config = { wait: 20, hold: 6 };
   const tick = (state, now, idleSince = 0, eligible = true) => tourTick(state, { now, idleSince, eligible, plan }, config);
   let state = { phase: "waiting", step: 0, at: 0 };
@@ -366,9 +365,7 @@ test("the tour waits for a pause, opens a few memories one after another, stops 
   assert.equal(last.state.phase, "off");
   assert.equal(tick(last.state, 500, 0).open, null, "and it runs once per visit");
   assert.equal(tourTick({ phase: "waiting", step: 0, at: 0 }, { now: 99, idleSince: 0, eligible: true, plan: [] }).open, null, "no plan, no tour");
-  const many = tourPlan(Array.from({ length: 40 }, (_, k) => ({ period: k, weight: 2, year: k })));
-  assert.equal(many.length, 5);
-  assert.ok(many.every((index, k) => k === 0 || index > many[k - 1]), "spread along the life, in order");
+  assert.deepEqual(tourPlan([{ period: 2 }, { period: 0 }, { period: 2 }]).slice(0, 2), [{ age: 0 }, { age: 2 }], "only the ages that hold memories, once each");
 });
 
 test("a question lights exactly its memories and draws one line from each to the ring, whatever the number of memories", () => {
@@ -483,4 +480,15 @@ test("a frame that arrives on time at film pace is not mistaken for a slow devic
   assert.ok(worked(1000 / 24) < QUALITY.slow, "on time");
   assert.ok(worked(1000 / 24 + 33) > QUALITY.slow, "two refreshes late");
   assert.equal(nextQuality(0, worked(1000 / 24)), 0);
+});
+
+test("a memory is new for some weeks from the first of the month it was added, and never before it", async () => {
+  const { FRESH, isFresh } = await import("../assets/js/explore.js");
+  assert.equal(FRESH.days, 45);
+  assert.equal(isFresh("2026-10", new Date(2026, 9, 20)), true);
+  assert.equal(isFresh("2026-10", new Date(2026, 10, 10)), true, "still new early the next month");
+  assert.equal(isFresh("2026-10", new Date(2026, 10, 20)), false);
+  assert.equal(isFresh("2026-11", new Date(2026, 9, 20)), false, "not before it was added");
+  assert.equal(isFresh(undefined), false);
+  assert.equal(isFresh("2026-10-03"), false, "a month, never a day");
 });

@@ -58,7 +58,7 @@ A memory is a file named after its id (lowercase letters, digits, hyphens), whic
 
 `date` is `YYYY` or `YYYY-MM` (add `"approx": true` when it is roughly then), `kind` is personal, professional, product or
 education, `weight` 1 to 3, `threads` (one to three, the first one decides its lane) come from `content/life.json`, and
-`order` breaks a tie between memories of the same date. There is no `period`: a memory's age on its date decides its
+`order` breaks a tie between memories of the same date, and `added` (`YYYY-MM`, written by the import for a new memory) makes it glow as new for some weeks. There is no `period`: a memory's age on its date decides its
 galaxy (see the seven ages below). `npm run
 build` stops with the file name and the reason when something is missing.
 

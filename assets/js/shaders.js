@@ -11,6 +11,9 @@ export const KIND_TINT = { strength: 0.12, night: ["#ecd2b0", "#b8cdea", "#b8cde
 export const CLOUD = { spin: 0.07, breath: 0.05, pace: 0.5, still: 0.92 };
 export const CORE = { dim: 0.97, reach: 2.6, dust: 1.4 };
 export const POINTER = { radius: 0.2, push: 0.04, rate: 6 };
+export const FRESH_GLOW = 0.35;
+export const PAPER = { ink: 0.42, edge: 0 };
+export const RING_GLOW = { light: 0.8, grow: 0.12 };
 export const HOVER = { pull: 0.1, glow: 0.3, grow: 0.12, inRate: 2.2, outRate: 1.2 };
 
 export const igniteAt = (fraction) => DISCOVER.order * fraction + DISCOVER.arrive * DISCOVER.flight;
@@ -153,7 +156,10 @@ export const DUST_VERTEX = `
 `;
 
 export const DUST_FRAGMENT = `
+  #define PAPER_INK ${PAPER.ink.toFixed(2)}
+  #define PAPER_EDGE ${PAPER.edge.toFixed(2)}
   uniform vec3 uInk;
+  uniform float uPaper;
   uniform vec3 uTints[4];
   uniform float uTint;
   varying float vAlpha;
@@ -163,7 +169,7 @@ export const DUST_FRAGMENT = `
     if (d > 1.0) discard;
     vec3 colour = uInk;
     if (vKind > -0.5) colour = mix(uInk, uTints[int(vKind + 0.5)], uTint);
-    gl_FragColor = vec4(colour, smoothstep(1.0, 0.3, d) * vAlpha);
+    gl_FragColor = vec4(colour, smoothstep(1.0, mix(0.3, PAPER_EDGE, uPaper), d) * vAlpha * mix(1.0, PAPER_INK, uPaper));
   }
 `;
 

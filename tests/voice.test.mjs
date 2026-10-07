@@ -29,7 +29,7 @@ const sources = {
   ...Object.fromEntries(readdirSync(`${root}content`).filter((file) => file.endsWith(".json")).map((file) => [`content/${file}`, read(`content/${file}`)])),
 };
 
-test("the offer is only ever called my clone: no tool, product or afterlife words anywhere on the site or in its documents", () => {
+test("the offer is only ever called Echo: no tool, product or afterlife words anywhere on the site or in its documents", () => {
   for (const [file, source] of Object.entries(sources)) {
     const found = plain(source).match(new RegExp(BANNED.source, "gi"));
     assert.equal(found, null, `${file}: ${found}`);
@@ -53,18 +53,18 @@ test("Spanish addresses the reader as tú, uses the agreed words and the right q
   assert.equal(dict.es.ui.rail.decade, "Los años {label}");
 });
 
-test("the clone is named my clone in both languages on the site's cards and lists", () => {
-  assert.match(dict.en.clone.form.region, /my clone/);
-  assert.match(dict.es.clone.form.region, /mi clon/);
-  assert.match(dict.en.hero.clone, /my clone/);
-  assert.match(dict.es.hero.clone, /mi clon/);
+test("the clone is named Echo in both languages on the site's cards and lists", () => {
+  assert.match(dict.en.clone.form.region, /Echo/);
+  assert.match(dict.es.clone.form.region, /Eco/);
+  assert.match(dict.en.hero.clone, /Echo/);
+  assert.match(dict.es.hero.clone, /Eco/);
 });
 
 test("the copy tells the same story in both languages: the hero, the book, the clone, the lists, the search snippet and the 404", () => {
   const words = (text) => text.trim().split(/\s+/).length;
   for (const [lang, parts] of Object.entries({
-    en: { went: "what went well and what went wrong", gone: "no longer here", ready: "isn't ready yet", clone: "My clone", write: "Write" },
-    es: { went: "lo que salió bien y lo que salió mal", gone: "ya no esté", ready: "Todavía no está listo", clone: "Mi clon", write: "Escríbeme" },
+    en: { went: "what went well and what went wrong", gone: "no longer here", ready: "isn't ready yet", clone: "The Echo", write: "Write" },
+    es: { went: "lo que salió bien y lo que salió mal", gone: "ya no esté", ready: "Todavía no está listo", clone: "El Eco", write: "Escríbeme" },
   })) {
     const d = dict[lang];
     assert.ok(words(d.hero.lede) <= 45, `${lang}: the hero says it in 45 words or fewer`);
@@ -90,4 +90,10 @@ test("memories of loss are marked quiet: no invitation to a list appears on them
   for (const id of ["grandfather", "inundaciones-chiang-mai-2024", "separacion-1988"]) assert.match(read("index.html"), new RegExp(`<li id="m-${id}"[^>]*data-quiet="1"`), id);
   assert.doesNotMatch(read("index.html"), /<li id="m-born-among-cows"[^>]*data-quiet/);
   assert.match(read("assets/js/engine.js"), /station\.kind === "milestone" && periodView < 0 && !station\.element\.dataset\.quiet/);
+});
+
+test("a memory tells what happened in the past: no historic present for the moment itself", () => {
+  const historic = /\b(?:I|we) (?:notice|start|meet|leave|decide|arrive|move|join|buy|turn|marry)\b/;
+  for (const memory of memories) assert.doesNotMatch(memory.en.body, historic, memory.en.title);
+  assert.match(read("design/index.html"), /a memory tells what happened in the past, and uses the present only for what is still true today/);
 });

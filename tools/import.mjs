@@ -10,7 +10,8 @@ const monthOf = (date) => String(date ?? "").slice(0, /^\d{4}-\d{2}/.test(String
 const readJson = (url, fallback) => (existsSync(url) ? JSON.parse(readFileSync(url, "utf8")) : fallback);
 const writeJson = (url, value) => writeFileSync(url, `${JSON.stringify(value, null, 2)}\n`);
 
-export function importArchive(data, dir = CONTENT) {
+export function importArchive(data, dir = CONTENT, now = new Date()) {
+  const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   const life = readJson(new URL("life.json", dir));
   const folder = new URL("memories/", dir);
   mkdirSync(folder, { recursive: true });
@@ -98,8 +99,9 @@ export function importArchive(data, dir = CONTENT) {
   if (nextLife.threads !== life.threads || data.ahead !== undefined) writeJson(new URL("life.json", dir), nextLife);
   for (const [id, memory] of ready) {
     const file = new URL(`${id}.json`, folder);
-    report[existsSync(file) ? "updated" : "added"]++;
-    writeJson(file, memory);
+    const before = existsSync(file) ? readJson(file) : null;
+    report[before ? "updated" : "added"]++;
+    writeJson(file, { ...memory, ...(before ? (before.added ? { added: before.added } : {}) : { added: month }) });
   }
   for (const [facet, table] of Object.entries(tables)) if (Object.keys(table).length) writeJson(new URL(`${facet}.json`, dir), table);
   return report;

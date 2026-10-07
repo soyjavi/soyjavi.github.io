@@ -3,7 +3,7 @@ import { AHEAD, FLOOR, KINDS, SPIN, START, shapeBy, onPath, spinAngle, starfield
 import { createBackdrop } from "./backdrop.js";
 import { CADENCE, QUALITY, pace } from "./explore.js";
 import { approach, clamp, ease, eye, slide, turn, zoom } from "./orbit.js";
-import { DIRECT, ENTRANCE, DUST_FRAGMENT, DUST_VERTEX, formedAt, KIND_TINT, MARK_FRAGMENT, MARK_VERTEX, HOVER, POINTER, STAR_FRAGMENT, STAR_VERTEX } from "./shaders.js";
+import { DIRECT, ENTRANCE, DUST_FRAGMENT, DUST_VERTEX, formedAt, KIND_TINT, MARK_FRAGMENT, MARK_VERTEX, HOVER, RING_GLOW, FRESH_GLOW, POINTER, STAR_FRAGMENT, STAR_VERTEX } from "./shaders.js";
 import { lerp, reducedMotion, seeded, smoothstep } from "./util.js";
 
 export const HOME_PITCH = -0.27;
@@ -86,6 +86,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
     uKinds: { value: kindTexture },
     uTints: { value: tints },
     uTint: { value: KIND_TINT.strength },
+    uPaper: { value: 0 },
     uSpin: { value: new Float32Array(SPIN.slots) },
     uPivot: { value: Array.from({ length: SPIN.slots }, (_, k) => new THREE.Vector3(...(sky.list[k]?.centre ?? [0, 0, 0]))) },
     uKeep: { value: 1 },
@@ -124,6 +125,8 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
     { size: 8, state: 4, order: 0 },
   ];
   const RING = 4;
+  const ringGlow = [0, 0];
+  let fresh = [];
   const PREVIEW = 5;
   const markPosition = dynamic(new Float32Array(marksData.length * 3), 3);
   const markSize = dynamic(Float32Array.from(marksData.map((mark) => mark.size)), 1);
@@ -324,7 +327,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
   const view = { target: [...CENTRE], distance: 700, yaw: 0, pitch: HOME_PITCH };
   const goal = { target: [...CENTRE], distance: 340, yaw: 0, pitch: HOME_PITCH };
   const inset = { x: 0, y: 0, goalX: 0, goalY: 0 };
-  const state = { reveal: null, follow: -1, idle: true, hover: -1, selection: -1, preview: -1, previewFade: 0, ringFade: 0, portrait: innerWidth / innerHeight < 1, drift: 0, turned: 0, touched: -1e9 };
+  const state = { reveal: null, follow: -1, idle: true, hover: -1, selection: -1, preview: -1, previewFade: 0, ringFade: 0, portrait: innerWidth / innerHeight < 1, drift: 0, turned: 0, ring: -1, touched: -1e9 };
 
   const extent = Math.max(...[...marks.map((mark) => mark.position), future.book, future.clone].map((point) => Math.hypot(point[0], point[1]))) + 12;
   const homeDistance = () => Math.max(160, extent * 4.3) * (state.portrait ? 1.3 : 1);
@@ -370,6 +373,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
     paintTints();
     markMaterial.blending = THREE.NormalBlending;
     dustUniforms.uGain.value = (night ? 0.55 : 0.6) * gain;
+    dustUniforms.uPaper.value = night ? 0 : 1;
     dustMaterial.needsUpdate = true;
   };
   applyTheme();
@@ -572,7 +576,8 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
         levelsMoving = true;
       } else levelNow[i] = levelGoal[i];
     }
-    if (levelsMoving) levelTexture.needsUpdate = true;
+    for (const i of fresh) levelNow[i] = levelGoal[i] * (1 + FRESH_GLOW * (0.5 + 0.5 * Math.sin(time * 0.9)));
+    if (levelsMoving || fresh.length) levelTexture.needsUpdate = true;
 
     const set = (index, show) => {
       centerOf(marks.length + index, scratch);
@@ -582,8 +587,11 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
     const reached = (year) => (dustUniforms.uReveal.value >= unitsOf(year) ? 1 : 0);
     set(0, reached(today));
     set(1, reached(today));
-    set(2, reached(lastYear));
-    set(3, reached(lastYear));
+    ringGlow.forEach((glow, k) => (ringGlow[k] = ease(glow, state.ring === k ? 1 : 0, dt, state.ring === k ? HOVER.inRate : HOVER.outRate)));
+    set(2, reached(lastYear) * (1 + RING_GLOW.light * ringGlow[0]));
+    set(3, reached(lastYear) * (1 + RING_GLOW.light * ringGlow[1]));
+    markSize.setX(2, marksData[2].size * (1 + RING_GLOW.grow * ringGlow[0]));
+    markSize.setX(3, marksData[3].size * (1 + RING_GLOW.grow * ringGlow[1]));
     if (state.selection >= 0) {
       centerOf(state.selection, scratch);
       markPosition.setXYZ(RING, scratch.x, scratch.y, scratch.z);
@@ -742,6 +750,8 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
     },
     setSelection: (index) => (state.selection = index),
     setHover: (index) => (state.hover = index),
+    setRingGlow: (k) => (state.ring = k),
+    setFresh: (indices) => (fresh = indices),
     setPreview: (index) => (state.preview = index),
     setJumps: (pairs) => (hop.pairs = pairs),
     slotOf: (name) => ({ today: marks.length, book: marks.length + 2, clone: marks.length + 3 })[name],

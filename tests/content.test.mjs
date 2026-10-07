@@ -45,7 +45,7 @@ test("no content file carries a full date or a private field", () => {
     const text = readFileSync(`${root}content/${file}`, "utf8");
     assert.doesNotMatch(text, /"[^"]*\d{4}-\d{2}-\d{2}[^"]*"/, `${file} has a full date`);
   }
-  for (const entry of life.milestones) assert.deepEqual(Object.keys(entry).filter((key) => !["id", "date", "approx", "kind", "weight", "period", "threads", "people", "places", "links", "quiet"].includes(key)), [], entry.id);
+  for (const entry of life.milestones) assert.deepEqual(Object.keys(entry).filter((key) => !["id", "date", "approx", "kind", "weight", "period", "threads", "people", "places", "links", "quiet", "added"].includes(key)), [], entry.id);
 });
 
 const facetsOf = () => Object.fromEntries(FACETS.map((facet) => [facet, life[facet] ?? []]));

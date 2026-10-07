@@ -1,6 +1,7 @@
 import { esc, homePath, kicker, otherLang } from "./html.mjs";
 import { footer, head, masthead, personLd, tools, websiteLd, wordmark } from "./layout.mjs";
 import { FACETS } from "../assets/js/life.js";
+import { normalize } from "../assets/js/explore.js";
 import { explore, stats } from "./explore.mjs";
 import { rail } from "./rail.mjs";
 import { paragraphsOf } from "./content.mjs";
@@ -61,22 +62,24 @@ const facetLists = (d, life, entry) =>
     .map((facet) => `<ul class="facets" data-facet="${facet}" data-label="${esc(d.ui.explore[{ people: "with", places: "at", threads: "about" }[facet]])}" aria-label="${esc(d.ui.explore[facet])}">${entry[facet].map((id) => `<li data-item="${id}">${esc(d[facet][id])}</li>`).join("")}</ul>`)
     .join("\n            ");
 
-const milestone = (d, life, entry, head) => {
+const wordsOf = (copy) => [...new Set(normalize(`${copy.title} ${copy.body}`).split(/[^\p{L}\p{N}]+/u).filter((word) => word.length > 3))].join(" ");
+
+const milestone = (d, life, entry, head, alt) => {
   const copy = d.life[entry.id];
   const period = d.periods[entry.period];
   const attributes = FACETS.filter((facet) => life[facet]?.length && entry[facet]?.length).map((facet) => ` data-${facet}="${entry[facet].join(",")}"`).join("");
   const links = entry.links?.length ? ` data-links="${entry.links.join(",")}"` : "";
-  return `<li id="m-${entry.id}" data-station="milestone" data-panel="m-${entry.id}" data-milestone="${entry.id}" data-date="${entry.date}" data-weight="${entry.weight}" data-kind="${entry.kind}"${entry.quiet ? ' data-quiet="1"' : ""} data-period="${entry.period}"${attributes}${links} data-hud="${esc(`${period.kicker.split(" · ")[0]} · ${copy.title}`)}">
+  return `<li id="m-${entry.id}" data-station="milestone" data-panel="m-${entry.id}" data-milestone="${entry.id}" data-date="${entry.date}" data-weight="${entry.weight}" data-kind="${entry.kind}"${entry.quiet ? ' data-quiet="1"' : ""} data-period="${entry.period}"${attributes}${links} data-alt="${esc(wordsOf(alt.life[entry.id]))}" data-hud="${esc(`${period.kicker.split(" · ")[0]} · ${copy.title}`)}">
             <p class="kicker">${kicker(period.kicker)}</p>${head ? `\n            <div class="period-head"><h2 class="h2">${period.title}</h2><p class="intro">${esc(period.intro)}</p></div>` : ""}
-            <time datetime="${entry.date}">${esc(when(d.locale, entry.date, entry.approx))}</time>
+            <time datetime="${entry.date}">${esc(when(d.locale, entry.date, entry.approx))}</time>${entry.added ? `<span class="fresh kicker" data-added="${entry.added}" hidden>${esc(d.ui.explore.fresh)}</span>` : ""}
             <h3 class="h3">${esc(copy.title)}</h3>
             ${paragraphsOf(copy.body).map((part) => `<p>${esc(part)}</p>`).join("\n            ")}
             ${facetLists(d, life, entry)}
           </li>`;
 };
 
-const period = (d, life, id) => {
-  const items = life.milestones.filter((entry) => entry.period === id).map((entry, index) => milestone(d, life, entry, index === 0));
+const period = (d, life, id, alt) => {
+  const items = life.milestones.filter((entry) => entry.period === id).map((entry, index) => milestone(d, life, entry, index === 0, alt));
   return `<section class="chapter period" id="period-${id}"${d.periods[id].hint ? ` data-hint="${esc(d.periods[id].hint)}"` : ""}>
         <ol class="milestones">
           ${items.join("\n          ")}
@@ -122,7 +125,7 @@ export function home({ site, life, dict }, lang) {
         </div>
       </section>
 
-            ${life.periods.map((id) => period(d, life, id)).join("\n\n      ")}
+            ${life.periods.map((id) => period(d, life, id, dict[otherLang(lang)])).join("\n\n      ")}
 
       <section class="chapter" id="book" data-station="book" data-hud="${esc(d.book.kicker)}">
         <div class="copy">

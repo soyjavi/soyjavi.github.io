@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { BUDGET, FACETS, FLOOR, RAIL, START, shapeBy, futures, layout, memories, playElapsed, monthsUntil, playYear, railPercent, skyOf, todayYear, untilText, yearRings } from "./life.js";
-import { LEVEL, askLevels, askPairs, declared, periodNames, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, jumps, leaderOf, levels as levelsOf, matching, perGalaxy, miniMap, miniVisible, QUALITY, averageMs, nextQuality, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, strongest, tagSpots, tourPlan, tourTick, worked } from "./explore.js";
+import { LEVEL, askLevels, askPairs, declared, periodNames, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, jumps, leaderOf, levels as levelsOf, matching, perGalaxy, miniMap, miniVisible, QUALITY, averageMs, nextQuality, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, strongest, tagSpots, tourPlan, tourTick, worked, isFresh } from "./explore.js";
 import { clamp } from "./orbit.js";
 import { createSound } from "./sound.js";
 import { OVERVIEW_PITCH, createScene } from "./scene.js";
@@ -120,14 +120,20 @@ async function start() {
   const info = lived.map((station) => ({
     time: station.element.querySelector("time").textContent,
     title: station.element.querySelector("h3").textContent,
-    body: station.element.querySelector("p:not(.kicker):not(.intro)").textContent,
+    body: [...station.element.querySelectorAll(":scope > p:not(.kicker):not(.intro)")].map((part) => part.textContent).join(" "),
   }));
+  const freshMarks = lived.flatMap((station, i) => {
+    const badge = station.element.querySelector(".fresh");
+    if (!badge || !isFresh(badge.dataset.added)) return [];
+    badge.hidden = false;
+    return [i];
+  });
   const finderItems = lived.map((station, i) => ({
     index: i,
     id: station.id,
     title: info[i].title,
     body: info[i].body,
-    extra: `${info[i].time} ${FACETS.flatMap((facet) => (marks[i].members[facet] ?? []).map((item) => names[facet][facets[facet][item]] ?? "")).join(" ")}`,
+    extra: `${info[i].time} ${station.element.dataset.alt ?? ""} ${FACETS.flatMap((facet) => (marks[i].members[facet] ?? []).map((item) => names[facet][facets[facet][item]] ?? "")).join(" ")}`,
     weight: marks[i].weight,
     order: i,
   }));
@@ -136,6 +142,7 @@ async function start() {
   const future = futures(sky);
   const heads = new Set(headlines(marks));
   const scene = createScene({ canvas, cloud, marks, future, today, mobile, sky, kinds: lived.map((station) => station.element.dataset.kind) });
+  scene.setFresh(freshMarks);
   const root = document.documentElement;
   let entering = false;
   const born = new Set();
@@ -249,7 +256,10 @@ async function start() {
       const [name, span] = (first.querySelector(".kicker")?.textContent ?? periods[k]).split(" · ");
       const node = addFixed("", vector([x + sx, y + sy, z]), "galaxy", 0.9, (galaxy.start + galaxy.end) / 2);
       const hint = element("span", "galaxy-hint", story.querySelector(`#period-${periods[k]}`)?.dataset.hint ?? "");
-      node.append(element("span", "", name), ...(span ? [element("span", "galaxy-years", span)] : []), element("b", "galaxy-count"), hint, element("i", "leader"));
+      const [number, ...words] = name.split(" / ");
+      const title = element("span", "galaxy-title");
+      title.append(element("span", "galaxy-number", number), ...(words.length ? [element("span", "galaxy-name", ` / ${words.join(" / ")}`)] : []));
+      node.append(title, element("b", "galaxy-count"), ...(span ? [element("span", "galaxy-years", span)] : []), hint, element("i", "leader"));
       galaxyLabels[k] = fixed.at(-1);
       galaxyLabels[k].hint = hint;
       galaxyLabels[k].leader = node.querySelector(".leader");
@@ -267,7 +277,25 @@ async function start() {
   });
   const monthsLeft = stage.dataset.until ? monthsUntil(stage.dataset.until) : -1;
   if (monthsLeft >= 0) addFixed(untilText(monthsLeft, document.documentElement.lang), vector(future.today.map((value, axis) => (value + future.book[axis]) / 2)), "countdown-mark", 0.8, today);
-  [["book", tools.dataset.book], ["clone", tools.dataset.clone]].forEach(([name, text], k) => addFixed(text, vector(future[name]), "ahead", 0.6, Infinity, RING_UNITS[name], marks.length + k));
+  const ringLabels = [["book", tools.dataset.book, tools.dataset.bookHint], ["clone", tools.dataset.clone, tools.dataset.cloneHint]].map(([name, text, hint], k) => {
+    const node = addFixed(text, vector(future[name]), "ahead", 0.6, Infinity, RING_UNITS[name], marks.length + k);
+    if (hint) node.append(element("span", "ahead-hint", hint));
+    return fixed.at(-1);
+  });
+  const lightRing = (slot) => {
+    ringLabels.forEach((item, k) => {
+      const on = slot === marks.length + k;
+      if (on !== (item.node.dataset.hot === "1")) item.node.dataset.hot = on ? "1" : "";
+    });
+    scene.setRingGlow(slot >= marks.length ? slot - marks.length : -1);
+  };
+  document.querySelectorAll('.masthead nav a[data-go="book"], .masthead nav a[data-go="clone"]').forEach((link) => {
+    const slot = marks.length + (link.dataset.go === "book" ? 0 : 1);
+    link.addEventListener("pointerenter", () => lightRing(slot));
+    link.addEventListener("focus", () => lightRing(slot));
+    link.addEventListener("pointerleave", () => lightRing(hover));
+    link.addEventListener("blur", () => lightRing(hover));
+  });
 
   const card = element("aside", "card");
   card.setAttribute("tabindex", "-1");
@@ -411,6 +439,7 @@ async function start() {
     scene.setLinks(neighbours.links.filter((i) => picked.has(i)), neighbours.near.filter((i) => picked.has(i)));
     scene.setSelection(memory);
     const viewed = periodView >= 0 ? periodView : memory >= 0 ? marks[memory].period : -1;
+    sound.age(viewed);
     const rings = (!gentle.on || periodView >= 0) && viewed >= 0 ? yearRings(sky.list[viewed], YEAR_RING_MAX) : [];
     const galaxy = viewed >= 0 ? sky.list[viewed] : null;
     scene.setYearRings(galaxy?.centre ?? null, rings, galaxy ?? {});
@@ -432,7 +461,7 @@ async function start() {
       const counts = perGalaxy(marks, chain, sky.list.length);
       galaxyLabels.forEach((item, k) => {
         if (!item) return;
-        item.dim = viewed >= 0 && viewed !== k ? 0 : filter && !counts[k] ? 0.3 : 1;
+        item.dim = (viewed >= 0 && viewed !== k) || ["book", "clone"].includes(stations[current].kind) ? 0 : filter && !counts[k] ? 0.3 : 1;
         item.pin = viewed === k;
         item.node.dataset.pin = item.pin ? "1" : "";
         if (item.pin) item.node.setAttribute("title", tools.dataset.overview);
@@ -534,7 +563,18 @@ async function start() {
     cardBody.querySelector(".expander")?.focus({ preventScroll: true });
   };
 
+  const moreCue = element("p", "more-cue", tools.dataset.continues ?? "");
+  moreCue.setAttribute("aria-hidden", "true");
+  card.append(moreCue);
+  const cueMore = () => {
+    const over = cardBody.scrollHeight > cardBody.clientHeight + 4 && cardBody.scrollTop + cardBody.clientHeight < cardBody.scrollHeight - 4;
+    const mark = over ? "1" : "";
+    if (card.dataset.overflow !== mark) card.dataset.overflow = mark;
+    if (over) moreCue.style.bottom = `${(cardSteps.hidden ? 0 : cardSteps.offsetHeight) + 10}px`;
+  };
+  cardBody.addEventListener("scroll", cueMore, { passive: true });
   const showMore = () => {
+    cueMore();
     const block = card.querySelector(".related");
     const list = block?.querySelector("ul");
     if (!list) return;
@@ -614,7 +654,10 @@ async function start() {
   };
 
   const renderCard = () => {
-    if (periodView >= 0) return renderPeriodCard();
+    if (periodView >= 0) {
+      renderPeriodCard();
+      return requestAnimationFrame(cueMore);
+    }
     const station = stations[current];
     const clone = station.panel.cloneNode(true);
     clone.removeAttribute("data-station");
@@ -1174,8 +1217,8 @@ async function start() {
     if (index >= 0 && index !== hover) sound.tick();
     hover = index;
     card.querySelectorAll(".peer[data-lit]").forEach((row) => delete row.dataset.lit);
-    if (index >= 0 && periodView >= 0) {
-      const row = card.querySelector(`.peer[data-memory="${index}"]`);
+    if (index >= 0) {
+      const row = card.querySelector(`.related .peer[data-memory="${index}"]`);
       if (row) {
         row.dataset.lit = "1";
         const list = row.closest("ul");
@@ -1184,6 +1227,7 @@ async function start() {
       }
     }
     scene.setHover(index);
+    lightRing(index);
     canvas.style.cursor = index >= 0 ? "pointer" : "";
   });
   const aheadAt = (index) => (index === marks.length ? bookAt : index === marks.length + 1 ? cloneAt : -1);
@@ -1288,7 +1332,8 @@ async function start() {
     const calm = !document.hidden && finder.hidden && guide.hidden && tools.dataset.sheet !== "open" && !filter && play.year === null && !focusing() && !document.activeElement?.closest?.("input, textarea, select, button, a, .finder, .card, .masthead, .rail") && !card.matches(":hover");
     const step = tourTick(touring, { now: nowSeconds, idleSince: touched, eligible: calm && (touring.phase === "touring" || current === 0), plan }, { wait: +tools.dataset.idle || 20, hold: +tools.dataset.tourHold || 6 });
     touring = step.state;
-    if (step.open !== null) select(stationOf(step.open), { push: false, hush: true });
+    if (step.open?.age !== undefined) selectPeriod(step.open.age, { push: false });
+    else if (step.open) select(step.open.ahead === "book" ? bookAt : cloneAt, { push: false, hush: true });
     else if (step.done) select(0, { push: false, hush: true });
     if (play.running) {
       play.year = playYear(performance.now() / 1000 - play.from, today);
@@ -1306,7 +1351,6 @@ async function start() {
     else if (headsQuiet.away > 0.8) headsQuiet.on = false;
     const selected = viewedMemory();
     const ratio = scene.view.distance / scene.homeDistance();
-    const peers = new Set(chosen.slice(0, MAX_RELATED));
     const keepOut = frameRects().map((box) => ({ left: box.left - 12, right: box.right + 12, top: box.top - 12, bottom: box.bottom + 12 }));
     keepOut.push({ left: 0, right: innerWidth, top: 0, bottom: Math.max(KEEP_TOP, (masthead?.getBoundingClientRect().bottom ?? 0) + 4) }, { left: 0, right: innerWidth, top: innerHeight - 60, bottom: innerHeight });
 
@@ -1341,7 +1385,7 @@ async function start() {
     const reaches = new Map();
     const exits = [];
     const marked = [];
-    if (selected >= 0 && play.year === null) {
+    if (selected >= 0 && play.year === null && !filter) {
       const cardBox = card.getBoundingClientRect();
       const stacked = stackedQuery.matches;
       const free = {
@@ -1358,7 +1402,8 @@ async function start() {
       chosen.slice(0, MAX_LINKS_CUT).forEach((j) => {
         const samples = arcSamples.map((sample, k) => scene.arcScreen(selected, j, k / EDGE_SAMPLES, sample));
         const exit = edgeExit(samples, reach);
-        if (exit) exits.push({ j, ...exit });
+        const seen = projected[j]?.on && !overlaps({ left: projected[j].x, right: projected[j].x, top: projected[j].y, bottom: projected[j].y }, cardBox);
+        if (exit && !seen) exits.push({ j, ...exit });
       });
       const shown = exits.slice(0, EDGE_MARKS).map((exit, k) => {
         const mark = edgeMarks[k];
@@ -1514,7 +1559,6 @@ async function start() {
       if (i === selected) priority = 1000;
       else if (i === hover) priority = 900;
       else if (i === preview) priority = 880;
-      else if (peers.has(i)) priority = 500 + mark.weight;
       else if (filter && mark.members[filter.facet]?.includes(filter.item)) priority = 300 + mark.weight;
       else if (mark.weight >= 3 && ratio < 0.6) priority = 30;
       else if (mark.weight === 2 && ratio < 0.5) priority = 20;

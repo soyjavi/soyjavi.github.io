@@ -36,6 +36,7 @@ export function readMemories(dir = CONTENT) {
       const memory = { id, ...JSON.parse(readFileSync(new URL(file, folder), "utf8")) };
       if (!precisionOf(String(memory.date))) throw new Error(`content/memories/${file}: date "${memory.date}" must be YYYY or YYYY-MM`);
       for (const lang of LANGS) if (!memory[lang]?.title || !memory[lang]?.body) throw new Error(`content/memories/${file}: needs "${lang}" with a title and a body`);
+      if (memory.added !== undefined && !/^\d{4}-(0[1-9]|1[0-2])$/.test(memory.added)) throw new Error(`content/memories/${file}: added "${memory.added}" must be YYYY-MM`);
       for (const lang of LANGS) if (bodyProblem(memory[lang].body)) throw new Error(`content/memories/${file} (${lang}): ${bodyProblem(memory[lang].body)}`);
       return memory;
     })

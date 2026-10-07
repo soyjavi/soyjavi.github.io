@@ -221,3 +221,32 @@ test("a person or place nobody is remembered with is not written, even when the 
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("a memory the import adds carries the month it was added, and an update keeps the month it first had", () => {
+  const { dir, url } = copyOfContent();
+  try {
+    importArchive({ memories: [memory({ id: "fresh-one" })] }, url, new Date(2026, 9, 7));
+    const first = JSON.parse(readFileSync(join(dir, "memories", "fresh-one.json"), "utf8"));
+    assert.equal(first.added, "2026-10");
+    importArchive({ memories: [memory({ id: "fresh-one" })] }, url, new Date(2027, 2, 1));
+    assert.equal(JSON.parse(readFileSync(join(dir, "memories", "fresh-one.json"), "utf8")).added, "2026-10");
+    const home = renderSite(loadContent(url)).get("index.html");
+    assert.match(home, /<span class="fresh kicker" data-added="2026-10" hidden>New<\/span>/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("importing over a memory that has no added month leaves it without one, so a full import never makes everything new", () => {
+  const { dir, url } = copyOfContent();
+  try {
+    const [file] = readdirSync(join(dir, "memories"));
+    const id = file.slice(0, -5);
+    const existing = JSON.parse(readFileSync(join(dir, "memories", file), "utf8"));
+    assert.equal(existing.added, undefined);
+    importArchive({ memories: [memory({ id, threads: existing.threads, date: existing.date })] }, url);
+    assert.equal(JSON.parse(readFileSync(join(dir, "memories", file), "utf8")).added, undefined);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
