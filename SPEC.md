@@ -10,7 +10,7 @@ holds a life from 1980 to today as soft clouds of dots, one per public memory, b
 on a starry sky in which the dots gather, in the order the years happened, into one galaxy per age of the life (the seven ages of a person, cut at 7, 14, 25, 40, 55 and 70 from his birth). It is
 explored, not scrolled: the camera is free (drag, scroll or pinch, right drag), a click opens a memory in a card, and the
 memories are one sky, with no other view to choose. Threads, people and places are filters, found by name: a filter lights
-its memories and draws its jumps from galaxy to galaxy. A memory lights what it is related to and draws a line to each. A timeline rail that can
+its memories and draws them as a figure, named once. A memory lights what it is related to and draws a line to each. A timeline rail that can
 play the life year by year, a finder, a surprise button and the keyboard are other ways in, and Earlier and Later give
 the sequence by date. Two hollow rings ahead of today are the book and the clone, each with its own waitlist. The site has no blog and no
 writing section: it shows a life and sells those two things. Each waitlist is wired for Buttondown, one list per tag, and
@@ -111,7 +111,7 @@ The site borrows its words from astronomy and uses each for one thing only. The 
 | The whole life | **The sky**: a group of galaxies bound together, seen as one night | Everything told, from 1980 to the edge of what is ahead. It is not a galaxy; a life is the sky and the sky holds galaxies |
 | An age (`early` … `later`) | **A galaxy**: a long-lived structure of stars turning round a core, with arms | One per age lived and remembered (at most seven), as large as what it holds. The core is the start of the age and the rim its end; the arms are the threads it holds |
 | A memory | **A star cluster or a nebula**: a cloud of stars | A cloud of dots, bigger and brighter by weight; its centre is dimmer than its edge so its dots stay apart. Many dots, no sharp point |
-| A thread (home, body, craft…) | **A constellation**: the pattern people draw between stars; also **an arm** of the galaxy | A sector of each galaxy and a line joining its memories in time, drawn when the camera is close |
+| A thread (home, body, craft…) | **A constellation**: the pattern people draw between stars; also **an arm** of the galaxy | A sector of each galaxy and a figure joining its memories, the shortest tree through them, drawn when the camera is close; as a filter, one figure across the whole sky |
 | A person, a place | A constellation drawn by another rule | A filter that lights the memories sharing it and dims the rest |
 | A year | **An orbit**, a growth ring of the galaxy | A ring round the core at the radius of that year, with its date; time is distance from the core |
 | The dust between memories | **Interstellar dust and gas** | The days nobody told, thicker where a thread was busy; it shows the shape of the age |
@@ -163,7 +163,7 @@ Why the life is the sky and not one galaxy: a single disc would hold all the mem
   star's distance follows its brightness (the brightest at 900 units, the faintest at 1,600), so the near ones move more
   than the far ones as the camera turns. Sizes grow with brightness and each star twinkles on its own phase. Every dot of
   the memories starts on the same shell.
-- **Guides.** A dotted outline around each galaxy (soft dots spaced ten pixels apart on screen, from just under a pixel in the whole-life view to a pixel and a quarter close up, and 50% to 75% of their strength), a line joining the memories of each thread inside it in order (its
+- **Guides.** A dotted outline around each galaxy (soft dots spaced ten pixels apart on screen, from just under a pixel in the whole-life view to a pixel and a quarter close up, and 50% to 75% of their strength), the figure of each thread inside it, each memory joined to its nearest (`figureOf`, the shortest tree on the face of the sky, so its lines never cross; its
   constellation, drawn only when the camera is close: it fades with `uFar`, so the whole-life view shows clouds, names and dotted guides only), an arc from galaxy to galaxy and a dashed arc through the opening. Labels for them are DOM nodes
   projected every frame.
 
@@ -262,7 +262,7 @@ Two and a half seconds after the last touch, wherever it is (the hero, a memory,
   so the target sits in the free area beside the card (above it on a phone).
 - **Opening.** A click or a tap on a cloud, a galaxy's label (it frames the galaxy, the age view; pressed again it returns to the whole-life view), a related
   memory, a result of the finder, a point on the rail, Surprise me,
-  a link with `data-go`, an address hash (`#book`, `#m-tapquo`, `#period-midlife`; a malformed one or one that names nothing is
+  a link with `data-go`, an address hash (`#book`, `#m-tapquo`, `#period-midlife`, `#thread-family`; a malformed one or one that names nothing is
   ignored), a focus on the real document, or Earlier and Later. The address follows the memory in view with
   `history.replaceState`. A `data-go` link to the book or the clone also puts the cursor in its waitlist field.
 - **Pointing.** The nearest cloud within its reach is named and the cursor changes. A drag never opens anything. The
@@ -336,9 +336,19 @@ Two and a half seconds after the last touch, wherever it is (the hero, a memory,
   interaction ends it where the reader is, and for good.
 - **Filtering.** A chip in a card, a filter offered by the finder or a thread in the legend dims everything outside it;
   pressing it again, the ✕ button or Escape lets go, and so does going back to the whole life from a memory or an age (the card's ✕, Whole life, the address without a hash). The legend of threads sits behind the Filter button. In the sky a
-  filter draws arcs between its memories in order, higher when they jump from one galaxy to another (`matching`,
-  `jumps`), and each galaxy's label counts how many it holds (`perGalaxy`), dimmed when none. Earlier and Later step
-  along the filter while it is on.
+  filter draws its figure: each memory joined to its nearest in the filter, the shortest tree through them on the face of
+  the sky where they are drawn when the filter is turned on (`matching`, `figureOf` on `scene.centerOf`, one line fewer than memories; it
+  crosses nowhere then, and inside a galaxy never, since a galaxy turns as one), kept while the sky turns, straight inside a
+  galaxy, and from one galaxy to another a slight arc (`FIGURE_LIFT`) of dots spaced like the galaxies' outlines that flow
+  slowly from the earlier memory to the later (`FIGURE_FLOW`, six pixels a second). In the whole-life view, with nothing
+  open and no age or play in view, its name is written once beside the figure (`.figure-name`: the name in Instrument
+  Serif Italic at `--fs-heading`, `--fs-heading-sm` on a phone, over "n memories · first–last year", `figureSpan`,
+  `figureCount`, with `ui.count.memory` for one), on the first free side of the figure's box that keeps clear of the
+  controls, the labels and its clouds, and hidden where none is free; a filter chosen in a card shows its figure
+  without it. In the whole-life view a filter is in the address (`#thread-<id>`, `#person-<id>`, `#place-<id>`, `filterHash`,
+  `filterOfHash`): it can be shared, a reload keeps it, opening one lands on the whole life with it on, and letting go
+  clears it. Each galaxy's label counts how many the filter holds
+  (`perGalaxy`), dimmed when none. Earlier and Later step along the filter while it is on.
 - **Finding.** `/` or the Find button opens the finder. Empty, it is an index of every memory grouped by period. With
   words, it first offers up to three threads, people or places whose name matches, each with its number of memories, to
   filter by (`filtersFor`), then up to eight memories matched without case or accents against the title, the text (both paragraphs), the
@@ -358,7 +368,7 @@ Two and a half seconds after the last touch, wherever it is (the hero, a memory,
 
 Each memory has a tag (date and title) beside its cloud. With a memory open only that memory, the memories he linked to, at most three (all of its relations, up to eight, once the card's list is expanded), the one pointed at and the one a card row or a
 finder result is pointing at are named, so every other cloud names itself only when the pointer reaches it. With
-nothing open the priority is the members of a filter, then by weight, with more of them the closer the camera (only the
+nothing open and no filter on the priority is by weight (with a filter on, no memory is named until it is pointed at), with more of them the closer the camera (only the
 heaviest, and only once the camera is in a galaxy). They are placed greedily
 (`tagSpots`, `pickSpot`): first on the right, left, below or above the cloud, then at its four corners, then in up to
 three rings further out, taking the first place that touches no other cloud's disc, no other label, no date or galaxy
@@ -470,7 +480,7 @@ What an agent (or a person) needs to look at the site and give art feedback. Not
 | A memory (card, related, edge marks, tags) | `#m-<id>`, the id being the file name in `content/memories/` |
 | The book, the clone, the contact | `#book`, `#clone`, `#contact` |
 | Related memories expanded | the "All related" button of a memory's card |
-| A filter (jump lines, counts on the galaxies) | a chip of a card, or Filter in the sheet; `✕` in the sheet or Escape lets go |
+| A filter (its figure, its name, counts on the galaxies) | `#thread-<id>`, `#person-<id>`, `#place-<id>`, a chip of a card, or Filter in the sheet; `✕` in the sheet or Escape lets go |
 | The finder, the guide, the sheet | `[data-find]` or `/`; `[data-guide-toggle]` or `?`; `[data-more-toggle]` |
 | Playing the life year by year | `[data-play]` on the rail |
 | Light theme | `[data-theme-toggle]` in the sheet, or `localStorage.theme = "light"` before loading |

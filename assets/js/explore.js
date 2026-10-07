@@ -95,11 +95,45 @@ export const askPairs = (lit, ring) => [...lit].map((i) => [i, ring, true]);
 
 export const matching = (marks, filter) => (filter ? marks.map((mark, i) => ((mark.members[filter.facet] ?? []).includes(filter.item) ? i : -1)).filter((i) => i >= 0) : []);
 
-export function jumps(marks, chain) {
-  const pairs = [];
-  chain.forEach((i, k) => k > 0 && pairs.push([chain[k - 1], i, marks[chain[k - 1]].period !== marks[i].period]));
-  return pairs;
+export const FILTER_HASH = { threads: "thread-", people: "person-", places: "place-" };
+
+export const filterHash = (facet, id) => `${FILTER_HASH[facet]}${id}`;
+
+export function filterOfHash(hash, facets) {
+  const [facet, prefix] = Object.entries(FILTER_HASH).find(([, start]) => hash.startsWith(start)) ?? [];
+  const item = facet ? (facets[facet] ?? []).indexOf(hash.slice(prefix.length)) : -1;
+  return item >= 0 ? { facet, item } : null;
 }
+
+export const FIGURE_LIFT = 0.06;
+
+export function figureOf(marks, chain, at = (i) => marks[i].position) {
+  if (chain.length < 2) return [];
+  const spots = new Map(chain.map((i) => [i, at(i)]));
+  const gap = (a, b) => Math.hypot(spots.get(a)[0] - spots.get(b)[0], spots.get(a)[1] - spots.get(b)[1]);
+  const nearest = new Map(chain.slice(1).map((i) => [i, { from: chain[0], d: gap(chain[0], i) }]));
+  const edges = [];
+  while (nearest.size) {
+    let next = -1;
+    let least = Infinity;
+    for (const [i, { d }] of nearest) if (d < least || (d === least && i < next)) [next, least] = [i, d];
+    const { from } = nearest.get(next);
+    nearest.delete(next);
+    edges.push([from, next, marks[from].period !== marks[next].period]);
+    for (const [i, entry] of nearest) {
+      const d = gap(next, i);
+      if (d < entry.d) nearest.set(i, { from: next, d });
+    }
+  }
+  return edges;
+}
+
+export function figureSpan(marks, chain) {
+  const years = chain.map((i) => Math.floor(marks[i].year));
+  return { count: chain.length, from: Math.min(...years), to: Math.max(...years) };
+}
+
+export const figureCount = ({ count, from, to }, { one, many }) => `${(count === 1 ? one : many).replace("{n}", String(count))} · ${from === to ? from : `${from}–${to}`}`;
 
 export function perGalaxy(marks, chain, count) {
   const counts = new Array(count).fill(0);

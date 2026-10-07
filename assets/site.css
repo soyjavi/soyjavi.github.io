@@ -1323,6 +1323,43 @@ ul.facets {
   color: var(--muted);
 }
 
+.figure-name {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  gap: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  text-shadow: 0 0 14px var(--bg), 0 0 14px var(--bg);
+  transition: opacity 1.2s var(--ease), visibility 1.2s;
+}
+
+.figure-name[data-on="1"] {
+  opacity: 1;
+  visibility: visible;
+}
+
+.figure-title {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: var(--fs-heading);
+  line-height: 1;
+  color: var(--fg);
+}
+
+.figure-count {
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 .galaxy {
   position: absolute;
   left: 0;
@@ -1823,6 +1860,10 @@ html:not(.immersive) .masthead {
 
   .tag {
     font-size: var(--fs-tag-phone);
+  }
+
+  .figure-title {
+    font-size: var(--fs-heading-sm);
   }
 
 }

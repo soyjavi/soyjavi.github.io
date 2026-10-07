@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { BUDGET, FACETS, FLOOR, RAIL, START, shapeBy, futures, layout, memories, playElapsed, monthsUntil, playYear, railPercent, skyOf, todayYear, untilText, yearRings } from "./life.js";
-import { LEVEL, askLevels, askPairs, declared, periodNames, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, jumps, leaderOf, levels as levelsOf, matching, perGalaxy, miniMap, miniVisible, QUALITY, averageMs, nextQuality, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, strongest, tagSpots, tourPlan, tourTick, worked, isFresh } from "./explore.js";
+import { LEVEL, askLevels, askPairs, declared, periodNames, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, figureCount, figureOf, figureSpan, filterHash, filterOfHash, leaderOf, levels as levelsOf, matching, perGalaxy, miniMap, miniVisible, QUALITY, averageMs, nextQuality, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, strongest, tagSpots, tourPlan, tourTick, worked, isFresh } from "./explore.js";
 import { clamp } from "./orbit.js";
 import { createSound } from "./sound.js";
 import { OVERVIEW_PITCH, createScene } from "./scene.js";
@@ -12,6 +12,7 @@ const STACKED = "(max-width: 900px), (max-aspect-ratio: 1/1)";
 const KEEP_TOP = 74;
 const KEEP_BOTTOM = 124;
 const MAX_TAGS = 24;
+const FIGURE_GAP = 18;
 const MAX_RELATED = 8;
 const AHEAD_GAPS = [0, 22];
 const RING_UNITS = { today: 2.4, book: 1.2, clone: 1.2 };
@@ -282,6 +283,13 @@ async function start() {
     if (hint) node.append(element("span", "ahead-hint", hint));
     return fixed.at(-1);
   });
+  const figureName = element("div", "figure-name");
+  figureName.setAttribute("aria-hidden", "true");
+  const figureTitle = element("span", "figure-title");
+  const figureLine = element("span", "figure-count");
+  figureName.append(figureTitle, figureLine);
+  labels.append(figureName);
+  const figure = { key: "", chain: [], edges: [], option: -1, width: 0, height: 0, shown: -1 };
   const lightRing = (slot) => {
     ringLabels.forEach((item, k) => {
       const on = slot === marks.length + k;
@@ -456,7 +464,7 @@ async function start() {
     scene.setFocus(memory >= 0 ? marks[memory].year : null);
     scene.setFilter(filter);
     const chain = matching(marks, filter);
-    scene.setJumps(lit ? askPairs(lit, scene.slotOf("clone")) : jumps(marks, chain));
+    scene.setJumps(lit ? askPairs(lit, scene.slotOf("clone")) : figure.edges, !lit);
     if (sky) {
       const counts = perGalaxy(marks, chain, sky.list.length);
       galaxyLabels.forEach((item, k) => {
@@ -782,7 +790,7 @@ async function start() {
     else if (station.kind === "book" || station.kind === "clone") sound.swell(station.kind);
     if (push) {
       try {
-        history.replaceState(null, "", station.kind === "hero" ? `${location.pathname}${location.search}` : `#${station.id}`);
+        history.replaceState(null, "", station.kind !== "hero" ? `#${station.id}` : filter ? `#${filterHash(filter.facet, facets[filter.facet][filter.item])}` : `${location.pathname}${location.search}`);
       } catch {
         return;
       }
@@ -819,6 +827,14 @@ async function start() {
 
   const setFilter = (next) => {
     filter = next;
+    const key = filter ? `${filter.facet}:${filter.item}` : "";
+    if (key !== figure.key) {
+      const chain = matching(marks, filter);
+      const span = figureSpan(marks, chain);
+      Object.assign(figure, { key, chain, edges: figureOf(marks, chain, (i) => scene.centerOf(i).toArray()), option: -1, width: 0, height: 0 });
+      figureTitle.textContent = filter ? names[filter.facet][facets[filter.facet][filter.item]] ?? "" : "";
+      figureLine.textContent = chain.length ? figureCount(span, { one: tools.dataset.countMemory, many: tools.dataset.countMemories }) : "";
+    }
     tools.querySelectorAll(".legend button").forEach((button) => {
       const facet = button.closest(".legend").dataset.facet;
       button.setAttribute("aria-pressed", String(!!filter && filter.facet === facet && facets[facet][filter.item] === button.dataset.item));
@@ -831,6 +847,11 @@ async function start() {
     if (filter) {
       unfilter.textContent = `✕ ${names[filter.facet][facets[filter.facet][filter.item]] ?? ""}`;
       unfilter.setAttribute("aria-label", `${copy.unfilter}: ${names[filter.facet][facets[filter.facet][filter.item]] ?? ""}`);
+    }
+    if (stations[current].kind === "hero" && periodView < 0) {
+      try {
+        history.replaceState(null, "", filter ? `#${filterHash(filter.facet, facets[filter.facet][filter.item])}` : `${location.pathname}${location.search}`);
+      } catch {}
     }
     refreshScene();
     if (stations[current].kind === "milestone" && periodView < 0) renderCard();
@@ -1138,6 +1159,11 @@ async function start() {
     }
     if (!id) return select(0, { push: false });
     if (periodAt.has(id)) return selectPeriod(periodAt.get(id), { push: false });
+    const chosen = filterOfHash(id, facets);
+    if (chosen) {
+      if (stations[current].kind !== "hero" || periodView >= 0) select(0, { push: false });
+      return setFilter(chosen);
+    }
     if (anchors.has(id)) select(anchors.get(id), { push: false });
   };
   document.querySelectorAll("[data-go]").forEach((link) =>
@@ -1548,6 +1574,34 @@ async function start() {
       }
     });
 
+    const whole = stations[current].kind === "hero" && selected < 0 && periodView < 0 && play.year === null;
+    let nameShown = 0;
+    if (filter && figure.chain.length && whole) {
+      const spots = figure.chain.map((i) => projected[i]).filter((spot) => spot.on);
+      if (spots.length) {
+        figure.width ||= figureName.offsetWidth;
+        figure.height ||= figureName.offsetHeight;
+        const { width, height } = figure;
+        const box = { left: Math.min(...spots.map((spot) => spot.x - spot.r)), right: Math.max(...spots.map((spot) => spot.x + spot.r)), top: Math.min(...spots.map((spot) => spot.y - spot.r)), bottom: Math.max(...spots.map((spot) => spot.y + spot.r)) };
+        const middle = (box.top + box.bottom - height) / 2;
+        const options = [[box.left, box.top - FIGURE_GAP - height], [box.right - width, box.top - FIGURE_GAP - height], [box.left - FIGURE_GAP - width, middle], [box.right + FIGURE_GAP, middle], [box.left, box.bottom + FIGURE_GAP], [box.right - width, box.bottom + FIGURE_GAP]].map(([left, top]) => ({ left, top, right: left + width, bottom: top + height }));
+        const stars = spots.map((spot) => ({ left: spot.x - spot.r * 0.7, right: spot.x + spot.r * 0.7, top: spot.y - spot.r * 0.7, bottom: spot.y + spot.r * 0.7 }));
+        const fits = (option) => option.left >= 12 && option.right <= innerWidth - 12 && option.top >= 12 && option.bottom <= innerHeight - 12 && !keepOut.some((other) => overlaps(option, other)) && !stars.some((other) => overlaps(option, other));
+        const at = figure.option >= 0 && fits(options[figure.option]) ? figure.option : options.findIndex(fits);
+        if (at >= 0) {
+          figure.option = at;
+          const chosen = options[at];
+          figureName.style.transform = `translate3d(${chosen.left.toFixed(1)}px, ${chosen.top.toFixed(1)}px, 0)`;
+          keepOut.push({ left: chosen.left - 8, right: chosen.right + 8, top: chosen.top - 8, bottom: chosen.bottom + 8 });
+          nameShown = 1;
+        }
+      }
+    }
+    if (nameShown !== figure.shown) {
+      figure.shown = nameShown;
+      figureName.dataset.on = nameShown ? "1" : "";
+    }
+
     const limit = innerWidth <= 760 ? 8 : ratio > 0.8 ? 14 : MAX_TAGS;
     const candidates = [];
     const clouds = [];
@@ -1559,7 +1613,7 @@ async function start() {
       if (i === selected) priority = 1000;
       else if (i === hover) priority = 900;
       else if (i === preview) priority = 880;
-      else if (filter && mark.members[filter.facet]?.includes(filter.item)) priority = 300 + mark.weight;
+      else if (filter) priority = 0;
       else if (mark.weight >= 3 && ratio < 0.6) priority = 30;
       else if (mark.weight === 2 && ratio < 0.5) priority = 20;
       else if (ratio < 0.22) priority = 10;
@@ -1629,6 +1683,7 @@ async function start() {
 
   new ResizeObserver(layoutInset).observe(card);
   const onResize = () => {
+    figure.width = figure.height = 0;
     scene.resize();
     fitCard();
     showMore();
@@ -1649,6 +1704,7 @@ async function start() {
   document.documentElement.classList.add("immersive");
   document.fonts?.ready.then(() => {
     tags.forEach((tag) => ((tag.width = 0), (tag.height = 0)));
+    figure.width = figure.height = 0;
     fitCard();
     showMore();
     layoutInset();

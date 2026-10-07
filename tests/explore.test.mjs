@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { CADENCE, LEVEL, RING_CLEARANCE, STRONG, askLevels, askPairs, declared, periodNames, strongest, TAG_GAP, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, jumps, leaderOf, levels, matching, miniMap, MINI_ZOOM, miniVisible, QUALITY, averageMs, nextQuality, normalize, perGalaxy, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, tagSpots, tourPlan, tourTick, pace, worked } from "../assets/js/explore.js";
+import { CADENCE, LEVEL, RING_CLEARANCE, STRONG, askLevels, askPairs, declared, periodNames, strongest, TAG_GAP, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, figureCount, figureOf, figureSpan, filterHash, filterOfHash, leaderOf, levels, matching, miniMap, MINI_ZOOM, miniVisible, QUALITY, averageMs, nextQuality, normalize, perGalaxy, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, tagSpots, tourPlan, tourTick, pace, worked } from "../assets/js/explore.js";
 import { layout } from "../assets/js/life.js";
 import { ORBIT, approach, ease, eye, nearest, slide, turn, zoom } from "../assets/js/orbit.js";
 import { loadContent } from "../src/content.mjs";
@@ -126,22 +126,70 @@ test("easing converges on the goal from any frame rate, and yaw takes the short 
   assert.ok(state.target.every((value, axis) => Math.abs(value - goal.target[axis]) < 0.02));
 });
 
-test("a filter becomes a path through the life: its memories in order, the jumps between galaxies and how many each galaxy holds", () => {
+test("a filter becomes a figure: the shortest tree through its memories, and how many each galaxy holds", () => {
   const sky = layout(life.milestones, { threads: life.threads }, { periods: life.periods, today: 2026.8 });
   assert.ok(sky.every((mark, i) => life.periods[mark.period] === life.milestones[i].period));
   const craft = { facet: "threads", item: life.threads.indexOf("craft") };
   const chain = matching(sky, craft);
   assert.deepEqual(chain, sky.map((mark, i) => (mark.members.threads.includes(craft.item) ? i : -1)).filter((i) => i >= 0));
   assert.ok(chain.every((i, k) => k === 0 || sky[i].year >= sky[chain[k - 1]].year), "in the order they happened");
-  const pairs = jumps(sky, chain);
-  assert.equal(pairs.length, chain.length - 1);
-  pairs.forEach(([from, to, across]) => assert.equal(across, sky[from].period !== sky[to].period));
-  assert.ok(pairs.some(([, , across]) => across), "work crosses from one stage of life to another");
+  const edges = figureOf(sky, chain);
+  assert.equal(edges.length, chain.length - 1, "a tree: one line fewer than memories");
+  edges.forEach(([from, to, across]) => assert.equal(across, sky[from].period !== sky[to].period));
+  assert.deepEqual(figureOf(sky, chain), edges, "the same figure every time");
+  const reached = new Set([chain[0]]);
+  for (let pass = 0; pass < chain.length; pass++) edges.forEach(([from, to]) => (reached.has(from) || reached.has(to)) && reached.add(from).add(to));
+  assert.equal(reached.size, chain.length, "every memory of the thread is in the one figure");
   const counts = perGalaxy(sky, chain, life.periods.length);
   assert.equal(counts.reduce((sum, n) => sum + n, 0), chain.length);
   life.periods.forEach((period, k) => assert.equal(counts[k], chain.filter((i) => life.milestones[i].period === period).length, period));
+  const span = figureSpan(sky, chain);
+  assert.equal(span.count, chain.length);
+  assert.equal(span.from, Math.floor(sky[chain[0]].year));
+  assert.equal(span.to, Math.floor(sky[chain.at(-1)].year));
+  assert.equal(figureCount(span, { one: "{n} memory", many: "{n} memories" }), `${chain.length} memories · ${span.from}–${span.to}`);
+  assert.equal(figureCount({ count: 1, from: 2003, to: 2003 }, { one: "{n} memory", many: "{n} memories" }), "1 memory · 2003", "one memory, one year");
+  const turned = (i) => [-sky[i].position[1], sky[i].position[0]];
+  assert.deepEqual(figureOf(sky, chain, turned), edges, "the figure is built from where the memories are drawn, and turning the sky does not change it");
+  const squeezed = (i) => [sky[i].position[0] * 0.01, sky[i].position[1]];
+  assert.notDeepEqual(figureOf(sky, chain, squeezed), edges, "and it follows those positions");
   assert.deepEqual(matching(sky, null), []);
-  assert.deepEqual(jumps(sky, []), []);
+  assert.deepEqual(figureOf(sky, []), []);
+  assert.deepEqual(figureOf(sky, [chain[0]]), []);
+});
+
+test("a filter has its own address, so it can be shared and comes back after a reload", () => {
+  const facets = { threads: life.threads, people: life.people, places: life.places };
+  for (const [facet, items] of Object.entries(facets)) {
+    items.forEach((id, item) => {
+      const hash = filterHash(facet, id);
+      assert.deepEqual(filterOfHash(hash, facets), { facet, item }, hash);
+      assert.ok(!life.milestones.some((entry) => `m-${entry.id}` === hash) && !life.periods.some((period) => `period-${period}` === hash) && !["book", "clone", "contact", "top"].includes(hash), `${hash} is no other address`);
+    });
+  }
+  assert.equal(filterHash("threads", "family"), "thread-family");
+  assert.equal(filterHash("people", "aitor"), "person-aitor");
+  assert.equal(filterHash("places", "bilbao"), "place-bilbao");
+  assert.equal(filterOfHash("thread-nothing", facets), null, "an unknown thread is no filter");
+  assert.equal(filterOfHash("m-born", facets), null);
+  assert.equal(filterOfHash("", facets), null);
+});
+
+test("no thread, person or place draws a figure whose lines cross on the face of the sky", () => {
+  const facets = { threads: life.threads, people: life.people, places: life.places };
+  const sky = layout(life.milestones, facets, { periods: life.periods, today: 2026.8 });
+  const xy = (i) => sky[i].position.slice(0, 2);
+  const side = (a, b, c) => Math.sign((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]));
+  const cross = ([a, b], [c, d]) => new Set([a, b, c, d]).size === 4 && side(xy(a), xy(b), xy(c)) * side(xy(a), xy(b), xy(d)) < 0 && side(xy(c), xy(d), xy(a)) * side(xy(c), xy(d), xy(b)) < 0;
+  let figures = 0;
+  for (const [facet, items] of Object.entries(facets)) {
+    items.forEach((_, item) => {
+      const edges = figureOf(sky, matching(sky, { facet, item }));
+      if (edges.length > 1) figures++;
+      edges.forEach((edge, k) => edges.slice(k + 1).forEach((other) => assert.ok(!cross(edge, other), `${facet} ${items[item]}: ${sky[edge[0]].id}–${sky[edge[1]].id} crosses ${sky[other[0]].id}–${sky[other[1]].id}`)));
+    });
+  }
+  assert.ok(figures > 10, "the data draws figures to check");
 });
 
 const overlap = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;

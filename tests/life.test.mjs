@@ -562,6 +562,19 @@ test("the constellations appear only when the camera is close to the sky: the wh
   const source = readFileSync(new URL("../assets/js/scene.js", import.meta.url), "utf8");
   assert.match(source, /lines\.userData\.constellation = true/);
   assert.match(source, /object\.userData\.constellation \? 1 - far : 1/, "they fade out as the camera pulls away");
+  assert.match(source, /groups\.forEach\(\(group\) => figureOf\(marks, group\)/, "each thread of a galaxy is drawn as its figure, not in date order");
+  assert.match(source, /if \(hop\.figure && across\) return flowing\.push\(marks\[from\]\.year <= marks\[to\]\.year \? \[from, to\] : \[to, from\]\);/, "a filter's jump to another galaxy is not a line but dots, from the earlier memory to the later");
+  assert.match(source, /points\.userData\.lay\(flowVertices, false, \(time \* FIGURE_FLOW\) % DOT_GAP\)/, "and the dots flow slowly along it");
+  const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
+  assert.match(engine, /edges: figureOf\(marks, chain, \(i\) => scene\.centerOf\(i\)\.toArray\(\)\)/, "a filter's figure is built once, from where its memories are drawn when it is turned on");
+  assert.match(engine, /scene\.setJumps\(lit \? askPairs\(lit, scene\.slotOf\("clone"\)\) : figure\.edges, !lit\)/, "and kept while the sky turns");
+  assert.match(engine, /const whole = stations\[current\]\.kind === "hero" && selected < 0 && periodView < 0 && play\.year === null;/, "the name of the figure belongs to the whole-life view only");
+  assert.match(engine, /else if \(filter\) priority = 0;/, "with a filter on, no memory is named until pointed at");
+  assert.match(engine, /station\.kind !== "hero" \? `#\$\{station\.id\}` : filter \? `#\$\{filterHash\(filter\.facet, facets\[filter\.facet\]\[filter\.item\]\)\}`/, "returning to the whole life with a filter on keeps it in the address");
+  for (const lang of ["en", "es"]) {
+    const { count } = JSON.parse(readFileSync(new URL(`../content/${lang}.json`, import.meta.url), "utf8")).ui;
+    assert.match(count.memory, /^\{n\} \S+$/, `${lang}: one memory has its own words`);
+  }
 });
 
 test("the guides are built and added to the scene", async () => {

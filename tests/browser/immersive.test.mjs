@@ -2207,6 +2207,40 @@ test("choosing a question lights its memories and draws a line from each to the 
   await close();
 });
 
+test("a thread on draws its figure, names it once beside it, names no memory until pointed at, and keeps its address", async () => {
+  const thread = "family";
+  const held = milestones.filter((entry) => entry.threads.includes(thread));
+  const titles = new Set(held.map((entry) => titleOf(entry.id)));
+  const { page, errors, close } = await open("/");
+  await immersive(page);
+  await page.waitForTimeout(4000);
+  await openFilters(page);
+  const button = page.locator(`.legend[data-facet=threads] button[data-item="${thread}"]`);
+  await button.click();
+  assert.equal(await page.evaluate(() => location.hash), `#thread-${thread}`, "the filter is in the address");
+  await page.waitForFunction((count) => document.querySelector("#scene").dataset.jumps === count, String(held.length - 1), { timeout: 8000 });
+  await page.waitForFunction(() => document.querySelector(".figure-name").dataset.on === "1", null, { timeout: 8000 });
+  assert.equal(await page.locator(".figure-title").textContent(), (await button.textContent()).trim(), "the thread is named once, in its own words");
+  assert.match(await page.locator(".figure-count").textContent(), new RegExp(`^${held.length} memories · \\d{4}–\\d{4}$`, "i"));
+  await page.mouse.move(4, 400);
+  await page.waitForTimeout(1500);
+  const name = await box(page, ".figure-name");
+  assert.ok(name.left >= 12 && name.right <= 1280 - 12 && name.top >= 12, "inside the window");
+  assert.deepEqual((await tagsShown(page)).filter((tag) => titles.has(tag.title)).map((tag) => tag.title), [], "no memory is named until pointed at");
+  await (await reveal(page, ".explore [data-unfilter]")).click();
+  await page.waitForFunction(() => document.querySelector(".figure-name").dataset.on === "", null, { timeout: 5000 });
+  assert.equal(await page.evaluate(() => location.hash), "", "letting go clears the address");
+  assert.deepEqual(errors, []);
+  await close();
+  const shared = await open(`/#thread-${thread}`);
+  await immersive(shared.page);
+  await shared.page.waitForFunction((want) => document.querySelector(".stage").dataset.filter === want, `threads:${thread}`, { timeout: 15000 });
+  await shared.page.waitForFunction(() => document.querySelector(".figure-name").dataset.on === "1", null, { timeout: 15000 });
+  assert.equal(await shared.page.locator(".hud").textContent(), await shared.page.locator("[data-station=hero]").getAttribute("data-hud"), "a shared filter opens on the whole life");
+  assert.deepEqual(shared.errors, []);
+  await shared.close();
+});
+
 test("with five questions the clone's card still shows its email field on laptop and phone screens, in both languages", async () => {
   for (const lang of ["en", "es"]) {
     for (const [width, height] of [[1366, 657], [1280, 640], [390, 844], [360, 640]]) {

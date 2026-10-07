@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { AHEAD, FLOOR, KINDS, SPIN, START, shapeBy, onPath, spinAngle, starfield, unitsOf, yearOf } from "./life.js";
 import { createBackdrop } from "./backdrop.js";
-import { CADENCE, QUALITY, pace } from "./explore.js";
+import { CADENCE, FIGURE_LIFT, QUALITY, figureOf, pace } from "./explore.js";
 import { approach, clamp, ease, eye, slide, turn, zoom } from "./orbit.js";
 import { DIRECT, ENTRANCE, DUST_FRAGMENT, DUST_VERTEX, formedAt, KIND_TINT, MARK_FRAGMENT, MARK_VERTEX, HOVER, RING_GLOW, FRESH_GLOW, POINTER, STAR_FRAGMENT, STAR_VERTEX } from "./shaders.js";
 import { lerp, reducedMotion, seeded, smoothstep } from "./util.js";
@@ -17,6 +17,7 @@ const RATE = 4.2;
 const DOT_MAX = 900;
 const STAR_ZOOM = 0.9;
 const DOT_GAP = 10;
+const FIGURE_FLOW = 6;
 const DRIFT = { rate: 0.11, yaw: 0.14, pitch: 0.02, rest: 2.5 };
 
 export function createScene({ canvas, cloud, marks, future, today, mobile, sky, kinds = [] }) {
@@ -177,7 +178,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
     if (opacity) lineMaterials.push({ material, opacity });
     const points = new THREE.Points(geometry, material);
     points.frustumCulled = false;
-    points.userData.lay = (vertices, closed = false) => {
+    points.userData.lay = (vertices, closed = false, offset = 0) => {
       const count = vertices.length / 3;
       const total = Math.min(1023, closed ? count + 1 : count);
       for (let i = 0; i < total; i++) {
@@ -187,7 +188,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
         dotScreen[i * 3 + 1] = (-dotScratch.y * 0.5 + 0.5) * innerHeight;
         dotScreen[i * 3 + 2] = dotScratch.z > -1 && dotScratch.z < 1 ? 1 : 0;
       }
-      let carry = 0;
+      let carry = offset;
       let out = 0;
       for (let i = 0; i < total - 1 && out < DOT_MAX; i++) {
         const [x0, y0, ok0, x1, y1, ok1] = [dotScreen[i * 3], dotScreen[i * 3 + 1], dotScreen[i * 3 + 2], dotScreen[i * 3 + 3], dotScreen[i * 3 + 4], dotScreen[i * 3 + 5]];
@@ -231,13 +232,13 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
   const turning = [];
   const constellations = () => {
     const threadOf = (mark) => mark.members.threads?.[0] ?? 0;
-    const last = new Map();
+    const groups = new Map();
     const figures = sky.list.map(() => ({ open: [], shadow: [] }));
-    marks.forEach((mark) => {
+    marks.forEach((mark, i) => {
       const key = `${mark.period}:${threadOf(mark)}`;
-      if (last.has(key)) figures[mark.period].open.push(...last.get(key), ...mark.position);
-      last.set(key, mark.position);
+      groups.set(key, [...(groups.get(key) ?? []), i]);
     });
+    groups.forEach((group) => figureOf(marks, group).forEach(([from, to]) => figures[marks[from].period].open.push(...marks[from].position, ...marks[to].position)));
     figures.forEach((figure, k) => {
       const centre = sky.list[k].centre;
       for (const [name, strength] of [["open", 0.34], ["shadow", 0.13]]) {
@@ -287,6 +288,8 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
     return points;
   });
   const ringVertices = new Float32Array(96 * 3);
+  const flowDots = [];
+  const flowVertices = new Float32Array((LINK_SEGMENTS + 1) * 3);
   const yearRing = { list: [], centre: [0, 0, 0], want: 0, fade: 0, galaxy: {} };
 
   const linkBuffer = (opacity) => {
@@ -301,14 +304,14 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
   const strong = linkBuffer(0.7);
   const soft = linkBuffer(0.3);
   const previewLine = linkBuffer(1);
-  const MAX_JUMPS = 160;
+  const MAX_JUMPS = 400;
   const jumpPositions = new Float32Array(MAX_JUMPS * LINK_SEGMENTS * 6);
   const jumpAttribute = dynamic(jumpPositions, 3);
   const jumpLines = new THREE.LineSegments(new THREE.BufferGeometry().setAttribute("position", jumpAttribute), lineMaterial(0.6));
   jumpLines.frustumCulled = false;
   jumpLines.geometry.setDrawRange(0, 0);
   scene.add(jumpLines);
-  const hop = { pairs: [], fade: 0 };
+  const hop = { pairs: [], fade: 0, figure: false };
   const arcInto = (positions, n, from, to, lift, span = 1) => {
     for (let segment = 0; segment < LINK_SEGMENTS; segment++) {
       for (const [slot, t] of [[0, (segment / LINK_SEGMENTS) * span], [1, ((segment + 1) / LINK_SEGMENTS) * span]]) {
@@ -671,15 +674,39 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
     const hopWeight = form;
     hop.fade += ((hop.pairs.length ? 1 : 0) - hop.fade) * (1 - Math.exp(-5 * dt));
     const hops = Math.min(hop.pairs.length, MAX_JUMPS);
+    const flowing = [];
+    let laid = 0;
     if (hops && hopWeight > 0.01) {
-      hop.pairs.slice(0, hops).forEach(([from, to, across], n) => {
+      hop.pairs.slice(0, hops).forEach(([from, to, across]) => {
+        if (hop.figure && across) return flowing.push(marks[from].year <= marks[to].year ? [from, to] : [to, from]);
         centerOf(from, here);
         centerOf(to, target);
-        arcInto(jumpPositions, n, here, target, here.distanceTo(target) * (across ? 0.3 : 0.12));
+        arcInto(jumpPositions, laid++, here, target, here.distanceTo(target) * (hop.figure ? 0 : across ? 0.3 : 0.12));
       });
       jumpAttribute.needsUpdate = true;
     }
-    jumpLines.geometry.setDrawRange(0, hops * LINK_SEGMENTS * 2);
+    jumpLines.geometry.setDrawRange(0, laid * LINK_SEGMENTS * 2);
+    while (flowDots.length < flowing.length) {
+      const points = dottedPath(0);
+      scene.add(points);
+      flowDots.push(points);
+    }
+    flowDots.forEach((points, n) => {
+      points.visible = n < flowing.length;
+      if (!points.visible) return;
+      centerOf(flowing[n][0], here);
+      centerOf(flowing[n][1], target);
+      const lift = here.distanceTo(target) * FIGURE_LIFT;
+      for (let step = 0; step <= LINK_SEGMENTS; step++) {
+        const t = step / LINK_SEGMENTS;
+        flowVertices[step * 3] = lerp(here.x, target.x, t);
+        flowVertices[step * 3 + 1] = lerp(here.y, target.y, t);
+        flowVertices[step * 3 + 2] = lerp(here.z, target.z, t) + 4 * t * (1 - t) * lift;
+      }
+      points.userData.lay(flowVertices, false, (time * FIGURE_FLOW) % DOT_GAP);
+      points.material.color.copy(ink.value);
+      points.material.opacity = 0.75 * hop.fade * hopWeight;
+    });
     jumpLines.material.opacity = 0.6 * hop.fade * hopWeight;
     jumpLines.visible = jumpLines.material.opacity > 0.01;
     canvas.dataset.jumps = jumpLines.visible ? String(hops) : "";
@@ -753,7 +780,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
     setRingGlow: (k) => (state.ring = k),
     setFresh: (indices) => (fresh = indices),
     setPreview: (index) => (state.preview = index),
-    setJumps: (pairs) => (hop.pairs = pairs),
+    setJumps: (pairs, figure = false) => Object.assign(hop, { pairs, figure }),
     slotOf: (name) => ({ today: marks.length, book: marks.length + 2, clone: marks.length + 3 })[name],
     setReveal: (year) => {
       dustUniforms.uReveal.value = year === null ? 1e4 : unitsOf(year);
