@@ -112,27 +112,32 @@
     "early": {
       "name": "Primeros años",
       "title": "Primeros <em>años.</em>",
-      "intro": "Desde que nací hasta que cumplí siete años."
+      "intro": "Nací en Bilbao en abril de 1980 y pasé mis primeros años entre un caserío con vacas y un quinto sin ascensor. Llegó un hermano, empezó la escuela, y un patio a pocos metros de casa era el mundo entero. Casi todo lo que vino después empezó en esas habitaciones pequeñas.",
+      "hint": "Un caserío, un patio, un hermano"
     },
     "school": {
       "name": "Años de escuela",
       "title": "Años <em>de escuela.</em>",
-      "intro": "De los siete a los catorce."
+      "intro": "A los ocho años la casa se rompió una noche, y la familia que conocía cambió de forma. Pasé una temporada con mis abuelos en Galicia, aprendí un deporte sobre un tatami, me desgarré un músculo y me rompí las paletas. Fueron los años en que aprendí que las cosas se acaban y que el cuerpo se cura.",
+      "hint": "Una casa que se rompió, un cuerpo que sanó"
     },
     "youth": {
       "name": "Juventud",
       "title": "<em>Juventud.</em>",
-      "intro": "De los catorce a los veinticinco."
+      "intro": "Repetí un curso por rebeldía y me pagué mi primer portátil. Entre un lenguaje de programación antiguo y JavaScript encontré un oficio que no pedía permiso a nadie. Después llegaron una primera nómina y, tras ella, una primera ruptura.",
+      "hint": "Un portátil, un oficio, una primera nómina"
     },
     "building": {
       "name": "Construir una vida",
       "title": "Construir <em>una vida.</em>",
-      "intro": "De los veinticinco a los cuarenta."
+      "intro": "Trabajé para otros y después levanté lo mío: una marca de camisetas que salió de la nieve, una empresa que vendí desde el otro lado del mundo. Me fui con una mochila y me quedé lejos de donde empecé. Allí una amiga y una película me presentaron a Yuri, y nos casamos con dos testigos.",
+      "hint": "Empresas, una mochila y Yuri"
     },
     "midlife": {
       "name": "Mitad de la vida",
       "title": "Mitad <em>de la vida.</em>",
-      "intro": "De los cuarenta a los cincuenta y cinco."
+      "intro": "A los cuarenta fui padre, construí una casa y vi cómo el agua se la llevaba. Se fue mi abuelo, mi hijo y yo nos pusimos el cinturón blanco y empecé a escribir mi vida. Ahora estoy reuniendo los papeles para volver.",
+      "hint": "Un hijo, una riada, el camino de vuelta"
     },
     "elder": {
       "name": "Madurez",

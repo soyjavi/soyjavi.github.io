@@ -112,27 +112,32 @@
     "early": {
       "name": "Early years",
       "title": "Early <em>years.</em>",
-      "intro": "From birth to the day I turned seven."
+      "intro": "I was born in Bilbao in April 1980 and spent my first years between a farmhouse with cows and a fifth floor with no lift. A brother arrived, school began, and a courtyard a few metres from home was the whole world. Most of what came later started in these small rooms.",
+      "hint": "A farmhouse, a courtyard, a brother"
     },
     "school": {
       "name": "School years",
       "title": "School <em>years.</em>",
-      "intro": "From seven to fourteen."
+      "intro": "At eight the house broke one night, and the family I knew changed shape. I spent a season with my grandparents in Galicia, learned a sport on a mat, tore a muscle and broke my front teeth. These were the years I learned that things end, and that a body heals.",
+      "hint": "A house that broke, a body that healed"
     },
     "youth": {
       "name": "Youth",
       "title": "<em>Youth.</em>",
-      "intro": "From fourteen to twenty-five."
+      "intro": "I failed a year out of rebellion and paid for my first laptop myself. Between an old programming language and JavaScript I found a trade that asked nobody's permission. Then came a first payslip and, after it, a first breakup.",
+      "hint": "A laptop, a trade, a first payslip"
     },
     "building": {
       "name": "Building a life",
       "title": "Building <em>a life.</em>",
-      "intro": "From twenty-five to forty."
+      "intro": "I worked for others and then built my own: a t-shirt brand that came out of the snow, a company I sold from the other side of the world. I left with one backpack and stayed far from where I started. There a friend and a film introduced me to Yuri, and we married with two witnesses.",
+      "hint": "Companies, a backpack, and Yuri"
     },
     "midlife": {
       "name": "Midlife",
       "title": "<em>Midlife.</em>",
-      "intro": "From forty to fifty-five."
+      "intro": "At forty I became a father, built a house and watched the water take it. My grandfather went, my son and I put on white belts, and I began writing my life down. Now I am gathering the papers to go back.",
+      "hint": "A son, a flood, the way back"
     },
     "elder": {
       "name": "Elder years",

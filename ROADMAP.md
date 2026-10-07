@@ -110,12 +110,6 @@ _None._
   `decision · creator · low`
   The previous page listed one; the new site shows only `hello@soyjavi.com` and X.
 
-- **AGES-COPY** — Write the intro and the hint of each age in his own words
-  `content · creator · normal`
-  Each age of the sky carries a title and a one-line intro (`ages` in `content/en.json` and `es.json`); today they say only the ages ("From seven to fourteen."). The creator or his biographer writes them as public text in his voice, in both languages, and decides which ages deserve a poetic title (Shakespeare's seven, from the infant to second childhood, are a source). No memory is moved by hand: its age decides.
-  The hint under the age in the whole-life view says today which threads mark the age against the rest of the life ("Marked by body and family"); an own line per age in `ages.<id>.hint`, in both languages, replaces it.
-  accept: every age has a title, an intro and a hint of his in both languages; the voice rules and `npm test` hold.
-
 ### Checks on real services and devices
 
 - **BRAND-BYLINE** — Is the book's byline a first name or a full name?

@@ -302,21 +302,22 @@ test("the hint under an age says the threads that mark it against the rest of th
   assert.deepEqual(distinctive(everything.slice(3, 6), everything, order, 2), ["body", "craft"]);
   const html = renderSite(content);
   for (const id of life.periods) for (const page of ["index.html", "es/index.html"]) assert.match(html.get(page), new RegExp(`<section class="chapter period" id="period-${id}" data-hint="[^"]+"`), `${page} ${id}`);
-  assert.match(content.dict.en.periods.early.hint, /^Marked by /);
-  assert.match(content.dict.es.periods.early.hint, /^Huella de /);
+  assert.equal(content.dict.en.periods.early.hint, content.dict.en.ages.early.hint, "the creator's own line wins");
   const dir = mkdtempSync(join(tmpdir(), "hint-"));
   try {
     cpSync(`${root}content`, dir, { recursive: true });
     for (const lang of LANGS) {
       const file = join(dir, `${lang}.json`);
       const words = JSON.parse(readFileSync(file, "utf8"));
+      for (const age of Object.values(words.ages)) delete age.hint;
       words.ages.early.hint = `own ${lang}`;
       writeFileSync(file, JSON.stringify(words));
     }
     const own = loadContent(pathToFileURL(`${dir}/`));
     assert.equal(own.dict.en.periods.early.hint, "own en");
     assert.equal(own.dict.es.periods.early.hint, "own es");
-    assert.match(own.dict.en.periods.school.hint, /^Marked by /, "the other ages keep the derived one");
+    assert.match(own.dict.en.periods.school.hint, /^Marked by /, "an age without its own line keeps the derived one");
+    assert.match(own.dict.es.periods.school.hint, /^Huella de /);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
