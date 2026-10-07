@@ -295,20 +295,25 @@ Two and a half seconds after the last touch, wherever it is (the hero, a memory,
 - **Sound.** On by default, and the button (pressed, never inverted) only exists where Web Audio does. A browser allows sound only after a
   gesture, so nothing is created until the first click, tap or key; pressing the Sound button as that first gesture
   turns it off instead. The choice is not stored and nothing is fetched. Everything is synthesised (`tones.js` holds the maths, `sound.js`
-  the Web Audio, `createGraph(context)` builds it on any context so it can be rendered offline) and it is meant to calm.
+  the Web Audio, `createGraph(context, { random, profile, output })` builds it on any context so it can be rendered offline, and `stop()` ends every source in it) and it is meant to calm.
   The bed is slow chords in D major without its leading tone, tuned on 432: five open voicings of stacked fifths and
-  fourths (Dmaj9, Gmaj9, Bm, Asus2, Em7), each 24 to 38 s long and melting into a random different next one over 9 s in the whole-life view; with an age in view (its age view or one of its memories) the bed holds that age's chord (`chordOfAge`, the age's index in the five) and the old chord fades as the new one rises over three seconds (`TONES.change`), and going back to the whole life starts again from the home chord,
-  made of detuned triangle pairs under a low-pass that breathes, a few soft sines an octave above for shimmer, a little
-  dark noise for air and a dry sine sub between 36 and 61 Hz. Everything but the sub goes through one generated
+  fourths (Dmaj9, Gmaj9, Bm, Asus2, Em7), each 24 to 38 s long and melting into a random different next one over 9 s in the whole-life view; with an age in view (its age view or one of its memories) the bed holds that age's chord (`chordOfAge`, the age's index in the five) and the old chord fades as the new one rises over five seconds (`change` of the profile), and going back to the whole life starts again from the home chord,
+  made of detuned triangle pairs under a low-pass that drifts, a few soft sines an octave above for shimmer, a little
+  pink noise for air (110 Hz to 1.5 kHz, as loud at 48 kHz as the brown air it replaced) and a dry sine sub between 36 and 61 Hz. The chords and the air
+  breathe: their level swells and settles once every 11 s, 4.4 s in and 6.6 s out (`TONES.breath`, about 5.5 breaths a minute, the pace of resonance breathing), about two decibels each way on the chords and three on the air, felt more than heard. Everything but the sub goes through one generated
   convolution reverb (stereo, five seconds, darkened). The master chain is a 2.2 kHz low-pass, a 30 Hz high-pass and a
   gain of 0.7; the bed sits near -42 dBFS RMS, a memory's note never above about -30 dBFS and well above the bed and nothing above 5 kHz
   (-68 dB). A memory opens with a glassy four-partial bell whose pitch walks D major pentatonic over two octaves
   with the date (290 to 860 Hz), 3, 4.5 or 6 s long by weight, at most four voices, 0.3 s apart and quieter when
   several ring; changing galaxy adds a slow air sweep (rising for a later memory, falling for an earlier one) and the
-  bell arrives 0.9 s after it. The pointer reaching a cloud plays one barely audible 432 Hz tone, at most once every
+  bell arrives 0.9 s after it. The pointer reaching a cloud plays one barely audible tone, the note of the sounding chord nearest to A 432 (`tickOf`), at most once every
   1.4 s; the book and the clone each get a low, slow swell (G2 and D3). Turning it on fades in over about ten seconds;
   turning it off fades out and suspends the context four seconds later, as a hidden tab does and the scene falling back to
-  the flat page closes it. Under reduced motion the scene, and so the button, is not there.
+  the flat page closes it. Under reduced motion the scene, and so the button, is not there. What the calm rests on is the
+  absence of a beat, consonant open chords, soft sustained timbres, slow changes, steady noise and a low level, not a
+  frequency: the tuning on 432 is a taste and the site claims no effect for it. `PROFILES.next` is what plays and
+  `PROFILES.now` the sound before the breath, the pink air, the chord tone and the five-second glide, kept so the tests
+  can prove the change holds the same level.
 - **Pace.** The sky is drawn like film, at 24 frames a second and never faster, whatever the screen's refresh rate
   (`CADENCE` and `pace` in `explore.js`; on a 120 Hz screen every fifth refresh, on a 60 Hz one an uneven 2-and-3). The
   cap holds while the camera is dragged or flown as well: the interface (card, controls, finder) is not drawn by the

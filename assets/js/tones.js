@@ -18,7 +18,6 @@ export const TONES = {
   soften: 2200,
   floor: 30,
   fade: 9,
-  change: 3,
   chordFrom: 24,
   chordTo: 38,
   detune: 4,
@@ -30,7 +29,6 @@ export const TONES = {
   airLevel: 0.012,
   airCut: 520,
   room: 1,
-  reverb: 5,
   reach: 0.03,
   bed: { pad: [0.35, 0.8], shimmer: [0.1, 1], air: [0.2, 0.9], sub: [1, 0] },
   note: [0.8, 1],
@@ -51,6 +49,13 @@ export const TONES = {
   suspendAfter: 4000,
   interval: 2000,
   horizon: 4,
+  breath: { period: 11, inhale: 0.4, pad: 0.25, air: 0.3, harmonics: 12 },
+  pink: { level: 0.0108, low: 110, high: 1500 },
+};
+
+export const PROFILES = {
+  now: { breath: false, pink: false, chordTick: false, change: 3, reverb: 5 },
+  next: { breath: true, pink: true, chordTick: true, change: 5, reverb: 5 },
 };
 
 const D3 = -19;
@@ -121,8 +126,50 @@ export function noiseOf(length, seed) {
   return data;
 }
 
-export function impulseOf(rate, seed = 1) {
-  const length = Math.floor(rate * TONES.reverb * 1.1);
+export function pinkOf(length, seed) {
+  const random = seeded(seed);
+  const data = new Float32Array(length);
+  let [b0, b1, b2] = [0, 0, 0];
+  let peak = 0;
+  for (let i = 0; i < length; i++) {
+    const white = random() * 2 - 1;
+    b0 = 0.99765 * b0 + white * 0.099046;
+    b1 = 0.963 * b1 + white * 0.2965164;
+    b2 = 0.57 * b2 + white * 1.0526913;
+    data[i] = b0 + b1 + b2 + white * 0.1848;
+    peak = Math.max(peak, Math.abs(data[i]));
+  }
+  for (let i = 0; i < length; i++) data[i] /= peak;
+  return data;
+}
+
+export function breathOf(phase, inhale = TONES.breath.inhale) {
+  const at = phase - Math.floor(phase);
+  return at < inhale ? -Math.cos((Math.PI * at) / inhale) : Math.cos((Math.PI * (at - inhale)) / (1 - inhale));
+}
+
+export function breathWave(inhale = TONES.breath.inhale, harmonics = TONES.breath.harmonics, steps = 2048) {
+  const real = new Float32Array(harmonics + 1);
+  const imag = new Float32Array(harmonics + 1);
+  for (let i = 0; i < steps; i++) {
+    const phase = i / steps;
+    const value = breathOf(phase, inhale);
+    for (let k = 1; k <= harmonics; k++) {
+      real[k] += (2 * value * Math.cos(2 * Math.PI * k * phase)) / steps;
+      imag[k] += (2 * value * Math.sin(2 * Math.PI * k * phase)) / steps;
+    }
+  }
+  return { real, imag };
+}
+
+export function tickOf(index) {
+  const near = (frequency) => Math.abs(Math.log2(frequency / TONES.tick));
+  const fold = (frequency) => frequency * 2 ** Math.round(Math.log2(TONES.tick / frequency));
+  return CHORDS[index % CHORDS.length].pad.map((step) => fold(hz(D3 + step))).reduce((best, frequency) => (near(frequency) < near(best) - 1e-9 ? frequency : best));
+}
+
+export function impulseOf(rate, seed = 1, seconds = PROFILES.next.reverb) {
+  const length = Math.floor(rate * seconds * 1.1);
   return [0, 1].map((channel) => {
     const random = seeded(seed + channel * 7919);
     const data = new Float32Array(length);
@@ -130,9 +177,9 @@ export function impulseOf(rate, seed = 1) {
     for (let i = 0; i < length; i++) {
       const time = i / rate;
       const onset = clamp01((time - TONES.reach) / 0.05);
-      const decay = Math.exp((-6.9078 * time) / TONES.reverb);
+      const decay = Math.exp((-6.9078 * time) / seconds);
       const tail = clamp01((length - i) / (rate * 0.4));
-      const cutoff = 3200 * (600 / 3200) ** clamp01(time / TONES.reverb);
+      const cutoff = 3200 * (600 / 3200) ** clamp01(time / seconds);
       low += (1 - Math.exp((-2 * Math.PI * cutoff) / rate)) * (random() * 2 - 1 - low);
       data[i] = low * onset * decay * tail;
     }

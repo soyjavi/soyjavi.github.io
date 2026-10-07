@@ -1,12 +1,12 @@
-import { TONES, chordOf, chordOfAge, nextChord, crowdOf, impulseOf, lengthOf, noiseOf, noteOf, peakOf, spanOf, swellOf, tickDue } from "./tones.js";
+import { PROFILES, TONES, breathOf, breathWave, chordOf, chordOfAge, nextChord, crowdOf, impulseOf, lengthOf, noiseOf, noteOf, peakOf, pinkOf, spanOf, swellOf, tickDue, tickOf } from "./tones.js";
 
 const BELL = [[1, 1, 1], [2, 0.22, 0.5], [3, 0.08, 0.3], [4.07, 0.03, 0.2]];
 const SWELL = [[1, 1, 1], [1.5, 0.25, 1.2]];
 const HOVER = [[1, 1, 1]];
 
-export function createGraph(context, random = Math.random) {
+export function createGraph(context, { random = Math.random, profile = PROFILES.next, output = context.destination } = {}) {
   const rate = context.sampleRate;
-  const state = { at: context.currentTime + 0.05, chord: 0, lastNote: -Infinity, lastTick: -Infinity, period: -1, year: 0, voices: [], layers: [], hold: null };
+  const state = { at: context.currentTime + 0.05, chord: 0, lastNote: -Infinity, lastTick: -Infinity, period: -1, year: 0, voices: [], layers: [], hold: null, stopped: false };
 
   const gain = (value = 0) => {
     const node = context.createGain();
@@ -32,8 +32,10 @@ export function createGraph(context, random = Math.random) {
     channels.forEach((data, k) => made.getChannelData(k).set(data));
     return made;
   };
+  const running = [];
   const slow = (frequency, depth, target) => {
     const lfo = wave("sine", frequency);
+    running.push(lfo);
     const swing = gain(depth);
     lfo.connect(swing);
     swing.connect(target);
@@ -47,10 +49,10 @@ export function createGraph(context, random = Math.random) {
   mix.connect(soften);
   soften.connect(floor);
   floor.connect(master);
-  master.connect(context.destination);
+  master.connect(output);
 
   const room = context.createConvolver();
-  room.buffer = buffer(impulseOf(rate));
+  room.buffer = buffer(impulseOf(rate, 1, profile.reverb));
   const back = gain(TONES.room);
   room.connect(back);
   back.connect(mix);
@@ -85,15 +87,43 @@ export function createGraph(context, random = Math.random) {
 
   const noise = buffer([noiseOf(rate * 6, 11)]);
   const air = context.createBufferSource();
-  const airBand = filter("bandpass", TONES.airCut, 0.6);
-  const airLevel = gain(TONES.airLevel);
-  air.buffer = noise;
+  const airLevel = gain(profile.pink ? TONES.pink.level : TONES.airLevel);
+  const airOut = gain(1);
+  if (profile.pink) {
+    const airLow = filter("highpass", TONES.pink.low, 0.5);
+    const airHigh = filter("lowpass", TONES.pink.high, 0.5);
+    air.buffer = buffer([pinkOf(rate * 6, 11)]);
+    air.connect(airLow);
+    airLow.connect(airHigh);
+    airHigh.connect(airLevel);
+  } else {
+    const airBand = filter("bandpass", TONES.airCut, 0.6);
+    air.buffer = noise;
+    air.connect(airBand);
+    airBand.connect(airLevel);
+  }
   air.loop = true;
-  air.connect(airBand);
-  airBand.connect(airLevel);
-  feed(airLevel, airs);
-  slow(0.043, TONES.airLevel * 0.6, airLevel.gain);
+  airLevel.connect(airOut);
+  feed(airOut, airs);
+  slow(0.043, airLevel.gain.value * 0.6, airLevel.gain);
   air.start();
+  running.push(air);
+
+  const lungs = { start: context.currentTime, period: TONES.breath.period };
+  if (profile.breath) {
+    const { real, imag } = breathWave();
+    const lfo = context.createOscillator();
+    lfo.setPeriodicWave(context.createPeriodicWave(real, imag, { disableNormalization: true }));
+    lfo.frequency.value = 1 / lungs.period;
+    [[padOut, TONES.breath.pad], [airOut, TONES.breath.air]].forEach(([node, depth]) => {
+      const swing = gain(depth);
+      lfo.connect(swing);
+      swing.connect(node.gain);
+    });
+    lungs.start = context.currentTime;
+    lfo.start(lungs.start);
+    running.push(lfo);
+  }
 
   const sweepOf = (nodes) => () => nodes.forEach((node) => node.disconnect());
 
@@ -110,7 +140,7 @@ export function createGraph(context, random = Math.random) {
       }
       return buses.get(output);
     };
-    const chord = { buses, oscillators: [], end };
+    const chord = { buses, oscillators: [], end, start, index };
     state.layers.push(chord);
     const layer = (oscillator, level, output) => {
       const envelope = gain(0);
@@ -186,9 +216,13 @@ export function createGraph(context, random = Math.random) {
     source.onended = sweepOf([source, band, envelope]);
   };
 
+  const sounding = (at) => state.layers.filter((layer) => layer.start <= at && layer.end > at).at(-1)?.index ?? state.chord;
+
   return {
     master,
+    breathing: (at = context.currentTime) => (profile.breath ? (breathOf((at - lungs.start) / lungs.period) + 1) / 2 : null),
     run(horizon = TONES.horizon) {
+      if (state.stopped) return;
       while (state.at < context.currentTime + horizon) {
         const span = spanOf(random());
         chordAt(state.chord, state.at, span);
@@ -197,32 +231,35 @@ export function createGraph(context, random = Math.random) {
       }
     },
     age(age) {
+      if (state.stopped) return;
       const hold = age < 0 ? null : age;
       if (hold === state.hold) return;
       state.hold = hold;
       const now = context.currentTime;
       state.layers.forEach(({ buses, oscillators, end }) => {
         if (end <= now) return;
-        buses.forEach((bus) => bus.gain.setTargetAtTime(0, now, TONES.change / 3));
+        buses.forEach((bus) => bus.gain.setTargetAtTime(0, now, profile.change / 3));
         oscillators.forEach((oscillator) => {
           try {
-            oscillator.stop(now + TONES.change * 2);
+            oscillator.stop(now + profile.change * 2);
           } catch {}
         });
       });
       state.layers = [];
       state.chord = chordOfAge(age);
       const span = spanOf(random());
-      chordAt(state.chord, now, span, TONES.change);
+      chordAt(state.chord, now, span, profile.change);
       state.at = now + span;
       state.chord = nextChord(state.hold, state.chord, random());
     },
     fade(on) {
+      if (state.stopped) return;
       const now = context.currentTime;
       master.gain.cancelScheduledValues(now);
       master.gain.setTargetAtTime(on ? TONES.master : 0, now, on ? TONES.fadeIn : TONES.fadeOut);
     },
     memory({ year, weight, period = -1 }, at = context.currentTime) {
+      if (state.stopped) return;
       if (!tickDue(at, state.lastNote, TONES.noteGap)) return;
       state.lastNote = at;
       const travelled = period >= 0 && state.period >= 0 && period !== state.period;
@@ -232,15 +269,29 @@ export function createGraph(context, random = Math.random) {
       strike(noteOf(year), { peak: peakOf(weight), attack: 0.02, length: lengthOf(weight), partials: BELL, outputs: notes, when: at + (travelled ? TONES.arrival : 0) });
     },
     swell(kind, at = context.currentTime) {
+      if (state.stopped) return;
       strike(swellOf(kind), { peak: TONES.swellPeak, attack: 0.9, length: 6, partials: SWELL, outputs: swells, when: at });
     },
     tick(at = context.currentTime) {
+      if (state.stopped) return;
       if (!tickDue(at, state.lastTick)) return;
       state.lastTick = at;
-      strike(TONES.tick, { peak: TONES.tickPeak, attack: 0.15, length: 1.4, partials: HOVER, outputs: hovers, when: at });
+      strike(profile.chordTick ? tickOf(sounding(at)) : TONES.tick, { peak: TONES.tickPeak, attack: 0.15, length: 1.4, partials: HOVER, outputs: hovers, when: at });
     },
     travel(direction, at = context.currentTime) {
+      if (state.stopped) return;
       sweep(direction, at);
+    },
+    stop() {
+      if (state.stopped) return;
+      state.stopped = true;
+      [...running, ...state.layers.flatMap((layer) => layer.oscillators)].forEach((node) => {
+        try {
+          node.stop(context.currentTime);
+        } catch {}
+      });
+      state.layers = [];
+      master.disconnect();
     },
   };
 }

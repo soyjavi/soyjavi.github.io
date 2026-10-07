@@ -2036,7 +2036,7 @@ const audioStub = (context) =>
   context.addInitScript(() => {
     window.__audio = { time: 0, contexts: 0, oscillators: [], sources: 0, convolvers: 0, resumed: 0, suspended: 0, gains: [], intervals: 0 };
     const param = (name) => ({ value: 0, name, setValueAtTime() {}, linearRampToValueAtTime() {}, exponentialRampToValueAtTime() {}, setTargetAtTime(value) { window.__audio.gains.push([name, value]); }, cancelScheduledValues() {} });
-    const node = (extra = {}) => ({ connect() {}, disconnect() {}, start() { window.__audio.oscillators.push(this.frequency?.value); }, stop() {}, gain: param("gain"), frequency: param("frequency"), detune: param("detune"), Q: param("q"), ...extra });
+    const node = (extra = {}) => ({ connect() {}, disconnect() {}, start() { window.__audio.oscillators.push(this.frequency?.value); }, stop() {}, setPeriodicWave() {}, gain: param("gain"), frequency: param("frequency"), detune: param("detune"), Q: param("q"), ...extra });
     window.AudioContext = class {
       constructor() {
         window.__audio.contexts++;
@@ -2049,6 +2049,7 @@ const audioStub = (context) =>
       createOscillator() { return node(); }
       createBiquadFilter() { return node(); }
       createConvolver() { window.__audio.convolvers++; return node(); }
+      createPeriodicWave() { return {}; }
       createBuffer(channels, length) { return { getChannelData: () => new Float32Array(length) }; }
       createBufferSource() { return node({ start() { window.__audio.sources++; } }); }
       resume() { window.__audio.resumed++; return Promise.resolve(); }
@@ -2555,6 +2556,88 @@ test("a soft tone answers the pointer reaching a cloud but never twice in a mome
     document.dispatchEvent(new Event("visibilitychange"));
   });
   assert.equal(await page.evaluate(() => window.__audio.resumed), resumed + 1, "and it comes back with the tab");
+  assert.deepEqual(errors, []);
+  await close();
+});
+
+test("rendered offline at 48 kHz, the bed breathes at the level of the sound before it, its tone joins the sounding chord, and it stops for good", async () => {
+  const { page, errors, close } = await open("/404.html");
+  const heard = await page.evaluate(async () => {
+    const { createGraph } = await import("/assets/js/sound.js");
+    const { PROFILES, TONES, seeded } = await import("/assets/js/tones.js");
+    const rate = 48000;
+    const seconds = 40;
+    const render = async (profile, { only, stop } = {}) => {
+      const saved = { ...TONES };
+      if (only === "air") Object.assign(TONES, { padLevel: 0, shimmerLevel: 0, subLevel: 0 });
+      const context = new OfflineAudioContext(1, rate * (only ? 20 : seconds), rate);
+      const sources = { started: 0, ended: 0 };
+      for (const make of ["createOscillator", "createBufferSource"]) {
+        const create = context[make].bind(context);
+        context[make] = () => {
+          const node = create();
+          const begin = node.start.bind(node);
+          node.start = (...args) => (sources.started++, node.addEventListener("ended", () => sources.ended++), begin(...args));
+          return node;
+        };
+      }
+      const graph = createGraph(context, { random: seeded(5), profile });
+      graph.master.gain.value = TONES.master;
+      graph.run(seconds);
+      Object.assign(TONES, saved);
+      if (stop) graph.stop();
+      const data = (await context.startRendering()).getChannelData(0);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      const power = (from, to) => {
+        let sum = 0;
+        for (let i = Math.floor(from * rate); i < Math.floor(to * rate); i++) sum += data[i] * data[i];
+        return sum / ((to - from) * rate);
+      };
+      const times = Array.from({ length: 120 }, (_, k) => 8 + k * 0.25);
+      return { graph, level: 10 * Math.log10(power(8, data.length / rate)), envelope: only ? [] : times.map((at) => 10 * Math.log10(power(at, at + 1))), times, peak: data.reduce((most, value) => Math.max(most, Math.abs(value)), 0), sources };
+    };
+    const now = await render(PROFILES.now);
+    const next = await render(PROFILES.next);
+    const brown = await render(PROFILES.now, { only: "air" });
+    const pink = await render({ ...PROFILES.now, pink: true }, { only: "air" });
+    const stopped = await render(PROFILES.next, { only: "all", stop: true });
+    const breath = next.times.map((at) => next.graph.breathing(at + 0.5));
+    const mean = (list) => list.reduce((sum, value) => sum + value, 0) / list.length;
+    const follows = (list) => {
+      const [a, b] = [mean(list), mean(breath)];
+      const top = list.reduce((sum, value, k) => sum + (value - a) * (breath[k] - b), 0);
+      return top / Math.sqrt(list.reduce((sum, value) => sum + (value - a) ** 2, 0) * breath.reduce((sum, value) => sum + (value - b) ** 2, 0));
+    };
+    const tones = (profile, act) => {
+      const context = new OfflineAudioContext(1, rate, rate);
+      const made = [];
+      const create = context.createOscillator.bind(context);
+      context.createOscillator = () => made[made.push(create()) - 1];
+      const graph = createGraph(context, { random: seeded(5), profile });
+      return act(graph, () => made.at(-1).frequency.value);
+    };
+    const inAge = (profile, age) => tones(profile, (graph, last) => (graph.age(age), graph.tick(0), last()));
+    const across = tones(PROFILES.next, (graph, last) => {
+      graph.run(200);
+      return Array.from({ length: 90 }, (_, k) => (graph.tick(1 + k * 2), Math.round(last())));
+    });
+    return {
+      now: now.level, next: next.level, brown: brown.level, pink: pink.level, followsNext: follows(next.envelope), followsNow: follows(now.envelope), off: now.graph.breathing(10),
+      ages: [inAge(PROFILES.now, 3), inAge(PROFILES.next, 3), inAge(PROFILES.next, 0)], across: [...new Set(across)], silent: stopped.peak, sources: stopped.sources,
+    };
+  });
+  const { tickOf } = await import("../../assets/js/tones.js");
+  assert.ok(Math.abs(heard.next - heard.now) < 1, `the same level (${heard.now.toFixed(1)} and ${heard.next.toFixed(1)} dB)`);
+  assert.ok(Math.abs(heard.pink - heard.brown) < 0.75, `the pink air is as loud as the brown (${heard.brown.toFixed(1)} and ${heard.pink.toFixed(1)} dB)`);
+  assert.ok(heard.next < -36 && heard.next > -48, "still a quiet bed");
+  assert.ok(heard.followsNext > 0.5, `its loudness follows the breath (${heard.followsNext.toFixed(2)})`);
+  assert.ok(heard.followsNext - heard.followsNow > 0.5, `the old bed does not (${heard.followsNow.toFixed(2)})`);
+  assert.equal(heard.off, null, "a bed without breath says so");
+  assert.deepEqual(heard.ages.map(Math.round), [432, Math.round(tickOf(3)), 432], "in an age the tone is that age's chord, only in the sound that plays now");
+  assert.ok(heard.across.length > 1, `across the whole life the tone follows each chord as it sounds (${heard.across.join(", ")})`);
+  assert.ok(heard.across.every((tone) => [0, 1, 2, 3, 4].some((index) => Math.round(tickOf(index)) === tone)));
+  assert.equal(heard.silent, 0, "a stopped bed makes no sound at all");
+  assert.ok(heard.sources.started > 10 && heard.sources.ended === heard.sources.started, `and every source in it ends, so nothing keeps running (${heard.sources.ended} of ${heard.sources.started})`);
   assert.deepEqual(errors, []);
   await close();
 });

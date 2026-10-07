@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { CHORDS, PENTATONIC, TONES, chordAfter, chordOf, crowdOf, hz, impulseOf, lengthOf, noiseOf, noteOf, peakOf, seeded, spanOf, swellOf, tickDue } from "../assets/js/tones.js";
+import { CHORDS, PENTATONIC, PROFILES, TONES, breathOf, breathWave, chordAfter, chordOf, crowdOf, hz, impulseOf, lengthOf, noiseOf, noteOf, peakOf, pinkOf, seeded, spanOf, swellOf, tickDue, tickOf } from "../assets/js/tones.js";
 
 const SCALE = [0, 2, 4, 5, 7, 9];
 const semitonesFromD = (frequency) => 12 * Math.log2(frequency / hz(-19));
@@ -129,15 +129,72 @@ test("a note that follows the camera into another galaxy waits for it only brief
 test("each age holds its own chord of the bed, and the whole life wanders from the home chord", async () => {
   const { chordOfAge, nextChord } = await import("../assets/js/tones.js");
   const { readFileSync } = await import("node:fs");
-  assert.equal(TONES.change >= 2 && TONES.change <= 4, true, "the bed glides to an age in two to four seconds");
+  assert.equal(PROFILES.now.change, 3, "the bed before glided to an age in three seconds");
+  assert.ok(PROFILES.next.change > PROFILES.now.change && PROFILES.next.change <= 6, "the bed that plays glides more gently, never slower than six");
   assert.equal(chordOfAge(-1), 0, "the whole life starts from the home chord");
   assert.deepEqual([0, 1, 2, 3, 4].map(chordOfAge), [0, 1, 2, 3, 4], "five ages, five chords");
   assert.equal(chordOfAge(5), 0);
   assert.equal(nextChord(3, 1, 0.9), 3, "inside an age the bed keeps its chord");
   assert.notEqual(nextChord(null, 1, 0.9), 1, "the whole life keeps wandering");
   const sound = readFileSync(new URL("../assets/js/sound.js", import.meta.url), "utf8");
-  assert.match(sound, /buses\.forEach\(\(bus\) => bus\.gain\.setTargetAtTime\(0, now, TONES\.change \/ 3\)\)/, "the old chord fades on its own bus as the new one rises, without touching its envelopes");
+  assert.match(sound, /buses\.forEach\(\(bus\) => bus\.gain\.setTargetAtTime\(0, now, profile\.change \/ 3\)\)/, "the old chord fades on its own bus as the new one rises, without touching its envelopes");
   assert.match(sound, /graph\.age\(state\.age\);/, "an age chosen before the sound starts is kept");
   const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
   assert.match(engine, /sound\.age\(viewed\);/);
+});
+
+test("the bed that plays and the one before it differ only in the improvements, each of which can be heard alone", () => {
+  assert.deepEqual(Object.keys(PROFILES.now).sort(), Object.keys(PROFILES.next).sort());
+  assert.deepEqual([PROFILES.now.breath, PROFILES.now.pink, PROFILES.now.chordTick], [false, false, false]);
+  assert.deepEqual([PROFILES.next.breath, PROFILES.next.pink, PROFILES.next.chordTick], [true, true, true]);
+  assert.equal(PROFILES.now.reverb, PROFILES.next.reverb, "the room stays until the creator chooses a shorter one");
+});
+
+test("the bed breathes at resonance pace, about five and a half breaths a minute, breathing out longer than in", () => {
+  const { period, inhale, pad, air } = TONES.breath;
+  assert.ok(60 / period >= 5 && 60 / period <= 6.5, `${(60 / period).toFixed(1)} breaths a minute`);
+  assert.ok(inhale > 0.3 && inhale < 0.5, "the out-breath is the longer one");
+  assert.ok(pad > 0 && pad <= 0.3 && air > 0 && air < 1, "a swell that is felt, never a pulse, and never a negative gain");
+  assert.equal(breathOf(0), -1, "it starts breathed out");
+  assert.ok(Math.abs(breathOf(inhale) - 1) < 1e-9, "full at the end of the in-breath");
+  assert.ok(Math.abs(breathOf(1) - breathOf(0)) < 1e-9 && Math.abs(breathOf(2.25) - breathOf(0.25)) < 1e-9, "every breath the same");
+  const samples = Array.from({ length: 1000 }, (_, k) => breathOf(k / 1000));
+  assert.ok(samples.every((value) => value >= -1 && value <= 1));
+  const steps = samples.slice(1).map((value, k) => Math.abs(value - samples[k]));
+  assert.ok(Math.max(...steps) < 0.02, "no jump anywhere in the breath");
+  const { real, imag } = breathWave();
+  assert.equal(real[0], 0, "no offset: the swell is around the level that ships");
+  assert.equal(imag[0], 0);
+  const at = (phase) => Array.from(real).reduce((sum, a, k) => sum + a * Math.cos(2 * Math.PI * k * phase) + imag[k] * Math.sin(2 * Math.PI * k * phase), 0);
+  const error = Math.max(...Array.from({ length: 200 }, (_, k) => Math.abs(at(k / 200) - breathOf(k / 200))));
+  assert.ok(error < 0.01, `the oscillator draws the same breath (${error.toFixed(4)})`);
+});
+
+test("the proposed air is a seeded pink noise, between the old brown air and white hiss", () => {
+  const pink = pinkOf(8000, 11);
+  assert.equal(pink.length, 8000);
+  assert.deepEqual(pinkOf(8000, 11), pink);
+  assert.ok(Math.abs(Math.max(...pink.map(Math.abs)) - 1) < 1e-6 && pink.every(Number.isFinite));
+  const random = seeded(11);
+  const white = Float32Array.from({ length: 8000 }, () => random() * 2 - 1);
+  const brown = noiseOf(8000, 11);
+  assert.ok(rough(brown, 0, 8000) < rough(pink, 0, 8000) && rough(pink, 0, 8000) < rough(white, 0, 8000));
+  assert.ok(TONES.pink.low >= 60 && TONES.pink.high <= TONES.soften, "inside the soft band of the master");
+});
+
+test("the hover tone takes the note of the sounding chord nearest to A, so it never rubs against the bed", () => {
+  CHORDS.forEach((chord, index) => {
+    const tone = tickOf(index);
+    assert.ok(tone > 300 && tone < 500, `${tone} stays a calm pitch`);
+    assert.ok(chord.pad.some((step) => pitchClass(tone) === (((step % 12) + 12) % 12)), `chord ${index}: a note of the chord`);
+  });
+  assert.equal(tickOf(0), TONES.tick, "the home chord keeps the A it always had");
+});
+
+test("the room can be shortened, keeping its shape", () => {
+  const rate = 8000;
+  const short = impulseOf(rate, 1, 3)[0];
+  assert.ok(short.length >= rate * 3 && short.length <= rate * 3.5);
+  assert.ok(Math.abs(short.at(-1)) < 1e-6);
+  assert.deepEqual(impulseOf(rate, 1, PROFILES.next.reverb)[0], impulseOf(rate)[0]);
 });
