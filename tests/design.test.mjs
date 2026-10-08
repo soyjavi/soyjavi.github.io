@@ -48,6 +48,18 @@ test("the colours in the stylesheet are exactly the twelve tokens, all neutral: 
   }
 });
 
+test("the line that invites a cold start stays readable at the quietest of its breath, and breathes with the sound", async () => {
+  const { TONES } = await import("../assets/js/tones.js");
+  const site = read("assets/site.css");
+  const block = site.match(/\.begin-hint \{[^}]*\}/)[0];
+  assert.match(block, /color: var\(--soft\);/);
+  const keyframes = site.match(/@keyframes begin-hint-breath \{[\s\S]*?\n\}/)[0];
+  const quietest = Math.min(...[...keyframes.matchAll(/opacity: ([\d.]+);/g)].map((m) => +m[1]));
+  const blend = (fore, back, alpha) => "#" + [1, 3, 5].map((i) => Math.round(parseInt(fore.slice(i, i + 2), 16) * alpha + parseInt(back.slice(i, i + 2), 16) * (1 - alpha)).toString(16).padStart(2, "0")).join("");
+  for (const [soft, ground] of [["paper-soft", "paper"], ["night-soft", "night"]]) assert.ok(ratio(blend(token(soft), token(ground), quietest), token(ground)) >= 4.5, `${soft} at ${quietest} on ${ground}`);
+  assert.match(site, new RegExp(`animation: begin-hint-breath ${TONES.breath.period}s `), "the same breath as the sound");
+});
+
 test("the contrast table is true, and every text pair clears 4.5 to 1", () => {
   const rows = [...design.matchAll(/<tr data-pair="(\w+) (\w+) bg"><td>[^<]*<\/td><td>([\d.]+)<\/td>/g)];
   assert.equal(rows.length, 8);

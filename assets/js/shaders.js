@@ -2,7 +2,9 @@ import { SPIN } from "./life.js";
 
 export const DISCOVER = { order: 0.6, jitter: 0.08, flight: 0.3, arrive: 0.54, swirl: 2.6, burst: 0.17, glow: 0.07 };
 
-export const ENTRANCE = { sky: 1.4, seed: 0.9, wait: 6, delay: 0.3, seconds: 4, dolly: 6, from: 1.6, card: 0.85, first: 0.9 };
+export const CALL = { period: 2.4, rise: 0.12, fall: 6, glow: 0.8, grow: 0.35, rate: 2 };
+
+export const ENTRANCE = { sky: 1.4, seed: 0.9, delay: 0.3, seconds: 4, dolly: 6, from: 1.6, card: 0.85, first: 0.9 };
 
 export const DIRECT = { sky: 0.5, delay: 0, seconds: 1.4, card: 0 };
 
@@ -34,6 +36,11 @@ export const DUST_VERTEX = `
   #define CLOUD_PACE ${CLOUD.pace.toFixed(2)}
   #define CLOUD_STILL ${CLOUD.still.toFixed(2)}
   #define ENTRANCE_FIRST ${ENTRANCE.first.toFixed(2)}
+  #define CALL_PERIOD ${CALL.period.toFixed(2)}
+  #define CALL_RISE ${CALL.rise.toFixed(2)}
+  #define CALL_FALL ${CALL.fall.toFixed(2)}
+  #define CALL_GLOW ${CALL.glow.toFixed(2)}
+  #define CALL_GROW ${CALL.grow.toFixed(2)}
   #define CORE_DIM ${CORE.dim.toFixed(2)}
   #define CORE_REACH ${CORE.reach.toFixed(2)}
   #define FAR_DUST ${CORE.dust.toFixed(2)}
@@ -63,6 +70,7 @@ export const DUST_VERTEX = `
   uniform float uSeed;
   uniform float uSeedOn;
   uniform float uKick;
+  uniform float uCall;
   uniform float uMix;
   uniform float uTime;
   uniform float uScale;
@@ -142,7 +150,10 @@ export const DUST_VERTEX = `
     vAlpha = mix(uGain * (0.2 + 0.6 * aSeed * aSeed) * near, vAlpha, m) * (1.0 - smoothstep(uReveal - 0.2, uReveal + 0.4, aU));
     gl_PointSize = mix(1.1 + 1.6 * aSeed * aSeed, gl_PointSize, m);
     vAlpha = min(1.0, vAlpha * lit * smoothstep(0.0, 0.5, pulse) * (1.0 + 1.2 * flash)) * mix(1.0, uSeedOn, isSeed);
-    gl_PointSize *= 1.0 + 0.8 * flash + HOVER_GROW * hovered;
+    float beat = fract(uTime / CALL_PERIOD);
+    float call = isSeed * uCall * (beat < CALL_RISE ? smoothstep(0.0, CALL_RISE, beat) : exp(-(beat - CALL_RISE) * CALL_FALL));
+    vAlpha = min(1.0, vAlpha * (1.0 + CALL_GLOW * call));
+    gl_PointSize *= 1.0 + 0.8 * flash + HOVER_GROW * hovered + CALL_GROW * call;
     vAlpha = min(1.0, vAlpha * (1.0 + HOVER_GLOW * hovered));
     if (aKind < 0.5 && uPointer.z > 0.001) {
       float ratio = projectionMatrix[1][1] / projectionMatrix[0][0];

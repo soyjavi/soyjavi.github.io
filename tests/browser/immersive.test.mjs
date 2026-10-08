@@ -97,6 +97,19 @@ const tagsShown = (page) =>
       return { title: node.querySelector("span").textContent, hot: node.dataset.hot === "1", name: node.dataset.name === "1", leader: node.dataset.leader === "1", left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, cx: +node.style.getPropertyValue("--cx"), cy: +node.style.getPropertyValue("--cy") };
     }),
   );
+const relatedClouds = async (page) => {
+  const peers = page.locator(".card .related .peer[data-memory]");
+  const found = [];
+  for (let k = 0; k < (await peers.count()); k++) {
+    await peers.nth(k).hover();
+    await page.waitForTimeout(500);
+    const tag = (await tagsShown(page)).find((candidate) => !candidate.hot);
+    if (tag) found.push(tag);
+  }
+  await page.mouse.move(640, 60);
+  await page.waitForTimeout(300);
+  return found;
+};
 const cloudOf = async (page, title) => (await tagsShown(page)).find((tag) => tag.title === title);
 const choose = async (page, id, label) => {
   await goTo(page, id);
@@ -665,8 +678,9 @@ test("pointing at a cloud names it, a click opens it and a click on empty space 
   await settled(page);
   await page.waitForTimeout(800);
   const card = await box(page, ".card");
-  const heavy = (await tagsShown(page)).find((tag) => tag.title !== TAPQUO_TITLE && tag.cx > card.right + 20 && tag.cx < 1240 && tag.cy > 120 && tag.cy < 640);
-  assert.ok(heavy, "a related memory is named in the free area");
+  assert.deepEqual((await tagsShown(page)).filter((tag) => !tag.hot).map((tag) => tag.title), [], "a related memory is not named until pointed at");
+  const heavy = (await relatedClouds(page)).find((tag) => tag.title !== TAPQUO_TITLE && tag.cx > card.right + 20 && tag.cx < 1240 && tag.cy > 120 && tag.cy < 640);
+  assert.ok(heavy, "a related memory, pointed at from the card, is named in the free area");
   await page.mouse.move(640, 60);
   await page.mouse.move(heavy.cx, heavy.cy);
   await page.waitForFunction(() => document.getElementById("scene").style.cursor === "pointer", null, { timeout: 5000 });
@@ -756,9 +770,9 @@ test("the finder understands accents and thread names, opens with a slash and cl
   assert.equal(await page.evaluate(() => document.activeElement.id), "finder-input");
   assert.equal(await page.locator("#finder-input").inputValue(), "", "the slash is not typed");
   await page.keyboard.type("caserio");
-  assert.deepEqual(await page.locator(".finder .peer:not(.show)").allTextContents(), [`${whenOf("born-among-cows")}${titleOf("born-among-cows")}`]);
+  assert.equal((await page.locator(".finder .peer:not(.show)").allTextContents())[0], `${whenOf("born-among-cows")}${titleOf("born-among-cows")}`, "the memory that names the place comes first");
   assert.equal(await page.locator(".finder .peer.show").first().textContent(), `1Show only ${content.dict.en.places["caserio-iturriagas"]}`, "the place is offered as a filter");
-  await page.locator(".finder .peer:not(.show)").click();
+  await page.locator(".finder .peer:not(.show)").first().click();
   await hud(page, hudOf("born-among-cows"));
   assert.equal(await page.locator(".finder").isVisible(), false);
   await page.keyboard.press("/");
@@ -1102,17 +1116,17 @@ test("the book and the clone wait at two named rings that open their cards", asy
     page.evaluate(() =>
       [...document.querySelectorAll(".labels .ahead:not(.now)")]
         .filter((node) => node.style.visibility === "visible" && +node.style.opacity > 0.2)
-        .map((node) => ({ text: node.textContent, cx: +node.style.getPropertyValue("--cx"), cy: +node.style.getPropertyValue("--cy") })),
+        .map((node) => ({ text: node.firstChild.textContent, cx: +node.style.getPropertyValue("--cx"), cy: +node.style.getPropertyValue("--cy") })),
     );
   await page.waitForFunction(() => [...document.querySelectorAll(".labels .ahead:not(.now)")].filter((node) => node.style.visibility === "visible" && +node.style.opacity > 0.2).length === 2, null, { timeout: 30000 });
-  assert.deepEqual((await rings()).map((ring) => ring.text).sort(), ["My clone", "The book"]);
-  for (const [text, label] of [["The book", BOOK], ["My clone", CLONE]]) {
+  assert.deepEqual((await rings()).map((ring) => ring.text).sort(), ["The Echo", "The book"]);
+  for (const [text, label] of [["The book", BOOK], ["The Echo", CLONE]]) {
     const ring = (await rings()).find((candidate) => candidate.text === text);
     await page.mouse.move(ring.cx, ring.cy);
     await page.waitForTimeout(250);
     assert.equal(await page.locator("#scene").evaluate((node) => node.style.cursor), "pointer", `${text}: the ring does not answer the pointer`);
     const [x, y] = await page.evaluate((name) => {
-      const node = [...document.querySelectorAll(".labels .ahead:not(.now)")].find((candidate) => candidate.textContent === name && candidate.style.visibility === "visible");
+      const node = [...document.querySelectorAll(".labels .ahead:not(.now)")].find((candidate) => candidate.firstChild.textContent === name && candidate.style.visibility === "visible");
       return [+node.style.getPropertyValue("--cx"), +node.style.getPropertyValue("--cy")];
     }, text);
     await page.mouse.click(x, y);
@@ -1144,8 +1158,8 @@ test("on a phone a tap opens a memory, one finger turns the scene and the card k
   await settled(page);
   await page.waitForTimeout(800);
   const top = (await box(page, ".card")).top;
-  const target = (await tagsShown(page)).find((tag) => tag.title !== titleOf("satoshi-ltd") && tag.cy > 150 && tag.cy < top - 20 && tag.cx > 20 && tag.cx < 370);
-  assert.ok(target, "a named cloud is above the card");
+  const target = (await relatedClouds(page)).find((tag) => tag.title !== titleOf("satoshi-ltd") && tag.cy > 150 && tag.cy < top - 20 && tag.cx > 20 && tag.cx < 370);
+  assert.ok(target, "a related cloud is above the card");
   await page.touchscreen.tap(target.cx, target.cy);
   await page.waitForFunction((title) => document.querySelector(".hud").textContent.endsWith(title), target.title, { timeout: 20000 });
   await settled(page);
@@ -1252,7 +1266,7 @@ test("without a Buttondown account each waitlist says it opens soon and offers n
     await hud(page, label);
     assert.equal(await page.locator(`.card-form[data-for=${list}]`).isVisible(), true);
     assert.equal(await page.locator(`.card-form[data-for=${list}] .note`).innerText(), "The waitlist isn't open yet.");
-    assert.equal(await page.locator(`.card-form[data-for=${list}] [aria-label]`).getAttribute("aria-label"), list === "book" ? "Waitlist for the book" : "Waitlist for my clone");
+    assert.equal(await page.locator(`.card-form[data-for=${list}] [aria-label]`).getAttribute("aria-label"), list === "book" ? "Waitlist for the book" : "Waitlist for the Echo");
     assert.equal(await page.locator(`.card a[href^='mailto:']`).count(), 0, `${list}: nothing to email from the card`);
   }
   await close();
@@ -1445,7 +1459,7 @@ test("the controls and the card speak Spanish on the Spanish page", async () => 
 
 const wideLife = () => {
   const { entries, facets, periods } = archive({ count: 250, people: 70, places: 10, threads: 6 });
-  const life = { ...content.life, periods, threads: facets.threads, people: facets.people, places: facets.places, ahead: { book: facets.threads[1], clone: facets.threads[2] }, milestones: entries };
+  const life = { ...content.life, totals: undefined, periods, threads: facets.threads, people: facets.people, places: facets.places, ahead: { book: facets.threads[1], clone: facets.threads[2] }, milestones: entries };
   const dict = Object.fromEntries(
     Object.entries(content.dict).map(([lang, d]) => [
       lang,
@@ -1556,7 +1570,7 @@ test("a ring's name starts at least 6 px outside the ring at three camera distan
   const measure = async () => {
     const label = await page.locator(".labels .ahead").evaluateAll((nodes) =>
       nodes
-        .filter((node) => node.textContent === "The book")
+        .filter((node) => node.firstChild.textContent === "The book")
         .map((node) => {
           const rect = node.getBoundingClientRect();
           return { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, x: +node.style.getPropertyValue("--cx"), y: +node.style.getPropertyValue("--cy"), r: +node.style.getPropertyValue("--r"), shown: node.style.visibility === "visible" && +node.style.opacity > 0.2 };
@@ -1586,44 +1600,38 @@ test("a ring's name starts at least 6 px outside the ring at three camera distan
   await close();
 });
 
-test("a tag that cannot sit beside its cloud moves out and is joined to it by a hairline, and none touches anything", async () => {
+test("closer in, the heavier clouds are named, no tag touches anything, and only a tag that moved away is joined by a hairline", async () => {
   const { page, close } = await open("/");
   await immersive(page);
   await page.waitForTimeout(5500);
-  await openFilters(page);
-  await page.locator(".legend button", { hasText: "Home" }).first().click();
-  await page.waitForTimeout(4500);
-  const shown = await keepClear(page, "filtered whole life");
-  assert.ok(shown.length >= 8, `${shown.length} tags in a filter that spans four galaxies`);
-  const leaders = await page.locator(".tag[data-leader='1'] .leader").evaluateAll((nodes) => nodes.map((node) => ({ width: parseFloat(node.style.width), shown: getComputedStyle(node).display !== "none" })));
-  assert.ok(leaders.length >= 1, "at least one tag had to move away from its cloud");
+  for (let step = 0; step < 2; step++) {
+    await page.mouse.move(900, 300);
+    await page.mouse.wheel(0, -700);
+    await settled(page);
+  }
+  await page.waitForTimeout(1500);
+  const shown = await keepClear(page, "closer in");
+  assert.ok(shown.length >= 3, `${shown.length} tags closer in`);
+  const leaders = await page.locator(".tag[data-on='1'][data-leader='1'] .leader").evaluateAll((nodes) => nodes.map((node) => ({ width: parseFloat(node.style.width), shown: getComputedStyle(node).display !== "none" })));
   assert.ok(leaders.every((leader) => leader.shown && leader.width > 4));
   const plain = await page.locator(".tag[data-on='1']:not([data-leader='1']) .leader").evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).display));
   assert.ok(plain.every((display) => display === "none"), "a tag beside its cloud has no hairline");
   await close();
 });
 
-test("the whole-life view names the heaviest, earliest memory of each galaxy in italics and no other cloud", async () => {
+test("the whole-life view names no cloud: each galaxy carries its hint in italics under its label, and an open memory takes the hints away", async () => {
   const { page, close } = await open("/");
   await immersive(page);
   await page.waitForTimeout(5500);
   const shown = await keepClear(page, "whole life");
-  const names = shown.filter((tag) => tag.name);
-  const moments = years(content.life.milestones);
-  const expected = content.life.periods.map((period) => {
-    const peers = content.life.milestones.map((entry, i) => ({ entry, year: moments[i] })).filter(({ entry }) => entry.period === period);
-    const top = Math.max(...peers.map(({ entry }) => entry.weight));
-    return content.dict.en.life[peers.filter(({ entry }) => entry.weight === top).sort((a, b) => a.year - b.year)[0].entry.id].title;
-  });
-  assert.deepEqual(names.map((tag) => tag.title).sort(), expected.sort(), "one name per galaxy");
-  assert.equal(shown.length, names.length, "only those clouds are named");
-  assert.equal(await page.locator(".tag[data-name='1'] b").first().evaluate((node) => getComputedStyle(node).display), "none", "the date is left out of a name");
-  assert.equal(await page.locator(".tag[data-name='1'] span").first().evaluate((node) => getComputedStyle(node).fontStyle), "italic");
+  assert.deepEqual(shown.map((tag) => tag.title), [], "no cloud is named from afar");
+  const hints = await page.locator(".galaxy-hint").evaluateAll((nodes) => nodes.filter((node) => !node.hidden && node.textContent).map((node) => getComputedStyle(node).fontStyle));
+  assert.ok(hints.length >= 3 && hints.every((style) => style === "italic"), `${hints.length} hints in italics`);
   await goTo(page, "m-tapquo");
   await hud(page, TAPQUO);
   await settled(page);
   await page.waitForTimeout(600);
-  assert.equal(await page.locator(".tag[data-on='1'][data-name='1']").count(), 0, "an open memory takes the names away");
+  assert.equal(await page.locator(".galaxy-hint:not([hidden])").evaluateAll((nodes) => nodes.filter((node) => node.textContent && node.offsetParent && getComputedStyle(node).visibility !== "hidden").length), 0, "an open memory takes the hints away");
   await close();
 });
 
@@ -1636,7 +1644,7 @@ test("with a memory open the galaxy shows a dashed ring for each year, labelled,
   assert.equal(await page.locator("#scene").getAttribute("data-rings"), "", "no year rings while it is gentle");
   await wake(page);
   assert.equal(await page.locator("#scene").getAttribute("data-rings"), String(ringsOf("firstjob").length));
-  const years = async () => page.locator(".ring-year").evaluateAll((nodes) => nodes.filter((node) => node.style.visibility === "visible" && +node.style.opacity > 0.5).map((node) => node.textContent));
+  const years = async () => page.locator(".ring-year").evaluateAll((nodes) => nodes.filter((node) => node.style.visibility === "visible" && +node.style.opacity > 0.3).map((node) => node.textContent));
   assert.deepEqual(await years(), ringsOf("firstjob"));
   const where = await page.locator(".ring-year").evaluateAll((nodes) => nodes.filter((node) => node.style.visibility === "visible").map((node) => node.getBoundingClientRect()));
   const card = await box(page, ".card");
@@ -2025,7 +2033,7 @@ test("H hides everything but the sky and any move, press or other key brings it 
   assert.equal(await page.locator("html").getAttribute("data-focus"), "", "typing h in the finder is just typing");
   assert.equal(await page.locator("#finder-input").inputValue(), "hhh");
   await page.keyboard.press("Escape");
-  await page.locator("#scene").click({ position: { x: 900, y: 600 } });
+  await page.evaluate(() => document.activeElement?.blur());
   await page.keyboard.press("h");
   await page.locator("[data-theme-toggle]").evaluate((node) => node.click());
   assert.deepEqual(errors, []);
@@ -2091,7 +2099,10 @@ test("sound is on by default but waits for the first gesture, plays a pluck for 
   const plucked = await page.evaluate(() => window.__audio.oscillators.length);
   assert.ok(plucked > bed, "opening a memory plays a note");
   assert.ok(await page.evaluate(() => Math.max(...window.__audio.gains.map((gain) => gain[1])) <= 0.7), "no level is ever set above 0.7 of full scale");
-  const bell = await page.evaluate((from) => window.__audio.oscillators.slice(from), bed);
+  const added = await page.evaluate((from) => window.__audio.oscillators.slice(from), bed);
+  const partial = (base) => (frequency) => [1, 2, 3, 4.07].some((ratio) => Math.abs(frequency / base - ratio) < 1e-6);
+  const bell = added.slice(added.findIndex((_, k) => added.slice(k).every(partial(added[k]))));
+  assert.ok(added.length > bell.length, "a new age brings in its own chord before the note");
   assert.ok(bell.length >= 2 && bell.length <= 5, "a bell has a few partials");
   assert.ok(bell[0] > 280 && bell[0] < 900, "its pitch is in the pentatonic range");
   assert.ok(bell.every((frequency) => frequency < 4000), "no shrill partial");
@@ -2103,7 +2114,9 @@ test("sound is on by default but waits for the first gesture, plays a pluck for 
   const flown = await page.evaluate(() => window.__audio.oscillators.length);
   await goTo(page, `m-mirai`);
   await hud(page, hudOf("mirai"));
-  assert.equal(await page.evaluate(() => window.__audio.oscillators.length), flown, "two notes within a moment are one note");
+  const since = await page.evaluate((from) => window.__audio.oscillators.slice(from), flown);
+  const rung = since.length ? since.slice(since.findIndex((_, k) => since.slice(k).every(partial(since[k])))) : [];
+  assert.ok(rung.length < 2 && !rung.some((frequency) => frequency > 280), "two notes within a moment are one note: only the age's chord comes in");
   await page.evaluate(() => (window.__audio.time += 1));
   await goTo(page, "book");
   await hud(page, BOOK);
@@ -2124,6 +2137,119 @@ test("sound is on by default but waits for the first gesture, plays a pluck for 
   await quiet.page.locator("[data-more-toggle]").click();
   assert.equal(await quiet.page.locator("[data-sound]").isVisible(), false, "no button where there is no Web Audio");
   await quiet.close();
+});
+
+test("a cold start waits on the first memory, says at the foot how to begin, and a click anywhere begins it with sound", async () => {
+  const human = (context) => context.addInitScript(() => Object.defineProperty(Navigator.prototype, "webdriver", { get: () => false }));
+  const { page, errors, close } = await open("/", { before: async (context) => (await human(context), await audioStub(context)) });
+  await page.waitForFunction(() => document.querySelector(".begin-hint")?.dataset.shown === "1", null, { timeout: 15000 });
+  assert.equal(await page.locator(".begin-hint").textContent(), content.dict.en.ui.explore.begin);
+  const foot = await box(page, ".begin-hint span");
+  assert.ok(foot.bottom <= 800 - 24 && foot.bottom >= 800 - 90 && Math.abs((foot.left + foot.right) / 2 - 640) < 2, "centred at the foot of the window");
+  assert.equal(await page.locator(".seed").count(), 1, "the first memory waits to be pressed");
+  assert.equal(await page.locator(".seed").getAttribute("aria-describedby"), "begin-hint", "a screen reader hears how to begin");
+  assert.equal(await page.locator("#begin-hint").getAttribute("aria-hidden"), null);
+  assert.deepEqual(await page.locator(".story").evaluate((node) => [getComputedStyle(node).opacity, getComputedStyle(node).visibility, getComputedStyle(node).pointerEvents]), ["0", "visible", "none"], "the page waits unseen and untouchable, but a screen reader can still read it");
+  const spots = [];
+  for (let k = 0; k < 18; k++) {
+    spots.push(await page.evaluate(() => {
+      const tag = document.querySelector(".tag[data-on='1']");
+      return tag ? tag.getBoundingClientRect().toJSON() : null;
+    }));
+    await page.waitForTimeout(500);
+  }
+  assert.ok(spots.every(Boolean), "its name stays while it waits");
+  const steps = spots.slice(1).map((spot, k) => Math.hypot(spot.left - spots[k].left, spot.top - spots[k].top));
+  assert.ok(Math.max(...steps) < 12, `and holds its place, unpushed by clouds not yet drawn (${Math.max(...steps).toFixed(1)} px)`);
+  assert.equal(await page.evaluate(() => document.documentElement.dataset.entering), "1", "nothing begins by itself");
+  assert.equal(await page.locator(".card").evaluate((node) => getComputedStyle(node.closest("body > *")).opacity), "0", "the card waits too");
+  assert.equal(await page.evaluate(() => window.__audio.contexts), 0, "and the sound with it");
+  await page.evaluate(() => {
+    window.__reached = 0;
+    for (const type of ["pointerdown", "pointerup", "click"]) document.querySelector("#scene").addEventListener(type, () => window.__reached++);
+  });
+  await page.evaluate(() => (document.querySelector(".explore").dataset.idle = "6"));
+  await page.mouse.move(820, 420);
+  await page.mouse.click(820, 420);
+  await page.waitForFunction(() => !document.querySelector(".begin-hint") && !document.querySelector(".seed"), null, { timeout: 5000 });
+  assert.equal(await page.evaluate(() => window.__reached), 0, "the first click only begins: nothing in the sky, seen or not, gets it");
+  assert.equal(await page.evaluate(() => window.__audio.contexts), 1, "the click that begins it is the gesture that lets the sound play");
+  assert.equal(await page.evaluate(() => location.hash), "", "and it lands on the presentation");
+  await page.waitForTimeout(1500);
+  assert.equal(await page.locator(".hud").textContent(), await page.locator("[data-station=hero]").getAttribute("data-hud"), "however long it waited, the idle tour counts from the beginning, not from the load");
+  await page.evaluate(() => (document.querySelector(".explore").dataset.idle = "20"));
+  await page.mouse.click(4, 400);
+  assert.ok(await page.evaluate(() => window.__reached) > 0, "from then on the sky answers");
+  await page.waitForFunction(() => document.documentElement.dataset.entering === undefined, null, { timeout: 15000 });
+  assert.equal(await page.locator(".card").isVisible(), true, "the card comes with the gathering");
+  assert.equal(await page.locator(".hud").textContent(), await page.locator("[data-station=hero]").getAttribute("data-hud"), "the presentation's card");
+  assert.deepEqual(errors, []);
+  await close();
+  const phone = await open("/es/", { ...PHONE, before: human });
+  await phone.page.waitForFunction(() => document.querySelector(".begin-hint")?.dataset.shown === "1", null, { timeout: 15000 });
+  assert.equal(await phone.page.locator(".begin-hint").textContent(), content.dict.es.ui.explore.begin, "the same line on a phone, in Spanish");
+  await phone.close();
+  const shared = await open("/#m-born", { before: human });
+  await hud(shared.page, BORN);
+  assert.equal(await shared.page.locator(".begin-hint").count(), 0, "a link to something skips the wait");
+  await shared.close();
+});
+
+test("on a cold start the interface never shows before the opening, and a page whose scene never runs still shows itself", async () => {
+  const human = (context) => context.addInitScript(() => Object.defineProperty(Navigator.prototype, "webdriver", { get: () => false }));
+  const context = await browser.newContext({ viewport: { width: 1280, height: 800 }, locale: "en-US" });
+  contexts.add(context);
+  await human(context);
+  let release;
+  const held = new Promise((resolve) => (release = resolve));
+  await context.route(`${base}/assets/site.js`, async (route) => {
+    await held;
+    await route.continue();
+  });
+  const page = await context.newPage();
+  await page.goto(`${base}/`, { waitUntil: "commit" });
+  await page.waitForSelector(".masthead", { state: "attached" });
+  await page.waitForTimeout(800);
+  assert.equal(await page.evaluate(() => document.documentElement.dataset.entering), "1", "the opening is marked before the scene loads");
+  for (const selector of [".masthead", ".story", ".rail"]) assert.equal(await page.locator(selector).evaluate((node) => getComputedStyle(node).opacity), "0", `${selector} waits for the opening`);
+  release();
+  await page.waitForFunction(() => document.documentElement.classList.contains("immersive"), null, { timeout: 30000 });
+  assert.equal(await page.locator(".masthead").evaluate((node) => getComputedStyle(node).opacity), "0", "and keeps waiting with the first memory");
+  await context.close();
+  const broken = await browser.newContext({ viewport: { width: 1280, height: 800 }, locale: "en-US" });
+  contexts.add(broken);
+  await human(broken);
+  await broken.route(`${base}/assets/site.js`, (route) => route.abort());
+  const lost = await broken.newPage();
+  await lost.goto(`${base}/`);
+  await lost.waitForFunction(() => document.documentElement.dataset.entering === undefined, null, { timeout: 8000 });
+  await lost.waitForFunction(() => getComputedStyle(document.querySelector(".masthead")).opacity === "1", null, { timeout: 4000 });
+  await broken.close();
+});
+
+test("while a cold start waits, Escape does not begin it, a right click and ctrl+wheel are held, and a focus into the page begins it and shows it", async () => {
+  const human = (context) => context.addInitScript(() => Object.defineProperty(Navigator.prototype, "webdriver", { get: () => false }));
+  const { page, errors, close } = await open("/", { before: human });
+  await page.waitForFunction(() => document.querySelector(".begin-hint")?.dataset.shown === "1", null, { timeout: 15000 });
+  await page.keyboard.press("Escape");
+  await page.keyboard.press("Shift");
+  await page.waitForTimeout(400);
+  assert.equal(await page.locator(".begin-hint").getAttribute("data-shown"), "1", "Escape and a lone modifier do not begin it");
+  const held = await page.evaluate(() => {
+    const menu = new MouseEvent("contextmenu", { bubbles: true, cancelable: true });
+    const zoom = new WheelEvent("wheel", { bubbles: true, cancelable: true, ctrlKey: true, deltaY: -100 });
+    document.querySelector("#scene").dispatchEvent(menu);
+    document.querySelector("#scene").dispatchEvent(zoom);
+    return [menu.defaultPrevented, zoom.defaultPrevented];
+  });
+  assert.deepEqual(held, [true, true], "no menu and no page zoom while it waits");
+  await page.evaluate(() => document.querySelector(".masthead a[href]").focus());
+  await page.waitForFunction(() => !document.querySelector(".begin-hint"), null, { timeout: 5000 });
+  await page.waitForFunction(() => document.documentElement.dataset.entering === undefined, null, { timeout: 5000 });
+  assert.equal(await page.locator(".masthead").evaluate((node) => getComputedStyle(node).opacity), "1", "a focus in the page begins it and shows the page");
+  assert.equal(await page.locator(".masthead a[href]").first().evaluate((node) => getComputedStyle(node).pointerEvents), "auto", "and its links answer");
+  assert.deepEqual(errors, []);
+  await close();
 });
 
 test("pressing the sound button as the very first gesture turns it off and nothing ever plays", async () => {
@@ -2557,9 +2683,10 @@ test("a soft tone answers the pointer reaching a cloud but never twice in a mome
   await page.waitForTimeout(800);
   await page.mouse.click(700, 450);
   const count = () => page.evaluate(() => window.__audio.oscillators.length);
+  const other = (await relatedClouds(page)).find((tag) => tag.title !== TAPQUO_TITLE);
+  assert.ok(other, "another cloud is found from the card");
+  await page.evaluate(() => (window.__audio.time += 2));
   const base = await count();
-  const other = (await tagsShown(page)).find((tag) => !tag.hot);
-  assert.ok(other, "another cloud is named");
   await page.mouse.move(other.cx, other.cy);
   await page.waitForTimeout(300);
   assert.equal(await count(), base + 1, "one soft tone, one partial");
@@ -2739,22 +2866,19 @@ test("at most two edge markers, each labelled in the tags' typeface, and no line
   }
 });
 
-test("every label speaks in one of three tiers: the open memory large and bright, the relations smaller, the anchors small and quiet", async () => {
+test("every label speaks in one of two tiers: memory names in one serif size, the open one only brighter, and the anchors small and quiet", async () => {
   const { page, close } = await open("/#m-relocation-hua-hin", { viewport: { width: 1280, height: 800 } });
   await hud(page, hudOf("relocation-hua-hin"));
   await settled(page);
   await quiet(page);
   const labels = await visibleLabels(page);
-  const combos = new Set(labels.map((label) => `${label.size} ${label.color}`));
-  assert.ok(combos.size <= 3, `${combos.size} styles: ${[...combos].join(" | ")}`);
-  const lead = labels.find((label) => label.cls.includes("tag") && label.size === "22px");
-  assert.ok(lead, "the open memory is 22px");
-  const sizes = (cls) => labels.filter((label) => label.cls.includes(cls)).map((label) => parseFloat(label.size));
-  assert.ok(sizes("tag").every((size) => size === 22 || size === 15));
-  assert.ok(sizes("galaxy").concat(sizes("ring-year"), sizes("ahead")).every((size) => size <= 15));
-  const anchor = labels.find((label) => /galaxy|ring-year|ahead now/.test(label.cls));
-  assert.ok(anchor && parseFloat(anchor.size) === 12, "the anchors are 12px");
-  assert.notEqual(anchor.color, lead.color, "anchors are never as bright as the open memory");
+  const names = labels.filter((label) => /tag|edge-mark/.test(label.cls));
+  const lead = await page.locator(".tag[data-on='1'][data-hot='1']").evaluate((node) => ({ size: getComputedStyle(node).fontSize, color: getComputedStyle(node.querySelector("span")).color }));
+  assert.ok(names.length >= 1);
+  assert.deepEqual([...new Set(names.map((label) => label.size))], [lead.size], "every memory name has one size, the open one too");
+  const anchors = labels.filter((label) => /galaxy|ring-year|ahead now|countdown-mark/.test(label.cls));
+  assert.ok(anchors.length >= 1 && anchors.every((label) => parseFloat(label.size) === 12), "the anchors are 12px");
+  assert.ok(anchors.every((anchor) => anchor.color !== lead.color), "anchors are never as bright as the open memory");
   await close();
 });
 

@@ -5,7 +5,7 @@ import { lerp, seeded, smoothstep } from "../assets/js/util.js";
 import { existsSync, readFileSync } from "node:fs";
 import { ageAt, ageIdOf } from "../assets/js/life.js";
 import { monthsUntil, untilText } from "../assets/js/life.js";
-import { CLOUD, DISCOVER, KIND_TINT, DUST_VERTEX, ENTRANCE, POINTER, formedAt, igniteAt } from "../assets/js/shaders.js";
+import { CALL, CLOUD, DISCOVER, KIND_TINT, DUST_VERTEX, ENTRANCE, POINTER, formedAt, igniteAt } from "../assets/js/shaders.js";
 import { archive } from "./fixtures/archive.mjs";
 import { loadContent } from "../src/content.mjs";
 
@@ -377,7 +377,18 @@ test("playing the life runs from birth to today at a steady pace and can resume 
 });
 
 test("on load the life is discovered in order: a quiet sky first, the first memory sparks right after the first touch, every one before the gathering ends", () => {
-  assert.ok(ENTRANCE.sky >= 1 && ENTRANCE.wait <= 8, "a breath of sky, and the opening starts by itself if nobody touches the first memory");
+  assert.ok(ENTRANCE.sky >= 1, "a breath of sky first");
+  assert.equal("wait" in ENTRANCE, false, "the opening never starts by itself: the first memory waits for a click, a tap or a key");
+  assert.ok(CALL.period >= 2 && CALL.period <= 4, "while it waits, the first memory beats slower than a heart and quicker than a breath");
+  assert.ok(CALL.rise < 0.25 && CALL.fall >= 3, "a beat rises quickly and fades slowly");
+  assert.ok(CALL.glow > 0 && CALL.glow <= 1 && CALL.grow > 0 && CALL.grow <= 0.5, "a soft beat, never a flash");
+  const scene = readFileSync(new URL("../assets/js/scene.js", import.meta.url), "utf8");
+  assert.match(scene, /calling = ease\(calling, armed \? 0 : 1, dt, CALL\.rate\);/, "the beat calls only until the opening begins, then fades");
+  assert.match(DUST_VERTEX, /float call = isSeed \* uCall \*/, "and only the first memory beats");
+  const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
+  assert.match(engine, /begunAt = performance\.now\(\) \/ 1000;[\s\S]*if \(entering\) enterTimer = setTimeout\(\(\) => finishEntering\(\), 20000\);/, "the interface's safety timer runs from the beginning, not from the load");
+  assert.doesNotMatch(engine.match(/const beginEntering = \(\) => \{[\s\S]*?\n  \};/)[0], /setTimeout/, "so a visitor who waits never sees it appear on an opening still to come");
+  assert.match(engine, /idleSince: Math\.max\(touched, begunAt\)/, "and the idle tour counts from the beginning too");
   assert.ok(ENTRANCE.delay + igniteAt(0) * ENTRANCE.seconds < 1.5, "the first memory sparks at once after the touch");
   assert.ok(ENTRANCE.delay + ENTRANCE.seconds < 5 && ENTRANCE.dolly >= ENTRANCE.seconds, "the gathering is under five seconds and the camera settles with the galaxies");
   assert.ok(igniteAt(1) + DISCOVER.burst < 1, "the last memory has burst before the end");

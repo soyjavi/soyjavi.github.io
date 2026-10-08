@@ -252,6 +252,39 @@ test("the theme switch is hidden until a script can work it, and sits with the l
   }
 });
 
+test("a cold start hides the interface before the first paint, only when the opening will be played, and never for good", () => {
+  const code = readFileSync(new URL("../assets/enter.js", import.meta.url), "utf8");
+  const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
+  assert.ok(code.includes(`"${engine.match(/const SCENE_FITS = "([^"]+)"/)[1]}"`), "the same window size as the scene");
+  assert.match(engine, /const flatten = \(\) => \{\n  while \(undo\.length\) undo\.pop\(\)\(\);\n  delete document\.documentElement\.dataset\.entering;/, "the flat page lets go of it");
+  const run = ({ hash = "", webdriver = false, reduced = false, fits = true, immersive = false, webgl = true } = {}) => {
+    const attrs = {};
+    const root = { setAttribute: (name, value) => (attrs[name] = value), removeAttribute: (name) => delete attrs[name], classList: { contains: () => immersive } };
+    let onLoad = null;
+    let later = null;
+    const env = {
+      document: { documentElement: root },
+      location: { hash },
+      navigator: { webdriver },
+      window: { matchMedia: true, addEventListener: (type, handler) => type === "load" && (onLoad = handler) },
+      matchMedia: (query) => ({ matches: query.includes("reduce") ? reduced : fits }),
+      setTimeout: (handler) => (later = handler),
+      WebGL2RenderingContext: webgl ? function () {} : undefined,
+    };
+    new Function(...Object.keys(env), code)(...Object.values(env));
+    return { attrs, load: () => (onLoad?.(), later?.(), attrs) };
+  };
+  assert.equal(run().attrs["data-entering"], "1", "a cold start hides the interface at once");
+  for (const [why, options] of [["a link to something", { hash: "#m-born" }], ["an automated browser", { webdriver: true }], ["reduced motion", { reduced: true }], ["a window too small", { fits: false }], ["a browser without WebGL2, which gets the flat page at once", { webgl: false }]]) assert.equal(run(options).attrs["data-entering"], undefined, why);
+  assert.equal(run().load()["data-entering"], undefined, "if the scene never runs, the page shows itself");
+  assert.equal(run({ immersive: true }).load()["data-entering"], "1", "if it runs, the opening keeps it");
+  for (const page of ["index.html", "es/index.html"]) {
+    const html = read(page);
+    assert.ok(html.indexOf("/assets/lang.js") < html.indexOf("/assets/enter.js") && html.indexOf("/assets/enter.js") < html.indexOf("</head>"), `${page}: in the head, after the language`);
+  }
+  assert.equal(read("404.html").includes("enter.js"), false, "only the home pages have an opening");
+});
+
 test("night is the first look whatever the system says, and a chosen theme is kept", () => {
   const code = readFileSync(new URL("../assets/theme.js", import.meta.url), "utf8");
   const run = ({ stored = null, throws = false } = {}) => {

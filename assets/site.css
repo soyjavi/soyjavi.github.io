@@ -2292,14 +2292,14 @@ html[data-focus="1"] .nudge {
   height: 20px;
 }
 
-html[data-entering] body > :not(.stage):not(.seed):not(script) {
+html[data-entering] body > :not(.stage):not(.seed):not(.begin-hint):not(script) {
   opacity: 0;
-  visibility: hidden;
+  pointer-events: none;
 }
 
-html[data-entering="out"] body > :not(.stage):not(.seed):not(script) {
+html[data-entering="out"] body > :not(.stage):not(.seed):not(.begin-hint):not(script) {
   opacity: 1;
-  visibility: visible;
+  pointer-events: auto;
   transition: opacity 1.4s var(--ease);
 }
 
@@ -2323,6 +2323,45 @@ html[data-entering="out"] body > :not(.stage):not(.seed):not(script) {
 
 .seed[data-gone] {
   pointer-events: none;
+}
+
+.begin-hint {
+  position: fixed;
+  z-index: 30;
+  left: 0;
+  right: 0;
+  bottom: max(36px, env(safe-area-inset-bottom));
+  margin: 0;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--soft);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s var(--ease);
+}
+
+.begin-hint[data-shown] {
+  opacity: 1;
+  transition-duration: 1.4s;
+}
+
+.begin-hint span {
+  display: inline-block;
+  animation: begin-hint-breath 11s ease-in-out 1.4s infinite;
+}
+
+@keyframes begin-hint-breath {
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+
+  40% {
+    opacity: 1;
+  }
 }
 
 @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {

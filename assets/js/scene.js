@@ -3,7 +3,7 @@ import { AHEAD, FLOOR, KINDS, SPIN, START, shapeBy, onPath, spinAngle, starfield
 import { createBackdrop } from "./backdrop.js";
 import { CADENCE, FIGURE_LIFT, QUALITY, figureOf, pace } from "./explore.js";
 import { approach, clamp, ease, eye, slide, turn, zoom } from "./orbit.js";
-import { DIRECT, ENTRANCE, DUST_FRAGMENT, DUST_VERTEX, formedAt, KIND_TINT, MARK_FRAGMENT, MARK_VERTEX, HOVER, RING_GLOW, FRESH_GLOW, POINTER, STAR_FRAGMENT, STAR_VERTEX } from "./shaders.js";
+import { CALL, DIRECT, ENTRANCE, DUST_FRAGMENT, DUST_VERTEX, formedAt, KIND_TINT, MARK_FRAGMENT, MARK_VERTEX, HOVER, RING_GLOW, FRESH_GLOW, POINTER, STAR_FRAGMENT, STAR_VERTEX } from "./shaders.js";
 import { lerp, reducedMotion, seeded, smoothstep } from "./util.js";
 
 export const HOME_PITCH = -0.27;
@@ -94,6 +94,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
     uSeed: { value: seedIndex },
     uSeedOn: { value: 0 },
     uKick: { value: 0 },
+    uCall: { value: 0 },
     uPointer: { value: new THREE.Vector3(0, 0, 0) },
     uHover: { value: new THREE.Vector2(-1, 0) },
     uInk: ink,
@@ -484,6 +485,7 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
   let origin = null;
   let loaded = null;
   let armed = false;
+  let calling = 0;
   let still = false;
   let dolly = null;
   let levelsMoving = true;
@@ -563,6 +565,8 @@ export function createScene({ canvas, cloud, marks, future, today, mobile, sky, 
     const kick = elapsed > 0 ? Math.min(1, (elapsed / 0.45) * Math.exp(1 - elapsed / 0.45)) : 0;
     dustUniforms.uSeedOn.value = markUniforms.uSeedOn.value = seedOn;
     dustUniforms.uKick.value = kick;
+    calling = ease(calling, armed ? 0 : 1, dt, CALL.rate);
+    dustUniforms.uCall.value = calling * seedOn;
     dustUniforms.uMix.value = intro;
     const formed = yearOf(sky, formedAt(intro));
     dustUniforms.uTime.value = markUniforms.uTime.value = starUniforms.uTime.value = time;

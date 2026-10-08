@@ -100,7 +100,7 @@ export function home({ site, life, dict }, lang) {
   ];
   return `<!doctype html>
 <html lang="${lang}">
-  ${head({ site, dict: d, lang, title: d.meta.title, description: d.meta.description, path: base, alternates, extra: `\n    <link rel="stylesheet" href="/assets/site.css" />\n    ${personLd(site)}\n    ${websiteLd(site, lang)}` })}
+  ${head({ site, dict: d, lang, title: d.meta.title, description: d.meta.description, path: base, alternates, extra: `\n    <link rel="stylesheet" href="/assets/site.css" />\n    ${personLd(site)}\n    ${websiteLd(site, lang)}`, early: '\n    <script src="/assets/enter.js"></script>' })}
   <body>
     ${masthead({ dict: d, lang, nav, switchHref: homePath(otherLang(lang)), brandHref: "#top", controls: explore({ life, dict: d, tools: tools({ dict: d, lang, switchHref: homePath(otherLang(lang)) }) }), inline: true })}
 

@@ -4,7 +4,6 @@ import { LEVEL, askLevels, askPairs, declared, periodNames, edgeExit, edgeLabel,
 import { clamp } from "./orbit.js";
 import { createSound } from "./sound.js";
 import { OVERVIEW_PITCH, createScene } from "./scene.js";
-import { ENTRANCE } from "./shaders.js";
 import { reducedMotion, seeded, webglAvailable } from "./util.js";
 
 const SCENE_FITS = "(min-height: 520px) and (min-width: 320px)";
@@ -12,7 +11,12 @@ const STACKED = "(max-width: 900px), (max-aspect-ratio: 1/1)";
 const KEEP_TOP = 74;
 const KEEP_BOTTOM = 124;
 const MAX_TAGS = 24;
+const HINT_AFTER = 2.2;
+const GUARD_AFTER = 0.6;
 const FIGURE_GAP = 18;
+const FIGURE_REACH = 160;
+const FIGURE_STEP = 24;
+const FIGURE_SPOTS = 400;
 const MAX_RELATED = 8;
 const AHEAD_GAPS = [0, 22];
 const RING_UNITS = { today: 2.4, book: 1.2, clone: 1.2 };
@@ -34,6 +38,7 @@ const undo = [];
 
 const flatten = () => {
   while (undo.length) undo.pop()();
+  delete document.documentElement.dataset.entering;
   document.documentElement.classList.remove("immersive");
   document.documentElement.classList.add("flat");
 };
@@ -152,7 +157,6 @@ async function start() {
     clearTimeout(enterTimer);
     entering = true;
     root.dataset.entering = "1";
-    enterTimer = setTimeout(() => finishEntering(), 20000);
   };
   const finishEntering = () => {
     if (!entering) return;
@@ -161,8 +165,15 @@ async function start() {
     root.dataset.entering = "out";
     enterTimer = setTimeout(() => delete root.dataset.entering, 1600);
   };
+  const revealOnFocus = (event) => {
+    if (!entering || event.target.closest?.(".seed")) return;
+    begin();
+    finishEntering();
+  };
+  document.addEventListener("focusin", revealOnFocus);
   undo.push(() => {
     clearTimeout(enterTimer);
+    document.removeEventListener("focusin", revealOnFocus);
     delete root.dataset.entering;
   });
   const automated = navigator.webdriver;
@@ -174,29 +185,46 @@ async function start() {
   const seed = element("button", "seed");
   seed.type = "button";
   seed.setAttribute("aria-label", info[firstMemory].title);
+  const hint = element("p", "begin-hint");
+  hint.id = "begin-hint";
+  seed.setAttribute("aria-describedby", hint.id);
+  let hintTimer = 0;
   let begun = false;
-  let autoTimer = 0;
   const beginGestures = ["pointerup", "touchend", "click", "keydown"];
   const dropBeginGestures = () => beginGestures.forEach((type) => document.removeEventListener(type, begin, true));
-  function begin() {
-    if (begun) return;
+  const guarded = ["pointerdown", "pointermove", "pointerup", "mousedown", "mouseup", "click", "dblclick", "contextmenu", "touchstart", "touchmove", "touchend", "wheel", "keydown"];
+  const guard = (event) => {
+    event.stopPropagation();
+    if (event.type === "contextmenu" || (event.type === "wheel" && event.ctrlKey)) event.preventDefault();
+  };
+  const dropGuard = () => guarded.forEach((type) => document.removeEventListener(type, guard, true));
+  let begunAt = 0;
+  function begin(event) {
+    if (begun || (event?.type === "keydown" && ["Escape", "Shift", "Control", "Alt", "Meta", "CapsLock"].includes(event.key))) return;
     begun = true;
-    clearTimeout(autoTimer);
+    begunAt = performance.now() / 1000;
     dropBeginGestures();
+    setTimeout(dropGuard, GUARD_AFTER * 1000);
     scene.begin(automated ? "still" : direct ? "direct" : "full");
+    if (entering) enterTimer = setTimeout(() => finishEntering(), 20000);
     seed.dataset.gone = "1";
-    setTimeout(() => seed.remove(), 1600);
+    clearTimeout(hintTimer);
+    delete hint.dataset.shown;
+    setTimeout(() => (seed.remove(), hint.remove()), 1600);
   }
   if (automated || direct) begin();
   else {
-    document.body.append(seed);
-    autoTimer = setTimeout(begin, ENTRANCE.wait * 1000);
+    document.body.append(seed, hint);
+    hintTimer = setTimeout(() => (hint.dataset.shown = "1"), HINT_AFTER * 1000);
     beginGestures.forEach((type) => document.addEventListener(type, begin, true));
+    guarded.forEach((type) => document.addEventListener(type, guard, { capture: true, passive: false }));
   }
   undo.push(() => {
-    clearTimeout(autoTimer);
+    clearTimeout(hintTimer);
     dropBeginGestures();
+    dropGuard();
     seed.remove();
+    hint.remove();
   });
   const qualityParam = new URLSearchParams(location.search).get("quality");
   let tier = qualityParam === "low" ? QUALITY.tiers.length - 1 : 0;
@@ -205,6 +233,7 @@ async function start() {
   scene.setQuality(tier);
   canvas.dataset.quality = String(tier);
   const sound = createSound();
+  hint.append(element("span", "", tools.dataset.begin));
 
   const labels = element("div", "labels");
   stage.append(labels);
@@ -289,7 +318,7 @@ async function start() {
   const figureLine = element("span", "figure-count");
   figureName.append(figureTitle, figureLine);
   labels.append(figureName);
-  const figure = { key: "", chain: [], edges: [], option: -1, width: 0, height: 0, shown: -1 };
+  const figure = { key: "", chain: [], edges: [], option: null, width: 0, height: 0, shown: -1 };
   const lightRing = (slot) => {
     ringLabels.forEach((item, k) => {
       const on = slot === marks.length + k;
@@ -831,7 +860,7 @@ async function start() {
     if (key !== figure.key) {
       const chain = matching(marks, filter);
       const span = figureSpan(marks, chain);
-      Object.assign(figure, { key, chain, edges: figureOf(marks, chain, (i) => scene.centerOf(i).toArray()), option: -1, width: 0, height: 0 });
+      Object.assign(figure, { key, chain, edges: figureOf(marks, chain, (i) => scene.centerOf(i).toArray()), option: null, width: 0, height: 0 });
       figureTitle.textContent = filter ? names[filter.facet][facets[filter.facet][filter.item]] ?? "" : "";
       figureLine.textContent = chain.length ? figureCount(span, { one: tools.dataset.countMemory, many: tools.dataset.countMemories }) : "";
     }
@@ -1158,6 +1187,7 @@ async function start() {
       return;
     }
     if (!id) return select(0, { push: false });
+    if (!begun) begin();
     if (periodAt.has(id)) return selectPeriod(periodAt.get(id), { push: false });
     const chosen = filterOfHash(id, facets);
     if (chosen) {
@@ -1356,7 +1386,7 @@ async function start() {
     }
     const nowSeconds = performance.now() / 1000;
     const calm = !document.hidden && finder.hidden && guide.hidden && tools.dataset.sheet !== "open" && !filter && play.year === null && !focusing() && !document.activeElement?.closest?.("input, textarea, select, button, a, .finder, .card, .masthead, .rail") && !card.matches(":hover");
-    const step = tourTick(touring, { now: nowSeconds, idleSince: touched, eligible: calm && (touring.phase === "touring" || current === 0), plan }, { wait: +tools.dataset.idle || 20, hold: +tools.dataset.tourHold || 6 });
+    const step = tourTick(touring, { now: nowSeconds, idleSince: Math.max(touched, begunAt), eligible: begun && calm && (touring.phase === "touring" || current === 0), plan }, { wait: +tools.dataset.idle || 20, hold: +tools.dataset.tourHold || 6 });
     touring = step.state;
     if (step.open?.age !== undefined) selectPeriod(step.open.age, { push: false });
     else if (step.open) select(step.open.ahead === "book" ? bookAt : cloneAt, { push: false, hush: true });
@@ -1584,13 +1614,22 @@ async function start() {
         const { width, height } = figure;
         const box = { left: Math.min(...spots.map((spot) => spot.x - spot.r)), right: Math.max(...spots.map((spot) => spot.x + spot.r)), top: Math.min(...spots.map((spot) => spot.y - spot.r)), bottom: Math.max(...spots.map((spot) => spot.y + spot.r)) };
         const middle = (box.top + box.bottom - height) / 2;
-        const options = [[box.left, box.top - FIGURE_GAP - height], [box.right - width, box.top - FIGURE_GAP - height], [box.left - FIGURE_GAP - width, middle], [box.right + FIGURE_GAP, middle], [box.left, box.bottom + FIGURE_GAP], [box.right - width, box.bottom + FIGURE_GAP]].map(([left, top]) => ({ left, top, right: left + width, bottom: top + height }));
+        const sides = [[box.left, box.top - FIGURE_GAP - height], [box.right - width, box.top - FIGURE_GAP - height], [box.left - FIGURE_GAP - width, middle], [box.right + FIGURE_GAP, middle], [box.left, box.bottom + FIGURE_GAP], [box.right - width, box.bottom + FIGURE_GAP]];
+        const placed = ([left, top]) => ({ left, top, right: left + width, bottom: top + height });
         const stars = spots.map((spot) => ({ left: spot.x - spot.r * 0.7, right: spot.x + spot.r * 0.7, top: spot.y - spot.r * 0.7, bottom: spot.y + spot.r * 0.7 }));
         const fits = (option) => option.left >= 12 && option.right <= innerWidth - 12 && option.top >= 12 && option.bottom <= innerHeight - 12 && !keepOut.some((other) => overlaps(option, other)) && !stars.some((other) => overlaps(option, other));
-        const at = figure.option >= 0 && fits(options[figure.option]) ? figure.option : options.findIndex(fits);
-        if (at >= 0) {
-          figure.option = at;
-          const chosen = options[at];
+        const held = figure.option && placed(figure.option.side >= 0 ? sides[figure.option.side] : [box.left + figure.option.dx, box.top + figure.option.dy]);
+        const around = () => {
+          const grid = [];
+          const step = Math.max(FIGURE_STEP, Math.ceil(Math.sqrt(((box.right - box.left + 2 * FIGURE_REACH) * (box.bottom - box.top + 2 * FIGURE_REACH)) / FIGURE_SPOTS)));
+          for (let top = box.top - FIGURE_REACH; top <= box.bottom + FIGURE_REACH - height; top += step) for (let left = box.left - FIGURE_REACH; left <= box.right + FIGURE_REACH - width; left += step) grid.push([left, top]);
+          return grid.sort((a, b) => Math.hypot(a[0] - box.left, a[1] + height - box.top) - Math.hypot(b[0] - box.left, b[1] + height - box.top));
+        };
+        const kept = held && fits(held) ? held : null;
+        const side = kept ? -1 : sides.findIndex((spot) => fits(placed(spot)));
+        const chosen = kept ?? (side >= 0 ? placed(sides[side]) : around().map(placed).find(fits));
+        if (!kept) figure.option = side >= 0 ? { side } : chosen ? { side: -1, dx: chosen.left - box.left, dy: chosen.top - box.top } : null;
+        if (chosen) {
           figureName.style.transform = `translate3d(${chosen.left.toFixed(1)}px, ${chosen.top.toFixed(1)}px, 0)`;
           keepOut.push({ left: chosen.left - 8, right: chosen.right + 8, top: chosen.top - 8, bottom: chosen.bottom + 8 });
           nameShown = 1;
@@ -1605,7 +1644,7 @@ async function start() {
     const limit = innerWidth <= 760 ? 8 : ratio > 0.8 ? 14 : MAX_TAGS;
     const candidates = [];
     const clouds = [];
-    projected.forEach((spot, j) => j < marks.length && spot.on && spot.r > 3 && clouds.push({ j, left: spot.x - spot.r * 0.7, right: spot.x + spot.r * 0.7, top: spot.y - spot.r * 0.7, bottom: spot.y + spot.r * 0.7 }));
+    projected.forEach((spot, j) => j < marks.length && spot.on && spot.r > 3 && (j === firstMemory || marks[j].year <= formed) && clouds.push({ j, left: spot.x - spot.r * 0.7, right: spot.x + spot.r * 0.7, top: spot.y - spot.r * 0.7, bottom: spot.y + spot.r * 0.7 }));
     tags.forEach((tag, i) => {
       const spot = projected[i];
       const mark = marks[i];

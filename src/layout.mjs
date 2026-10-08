@@ -14,7 +14,7 @@ export const wordmark = readFileSync(new URL("../assets/brand/javi-current.svg",
 
 const OG_LOCALE = { en: "en_US", es: "es_ES" };
 
-export function head({ site, dict, lang, title, description, path, alternates, type = "website", extra = "" }) {
+export function head({ site, dict, lang, title, description, path, alternates, type = "website", extra = "", early = "" }) {
   const url = `${site.url}${path}`;
   const links = Object.entries(alternates)
     .map(([code, alternatePath]) => `<link rel="alternate" hreflang="${code}" href="${site.url}${alternatePath}" />`)
@@ -48,7 +48,7 @@ export function head({ site, dict, lang, title, description, path, alternates, t
     <link rel="preload" href="/assets/fonts/instrument-serif-italic.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="/assets/brand.css" />${extra}
     <script src="/assets/theme.js"></script>
-    <script src="/assets/lang.js"></script>
+    <script src="/assets/lang.js"></script>${early}
   </head>`;
 }
 
