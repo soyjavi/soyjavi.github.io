@@ -6,7 +6,22 @@ export const LANGS = ["en", "es"];
 export const KINDS = ["personal", "professional", "product", "education"];
 export const BODY = { max: 900, paragraphs: 2 };
 export const paragraphsOf = (text) => String(text).split(/\n\s*\n/).map((part) => part.trim()).filter(Boolean);
-export const bodyProblem = (text) => (String(text).length > BODY.max ? `body is ${String(text).length} characters, the limit is ${BODY.max}` : paragraphsOf(text).length > BODY.paragraphs ? `body has ${paragraphsOf(text).length} paragraphs, the limit is ${BODY.paragraphs}` : null);
+const MONTHS = "January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sept?|Oct|Nov|Dec|enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre|ene|abr|ago|dic";
+const DAY = "(?:[1-9]|[12]\\d|3[01])";
+const ORDINAL = `${DAY}(?:st|nd|rd|th|\\.?º|o)`;
+const HOLIDAYS = new RegExp("\\b(?:Epiphany|Christmas (?:Day|Eve)|(?<!Chinese )New Year's (?:Day|Eve)|Boxing Day|Valentine's Day|All Saints' Day|Fourth of July|[Dd]ía de (?:Reyes|Navidad|San Valentín|Todos los Santos)|Nochebuena|Nochevieja|Año Nuevo(?! chino)|Noche de San Juan)\\b", "u");
+const DAY_DATE = new RegExp(
+  [
+    `(?<![\\d/.-])(?:${DAY}(?:st|nd|rd|th|\\.?º|o)?|primero)(?:\\s+of|\\s+de)?\\s+(?:${MONTHS})\\b`,
+    `\\b(?:${MONTHS})\\.?\\s+(?:${ORDINAL}|${DAY}(?=\\s*(?:[,.;:!?)]|$)|,?\\s+\\d{4}\\b))`,
+    `\\bon\\s+the\\s+${ORDINAL}\\b|\\bel\\s+d[ií]a\\s+${DAY}(?=\\s*(?:[,.;:!?)]|$))`,
+    `\\b\\d{4}-\\d{2}-\\d{2}\\b|\\b${DAY}[/-](?:0?[1-9]|1[0-2])[/-]\\d{2,4}\\b|\\b${DAY}\\.(?:0?[1-9]|1[0-2])\\.\\d{4}\\b`,
+  ].join("|"),
+  "iu",
+);
+const dayIn = (text) => String(text).match(DAY_DATE)?.[0] ?? String(text).match(HOLIDAYS)?.[0];
+export const dayProblem = (text) => (dayIn(text) ? `names a day ("${dayIn(text)}"), only a month or a year may be published` : null);
+export const bodyProblem = (text) => (String(text).length > BODY.max ? `body is ${String(text).length} characters, the limit is ${BODY.max}` : paragraphsOf(text).length > BODY.paragraphs ? `body has ${paragraphsOf(text).length} paragraphs, the limit is ${BODY.paragraphs}` : dayProblem(text) && `body ${dayProblem(text)}`);
 const tally = (list) => {
   const counts = new Map();
   for (const memory of list) for (const id of memory.threads ?? []) counts.set(id, (counts.get(id) ?? 0) + 1);
@@ -38,6 +53,7 @@ export function readMemories(dir = CONTENT) {
       for (const lang of LANGS) if (!memory[lang]?.title || !memory[lang]?.body) throw new Error(`content/memories/${file}: needs "${lang}" with a title and a body`);
       if (memory.added !== undefined && !/^\d{4}-(0[1-9]|1[0-2])$/.test(memory.added)) throw new Error(`content/memories/${file}: added "${memory.added}" must be YYYY-MM`);
       for (const lang of LANGS) if (bodyProblem(memory[lang].body)) throw new Error(`content/memories/${file} (${lang}): ${bodyProblem(memory[lang].body)}`);
+      for (const lang of LANGS) if (dayProblem(memory[lang].title)) throw new Error(`content/memories/${file} (${lang}): title ${dayProblem(memory[lang].title)}`);
       return memory;
     })
     .sort((a, b) => dateKey(a.date) - dateKey(b.date) || (a.order ?? 0) - (b.order ?? 0) || a.id.localeCompare(b.id));

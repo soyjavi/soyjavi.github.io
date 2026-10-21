@@ -7,7 +7,7 @@ import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { build } from "esbuild";
 import { FACETS, precisionOf, todayYear, years } from "../assets/js/life.js";
-import { bodyProblem, distinctive, LANGS, loadContent, root } from "../src/content.mjs";
+import { bodyProblem, dayProblem, distinctive, LANGS, loadContent, root } from "../src/content.mjs";
 import { ageAt, ageIdOf } from "../assets/js/life.js";
 import { renderSite } from "../src/site.mjs";
 import { bundleOptions } from "../tools/bundle.mjs";
@@ -93,6 +93,28 @@ test("no document carries a life date more precise than a month", () => {
   const months = "January|February|March|April|May|June|July|August|September|October|November|December";
   const day = new RegExp(`\\b\\d{1,2}(st|nd|rd|th)? (${months})\\b|\\b(${months}) \\d{1,2}(st|nd|rd|th)?\\b`);
   for (const file of ["README.md", "AGENTS.md", "ROADMAP.md", "SPEC.md", "design/index.html", "design/proposals.html"]) assert.doesNotMatch(readFileSync(`${root}${file}`, "utf8"), day, `${file} names a day`);
+});
+
+test("a memory text that names a day of the month is refused in either language, a month or a year is not", () => {
+  const days = ["On 14 February 2022 I joined", "He died on 22 February.", "El 3 de enero llegamos", "Nos casamos el 25 de octubre", "14 de Febrero", "14 DE FEBRERO", "March 5th, 2001", "the 1st of May", "on 14/02/2022", "14-02-2022", "2022-02-14", "Feb 14, 2022", "Feb. 14.", "14 Feb 2022", "Sept 23 2020", "1º de mayo", "1.º de mayo", "primero de mayo", "3\u00a0de enero", "on the 14th we left", "el día 14.", "On Epiphany I left", "on Valentine's Day", "El día de Reyes de 2015", "En Nochebuena", "on Christmas Day"];
+  const months = ["In February 2022 I joined", "En febrero de 2022 entré", "a historic day", "At the start of January 2015", "I was 25 in October", "the 12 months of 2022", "I may 3D print it", "March 2020", "In May 5 of us went", "In June 2 boys were born", "May 25 years later", "the 3rd time", "Over Christmas", "En Navidad", "frente al mar 2 años", "Ese día", "I had an epiphany", "Empezamos un año nuevo", "el Año Nuevo chino", "Chinese New Year's Day", "version 2.1.10", "came in the 3rd."];
+  for (const text of days) assert.ok(dayProblem(text), text);
+  for (const text of months) assert.equal(dayProblem(text), null, text);
+  assert.match(bodyProblem("We married on 25 October."), /body names a day \("25 October"\)/);
+});
+
+test("a memory whose title names a day stops the build", () => {
+  const dir = mkdtempSync(join(tmpdir(), "day-title-"));
+  try {
+    cpSync(`${root}content`, dir, { recursive: true });
+    const file = join(dir, "memories", readdirSync(join(dir, "memories"))[0]);
+    const memory = JSON.parse(readFileSync(file, "utf8"));
+    memory.es.title = "El 14 de febrero";
+    writeFileSync(file, JSON.stringify(memory));
+    assert.throws(() => loadContent(pathToFileURL(`${dir}/`)), /\(es\): title names a day \("14 de febrero"\)/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test("milestones are in chronological order, each period is contiguous and none is in the future", () => {

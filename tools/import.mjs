@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { ageAt, precisionOf } from "../assets/js/life.js";
-import { bodyProblem, CONTENT, KINDS, LANGS } from "../src/content.mjs";
+import { bodyProblem, CONTENT, dayProblem, KINDS, LANGS } from "../src/content.mjs";
 
 const SLUG = /^[a-z0-9-]+$/;
 const LISTS = ["people", "places", "links"];
@@ -74,6 +74,7 @@ export function importArchive(data, dir = CONTENT, now = new Date()) {
     for (const id of entry.links ?? []) if (!ids.has(id) || id === entry.id) errors.push(`${where}: link "${id}" points at no other memory`);
     for (const lang of LANGS) if (!entry[lang]?.title || !entry[lang]?.body) errors.push(`${where}: needs "${lang}" with a title and a body`);
     for (const lang of LANGS) if (entry[lang]?.body && bodyProblem(entry[lang].body)) errors.push(`${where} (${lang}): ${bodyProblem(entry[lang].body)}`);
+    for (const lang of LANGS) if (entry[lang]?.title && dayProblem(entry[lang].title)) errors.push(`${where} (${lang}): title ${dayProblem(entry[lang].title)}`);
     const memory = { date, ...(entry.approx ? { approx: true } : {}), kind: entry.kind, weight: entry.weight, threads: entry.threads };
     for (const key of LISTS) if (entry[key]?.length) memory[key] = entry[key];
     if (entry.order !== undefined) memory.order = entry.order;

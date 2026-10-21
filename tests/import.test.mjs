@@ -203,6 +203,9 @@ test("a memory text is one or two paragraphs of at most 900 characters: two prin
     assert.throws(() => importArchive({ memories: [memory({ id: "too-long", en: long })] }, url), /too-long \(en\): body is 901 characters/);
     const three = { title: "T", body: "One.\n\nTwo.\n\nThree." };
     assert.throws(() => importArchive({ memories: [memory({ id: "three-parts", es: three })] }, url), /three-parts \(es\): body has 3 paragraphs/);
+    const dated = { title: "T", body: "Llegamos el 31 de enero." };
+    assert.throws(() => importArchive({ memories: [memory({ id: "a-day", es: dated })] }, url), /a-day \(es\): body names a day/);
+    assert.throws(() => importArchive({ memories: [memory({ id: "a-day-title", en: { title: "On Epiphany I left", body: "I left." } })] }, url), /a-day-title \(en\): title names a day/);
     assert.equal(readdirSync(join(dir, "memories")).length, before + 1, "only the good one was written");
   } finally {
     rmSync(dir, { recursive: true, force: true });
