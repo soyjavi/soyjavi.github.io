@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { ageAt, precisionOf } from "../assets/js/life.js";
 import { bodyProblem, CONTENT, dayProblem, KINDS, LANGS } from "../src/content.mjs";
@@ -16,7 +16,7 @@ export function importArchive(data, dir = CONTENT, now = new Date()) {
   const folder = new URL("memories/", dir);
   mkdirSync(folder, { recursive: true });
   const errors = [];
-  const report = { added: 0, updated: 0, private: 0, people: 0, places: 0, threads: 0 };
+  const report = { added: 0, updated: 0, private: 0, retracted: 0, people: 0, places: 0, threads: 0 };
   const dictionaries = Object.fromEntries(LANGS.map((lang) => [lang, readJson(new URL(`${lang}.json`, dir))]));
   const nextLife = { ...life };
 
@@ -44,7 +44,15 @@ export function importArchive(data, dir = CONTENT, now = new Date()) {
   for (const name of ["book", "clone"]) if (!(nextLife.threads ?? life.threads).includes((nextLife.ahead ?? life.ahead)[name])) errors.push(`ahead.${name}: "${(nextLife.ahead ?? life.ahead)[name]}" is not one of the threads`);
   const threadIds = nextLife.threads ?? life.threads;
 
-  const incoming = (Array.isArray(data) ? data : data.memories ?? []).filter((entry) => entry?.public === true || (report.private++, false));
+  const listed = Array.isArray(data) ? data : data.memories ?? [];
+  const listedIds = new Set();
+  for (const entry of listed) {
+    if (entry?.id && listedIds.has(entry.id)) errors.push(`memory ${entry.id}: id is repeated`);
+    listedIds.add(entry?.id);
+  }
+  const incoming = listed.filter((entry) => entry?.public === true || (report.private++, false));
+  const retract = listed.filter((entry) => entry?.public === false && SLUG.test(entry?.id ?? "") && existsSync(new URL(`${entry.id}.json`, folder))).map((entry) => entry.id);
+  for (const question of readJson(new URL("questions.json", dir), [])) for (const id of retract) if (question.memories?.includes(id)) errors.push(`memory ${id}: closed, but the question "${question.id}" draws on it`);
   const tables = {};
   for (const facet of ["people", "places"]) {
     const table = readJson(new URL(`${facet}.json`, dir), {});
@@ -60,7 +68,7 @@ export function importArchive(data, dir = CONTENT, now = new Date()) {
     tables[facet] = table;
   }
 
-  const ids = new Set([...incoming.map((entry) => entry.id), ...readdirSync(folder).filter((file) => file.endsWith(".json")).map((file) => file.slice(0, -5))]);
+  const ids = new Set([...incoming.map((entry) => entry.id), ...readdirSync(folder).filter((file) => file.endsWith(".json")).map((file) => file.slice(0, -5))].filter((id) => !retract.includes(id)));
   const ready = incoming.map((entry, n) => {
     const where = `memory ${entry.id ?? `#${n + 1}`}`;
     const date = monthOf(entry.date);
@@ -98,6 +106,19 @@ export function importArchive(data, dir = CONTENT, now = new Date()) {
     }
   }
   if (nextLife.threads !== life.threads || data.ahead !== undefined) writeJson(new URL("life.json", dir), nextLife);
+  const lost = Object.fromEntries(["people", "places"].map((facet) => [facet, new Set()]));
+  for (const id of retract) {
+    for (const facet of Object.keys(lost)) for (const item of readJson(new URL(`${id}.json`, folder))[facet] ?? []) lost[facet].add(item);
+    unlinkSync(new URL(`${id}.json`, folder));
+    report.retracted++;
+  }
+  for (const file of readdirSync(folder).filter((name) => name.endsWith(".json"))) {
+    const url = new URL(file, folder);
+    const memory = readJson(url);
+    if (!memory.links?.some((id) => retract.includes(id))) continue;
+    const links = memory.links.filter((id) => !retract.includes(id));
+    writeJson(url, Object.fromEntries(Object.entries(memory).flatMap(([key, value]) => (key !== "links" ? [[key, value]] : links.length ? [[key, links]] : []))));
+  }
   for (const [id, memory] of ready) {
     const file = new URL(`${id}.json`, folder);
     const before = existsSync(file) ? readJson(file) : null;
@@ -105,6 +126,13 @@ export function importArchive(data, dir = CONTENT, now = new Date()) {
     writeJson(file, { ...memory, ...(before ? (before.added ? { added: before.added } : {}) : { added: month }) });
   }
   for (const [facet, table] of Object.entries(tables)) if (Object.keys(table).length) writeJson(new URL(`${facet}.json`, dir), table);
+  for (const [facet, gone] of Object.entries(lost)) {
+    if (!gone.size) continue;
+    const stay = new Set(readdirSync(folder).filter((name) => name.endsWith(".json")).flatMap((name) => readJson(new URL(name, folder))[facet] ?? []));
+    const table = readJson(new URL(`${facet}.json`, dir), {});
+    for (const item of gone) if (!stay.has(item)) delete table[item];
+    writeJson(new URL(`${facet}.json`, dir), table);
+  }
   return report;
 }
 
@@ -116,7 +144,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   }
   try {
     const report = importArchive(JSON.parse(readFileSync(file, "utf8")));
-    console.log(`${report.added} memories added, ${report.updated} updated, ${report.private} left out as private; ${report.people} people and ${report.places} places added${report.threads ? `; ${report.threads} threads` : ""}. Run npm run build next.`);
+    console.log(`${report.added} memories added, ${report.updated} updated, ${report.private} left out as private${report.retracted ? ` (${report.retracted} already published, now removed)` : ""}; ${report.people} people and ${report.places} places added${report.threads ? `; ${report.threads} threads` : ""}. Run npm run build next.`);
   } catch (error) {
     console.error(error.message);
     process.exit(1);

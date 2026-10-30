@@ -185,18 +185,6 @@ ordered by what is worth approving first; line numbers are from that review.
 
 ### 1. Bugs
 
-- **IMPORT-RETRACT** — The importer keeps a memory the archive has closed, and keeps one of two entries with one id
-  `bug · agent · high`
-  An entry marked `"public": false` is only counted (`tools/import.mjs:46`), so a memory already in `content/memories/`
-  stays published after the creator closes it in his archive, against "not in the repository in any form". Two incoming
-  entries with the same id report one added and one updated, and the second wins.
-  accept: on a temporary copy of `content/`, `importArchive` throws on a repeated id, and a non-public entry whose file
-  exists removes the file and the other memories' links to it, and the report gives only a count.
-- **ID-WORDS** — An address carries a word the site never says
-  `bug · agent · high`
-  The memory `aprendizaje-continuo-hasta-la-ia` puts the Spanish abbreviation the voice test bans into its anchor, its
-  links and the address bar (`#m-…-la-ia`); the test reads the text of the pages, not the ids.
-  accept: the file is renamed and its links follow; the voice test also checks every memory id, and fails on the old one.
 - **AGE-VIEW-KEYS** — In an age view the arrow keys skip its first memory
   `bug · agent · high`
   `selectPeriod` sets `current` to the age's first memory (`engine.js:833`) and `onKey` steps from it with `stepOf`

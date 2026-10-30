@@ -73,12 +73,12 @@ The home pages declare `rel=canonical`, `hreflang` for `en`, `es` and `x-default
   template `tools/archive.example.json`) or a bare list of memories, into these files; `threads` replace the
   list of `content/life.json` and their copy in both dictionaries, and the import refuses to drop one that memories use (a memory's galaxy is its age, never written). Only entries with `"public": true` are written, a day
   is cut to its month, people and places must be public to be pointed at, and if any public entry is wrong (id, date,
-  kind, weight, threads, people, places, links, a language, a text over 900 characters, in more than two paragraphs, or a title or text naming a day of the month or a fixed holiday) nothing is written and every reason is printed; a person or place no imported memory uses is not written.
+  kind, weight, threads, people, places, links, a language, a text over 900 characters, in more than two paragraphs, or a title or text naming a day of the month or a fixed holiday, a repeated id) nothing is written and every reason is printed; a person or place no imported memory uses is not written.
 
 ## What is public
 
 The repository is public, so `content/memories/`, `content/people.json`, `content/places.json` and the dictionaries hold
-only what the creator approved, already written as public text; the importer leaves out anything not marked public. A
+only what the creator approved, already written as public text; the importer leaves out anything not marked public, and removes a published memory whose entry says `"public": false`, the links to it and the people and places only it named. A
 test fails on any milestone more precise than a month, on a full date in any content file and on any field outside the
 model. People, his children included, appear by their own names; who took part in a public memory may come from the
 creator's archive. Everything else is the creator's own archive, and nothing in this repository says what it holds.

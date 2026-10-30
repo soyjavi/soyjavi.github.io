@@ -86,7 +86,7 @@ test("the importer writes only what is public, cuts any day down to the month an
       },
       url,
     );
-    assert.deepEqual(report, { added: 1, updated: 0, private: 2, people: 1, places: 0, threads: 0 });
+    assert.deepEqual(report, { added: 1, updated: 0, private: 2, retracted: 0, people: 1, places: 0, threads: 0 });
     const written = JSON.parse(readFileSync(join(dir, "memories", "first-race.json"), "utf8"));
     assert.equal(written.date, "2026-03");
     assert.ok(!("public" in written) && !("id" in written));
@@ -94,7 +94,7 @@ test("the importer writes only what is public, cuts any day down to the month an
     const people = Object.keys(JSON.parse(readFileSync(join(dir, "people.json"), "utf8")));
     assert.ok(people.includes("brother") && !people.includes("secret"));
     assert.equal(loadContent(url).dict.en.people.brother, "My brother");
-    assert.deepEqual(importArchive({ memories: [memory({ weight: 3 })] }, url), { added: 0, updated: 1, private: 0, people: 0, places: 0, threads: 0 });
+    assert.deepEqual(importArchive({ memories: [memory({ weight: 3 })] }, url), { added: 0, updated: 1, private: 0, retracted: 0, people: 0, places: 0, threads: 0 });
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -249,6 +249,59 @@ test("importing over a memory that has no added month leaves it without one, so 
     assert.equal(existing.added, undefined);
     importArchive({ memories: [memory({ id, threads: existing.threads, date: existing.date })] }, url);
     assert.equal(JSON.parse(readFileSync(join(dir, "memories", file), "utf8")).added, undefined);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("a memory the archive closes is removed from the repository and from the links that pointed at it, and an id listed twice stops the import", () => {
+  const { dir, url } = copyOfContent();
+  try {
+    const linked = readdirSync(join(dir, "memories")).map((file) => ({ id: file.slice(0, -5), ...JSON.parse(readFileSync(join(dir, "memories", file), "utf8")) })).find((entry) => entry.links?.length);
+    const target = linked.links[0];
+    const before = readdirSync(join(dir, "memories")).length;
+    const report = importArchive({ memories: [{ id: target, public: false }] }, url);
+    assert.equal(report.retracted, 1);
+    assert.equal(report.private, 1);
+    assert.equal(existsSync(join(dir, "memories", `${target}.json`)), false, "the closed memory is no longer a file");
+    assert.equal(readdirSync(join(dir, "memories")).length, before - 1);
+    const after = JSON.parse(readFileSync(join(dir, "memories", `${linked.id}.json`), "utf8"));
+    assert.ok(!(after.links ?? []).includes(target), "nothing links to it any more");
+    const peopleBefore = Object.keys(JSON.parse(readFileSync(join(dir, "people.json"), "utf8")));
+    assert.ok(peopleBefore.length);
+    assert.doesNotThrow(() => loadContent(url));
+    const unmarked = readdirSync(join(dir, "memories"))[0];
+    importArchive({ memories: [{ id: unmarked.slice(0, -5) }, { id: "x-typo", public: "false" }] }, url);
+    assert.equal(existsSync(join(dir, "memories", unmarked)), true, "only an explicit false closes a memory");
+    assert.throws(() => importArchive({ memories: [memory({ id: "twice" }), memory({ id: "twice", public: false })] }, url), /memory twice: id is repeated/);
+    assert.equal(existsSync(join(dir, "memories", "twice.json")), false, "nothing written");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("a memory a question of the clone draws on cannot be closed by an import, and an incoming link to a closed memory is refused", () => {
+  const { dir, url } = copyOfContent();
+  try {
+    const [drawn, one] = readdirSync(join(dir, "memories")).map((file) => file.slice(0, -5));
+    writeFileSync(join(dir, "questions.json"), JSON.stringify([{ id: "why", memories: [drawn], en: "Why?", es: "¿Por qué?" }]));
+    assert.throws(() => importArchive({ memories: [{ id: drawn, public: false }] }, url), /closed, but the question "why" draws on it/);
+    assert.equal(existsSync(join(dir, "memories", `${drawn}.json`)), true);
+    assert.throws(() => importArchive({ memories: [{ id: one, public: false }, memory({ id: "fresh", links: [one] })] }, url), /link "[^"]+" points at no other memory/);
+    assert.equal(existsSync(join(dir, "memories", `${one}.json`)), true, "a refused import removes nothing");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("closing a memory also removes the people and places only it named, and keeps those another memory still names", () => {
+  const { dir, url } = copyOfContent();
+  try {
+    importArchive({ people: { solo: { public: true, en: "Solo", es: "Solo" }, shared: { public: true, en: "Shared", es: "Compartido" } }, memories: [memory({ id: "one", people: ["solo", "shared"] }), memory({ id: "two", people: ["shared"] })] }, url);
+    importArchive({ memories: [{ id: "one", public: false }] }, url);
+    const people = JSON.parse(readFileSync(join(dir, "people.json"), "utf8"));
+    assert.ok(!("solo" in people) && "shared" in people);
+    assert.doesNotThrow(() => loadContent(url));
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

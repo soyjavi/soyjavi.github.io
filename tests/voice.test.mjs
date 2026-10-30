@@ -97,3 +97,10 @@ test("a memory tells what happened in the past: no historic present for the mome
   for (const memory of memories) assert.doesNotMatch(memory.en.body, historic, memory.en.title);
   assert.match(read("design/index.html"), /a memory tells what happened in the past, and uses the present only for what is still true today/);
 });
+
+test("no address of the site carries a word the site never says: memory ids, their pages and the sitemap", () => {
+  for (const file of readdirSync(`${root}content/memories`)) assert.equal(file.slice(0, -5).match(BANNED), null, file);
+  const sitemap = read("sitemap.xml");
+  assert.equal(sitemap.match(BANNED), null, "sitemap.xml");
+  for (const folder of ["m", "es/m"]) for (const id of readdirSync(`${root}${folder}`)) assert.equal(`${folder}/${id}`.match(BANNED), null, `${folder}/${id}`);
+});

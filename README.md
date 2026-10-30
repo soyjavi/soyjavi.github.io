@@ -94,7 +94,7 @@ brand page.
 
 The whole life can be one JSON file, imported with `npm run import -- archive.json`. [tools/archive.example.json](tools/archive.example.json)
 is a complete template (every block, with placeholders) and [tools/archive.schema.json](tools/archive.schema.json) is its
-JSON Schema, so an editor can validate it. Only entries with `"public": true` are written; a day in a date is cut to the
+JSON Schema, so an editor can validate it. Only entries with `"public": true` are written, and a memory already published whose entry says `"public": false` is removed, with the people and places only it named and the links that pointed at it (an import refuses it while a question of the clone draws on it); a day in a date is cut to the
 month; if anything is wrong nothing is written and every reason is printed. Any other key (notes, sources, a private
 flag of your own) is ignored.
 

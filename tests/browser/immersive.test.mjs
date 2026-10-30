@@ -172,7 +172,7 @@ const ringsOf = (id) => {
   const sky = skyOf(milestones, years(milestones), { periods: content.life.periods, today: todayYear(), threads: content.life.threads });
   return yearRings(sky.list[content.life.periods.indexOf(memory(id).period)], 8).map((ring) => String(ring.year));
 };
-const FAR = { from: "aprendizaje-continuo-hasta-la-ia", to: "primer-portatil-1996" };
+const FAR = { from: "diez-mil-horas-y-la-maquina", to: "primer-portatil-1996" };
 const COMPANION = memory("tapquo").links[0];
 const BORN = hudOf("born");
 const BOOK = content.dict.en.book.kicker;
@@ -1820,7 +1820,7 @@ test("a line is cut only where its marker shows, so the card's arrows and the ma
     const { page, errors, close } = await open("/", { viewport: size });
     await immersive(page);
     await page.waitForTimeout(3000);
-    for (const id of ["satoshi-ltd", "clonara", "arca", "tapquo", "school-trip-1994", "aprendizaje-continuo-hasta-la-ia", "relocation-hua-hin"].map((id) => `m-${id}`)) {
+    for (const id of ["satoshi-ltd", "clonara", "arca", "tapquo", "school-trip-1994", "diez-mil-horas-y-la-maquina", "relocation-hua-hin"].map((id) => `m-${id}`)) {
       await goTo(page, id);
       await page.waitForFunction((wanted) => document.documentElement.dataset.at !== undefined && location.hash === `#${wanted}`, id);
       await settled(page);
