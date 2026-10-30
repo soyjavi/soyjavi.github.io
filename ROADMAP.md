@@ -40,12 +40,6 @@ unless the task names it.
   board: CLOSED-MEMORIES
   The sky draws only open memories and nothing private is in the repository, not even as a stub. What the site can add is a number: how many memories are closed in each age and in total, shown in the label of each galaxy and in the hero, so the visitor feels the depth of the book and the clone. The hero already reads `totals` from `life.json` and says "Over 500 memories" / "Más de 500 recuerdos" with the creator's provisional figure; what is left is the count per age, once he gives it. The creator gives those figures and decides whether each galaxy label also carries its count per age; agent work follows: the field and its test, the labels, the hero and the flat page.
 
-- **THREAD-LEADS-AHEAD** — A thread ends at the book or the clone, not in a dead end
-  `feature · agent · normal`
-  board: THREAD-LEADS-AHEAD
-  With a thread on, the last Later is the ring `ahead` names for that thread and the figure ends with one more line to it; any other thread ends as today.
-  accept: a Node test: after the last memory of the book's thread the step is the book, after the clone's it is the clone, otherwise none; the ring is read from `ahead`, never named in code.
-
 - **SHARE-MEMORY** — A memory has an address that unfurls as itself
   `feature · agent · normal`
   board: SHARE-MEMORY

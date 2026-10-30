@@ -358,7 +358,7 @@ Two and a half seconds after the last touch, wherever it is (the hero, a memory,
   without it. In the whole-life view a filter is in the address (`#thread-<id>`, `#person-<id>`, `#place-<id>`, `filterHash`,
   `filterOfHash`): it can be shared, a reload keeps it, opening one lands on the whole life with it on, and letting go
   clears it. Each galaxy's label counts how many the filter holds
-  (`perGalaxy`), dimmed when none. Earlier and Later step along the filter while it is on.
+  (`perGalaxy`), dimmed when none. Earlier and Later step along the filter while it is on. A thread that `ahead` in `life.json` names for the book or the clone (`aheadOf`, `leadsTo` in `explore.js`) ends there: its last memory's Later reads the ring's name and opens it, and its figure ends with a line to that ring; any other filter ends at its last memory. Only a memory in the thread leads to the ring.
 - **Finding.** `/` or the Find button opens the finder. Empty, it is an index of every memory grouped by period. With
   words, it first offers up to three threads, people or places whose name matches, each with its number of memories, to
   filter by (`filtersFor`), then up to eight memories matched without case or accents against the title, the text (both paragraphs), the

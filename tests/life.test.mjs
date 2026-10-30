@@ -578,6 +578,7 @@ test("the constellations appear only when the camera is close to the sky: the wh
   assert.match(source, /points\.userData\.lay\(flowVertices, false, \(time \* FIGURE_FLOW\) % DOT_GAP\)/, "and the dots flow slowly along it");
   const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
   assert.match(engine, /edges: figureOf\(marks, chain, \(i\) => scene\.centerOf\(i\)\.toArray\(\)\)/, "a filter's figure is built once, from where its memories are drawn when it is turned on");
+  assert.match(engine, /if \(chain\.length && leads\) figure\.edges\.push\(\[chain\.at\(-1\), scene\.slotOf\(leads\), false\]\);/, "a thread's figure ends with a line to the ring it leads to");
   assert.match(engine, /scene\.setJumps\(lit \? askPairs\(lit, scene\.slotOf\("clone"\)\) : figure\.edges, !lit\)/, "and kept while the sky turns");
   assert.match(engine, /const whole = stations\[current\]\.kind === "hero" && selected < 0 && periodView < 0 && play\.year === null;/, "the name of the figure belongs to the whole-life view only");
   assert.match(engine, /else if \(filter\) priority = 0;/, "with a filter on, no memory is named until pointed at");

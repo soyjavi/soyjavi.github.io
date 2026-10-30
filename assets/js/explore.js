@@ -82,6 +82,8 @@ export function sequence(marks, index, filter = null) {
   return { previous: chain[at - 1] ?? null, next: chain[at + 1] ?? null };
 }
 
+export const leadsTo = (marks, index, filter, ahead, facets) => (filter && matching(marks, filter).at(-1) === index ? aheadOf(ahead, facets, filter) : null);
+
 export function filtersFor(marks, facets, names, query, limit = 3) {
   const items = FACETS.flatMap((facet) =>
     (facets[facet] ?? []).map((id, item) => ({ facet, item, title: names[facet]?.[id] ?? id, body: "", extra: "", count: matching(marks, { facet, item }).length })),

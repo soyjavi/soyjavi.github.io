@@ -3014,6 +3014,20 @@ test("the first memory of a visit opens gently, with no year rings and no minima
   await keyed.close();
 });
 
+test("with the book's thread on, Later at its last memory is the book, the figure reaches the book's ring and any other thread ends where it did", async () => {
+  const { page, errors, close } = await open(`/#thread-${content.life.ahead.book}`, { viewport: { width: 1280, height: 800 } });
+  await immersive(page);
+  const last = milestones.filter((entry) => entry.threads.includes(content.life.ahead.book)).sort((a, b) => String(a.date).localeCompare(String(b.date))).at(-1);
+  await goTo(page, `m-${last.id}`);
+  await hud(page, hudOf(last.id));
+  await settled(page);
+  assert.equal(await page.locator(".step[data-step=next]").textContent(), `${content.dict.en.ui.nav.book} →`);
+  await page.locator(".step[data-step=next]").click();
+  await hud(page, BOOK);
+  assert.deepEqual(errors, []);
+  await close();
+});
+
 test("a shared memory opens with a line that says whose life it is and goes to the whole life, the book's line replaces it from the second memory, and a visit from the top never shows it", async () => {
   const shared = await open(`/#m-${COMPANION}`, { viewport: { width: 1280, height: 800 } });
   await shared.page.waitForSelector(".nudge");

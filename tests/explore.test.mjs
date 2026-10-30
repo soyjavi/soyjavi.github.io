@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { CADENCE, LEVEL, aheadOf, inviteLine, RING_CLEARANCE, STRONG, askLevels, askPairs, declared, periodNames, strongest, TAG_GAP, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, figureCount, figureOf, figureSpan, filterHash, filterOfHash, leaderOf, levels, matching, miniMap, MINI_ZOOM, miniVisible, QUALITY, averageMs, nextQuality, normalize, perGalaxy, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, tagSpots, tourPlan, tourTick, pace, worked } from "../assets/js/explore.js";
+import { CADENCE, LEVEL, aheadOf, leadsTo, inviteLine, RING_CLEARANCE, STRONG, askLevels, askPairs, declared, periodNames, strongest, TAG_GAP, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, figureCount, figureOf, figureSpan, filterHash, filterOfHash, leaderOf, levels, matching, miniMap, MINI_ZOOM, miniVisible, QUALITY, averageMs, nextQuality, normalize, perGalaxy, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, tagSpots, tourPlan, tourTick, pace, worked } from "../assets/js/explore.js";
 import { layout } from "../assets/js/life.js";
 import { ORBIT, approach, ease, eye, nearest, slide, turn, zoom } from "../assets/js/orbit.js";
 import { loadContent } from "../src/content.mjs";
@@ -561,4 +561,21 @@ test("a thread leads to the ring `ahead` names for it, and no other filter does"
   assert.equal(aheadOf(ahead, facets, { facet: "people", item: 0 }), null);
   assert.equal(aheadOf(ahead, facets, null), null);
   assert.equal(aheadOf(undefined, facets, { facet: "threads", item: 2 }), null);
+});
+
+test("after the last memory of the book's thread the step is the book, after the clone's the clone, and anywhere else it is none", () => {
+  const facets = { threads: ["home", "craft", "learning"] };
+  const ahead = { book: "learning", clone: "craft" };
+  const marks = [[0], [2], [2], [1], [0]].map((threads, i) => ({ year: 1990 + i, members: { threads } }));
+  const learning = { facet: "threads", item: 2 };
+  assert.equal(leadsTo(marks, 1, learning, ahead, facets), null);
+  assert.equal(leadsTo(marks, 2, learning, ahead, facets), "book");
+  assert.equal(leadsTo(marks, 3, { facet: "threads", item: 1 }, ahead, facets), "clone");
+  assert.equal(leadsTo(marks, 4, { facet: "threads", item: 0 }, ahead, facets), null);
+  assert.equal(leadsTo(marks, 2, null, ahead, facets), null);
+  const outside = [[2], [0], [0]].map((threads, i) => ({ year: 1990 + i, members: { threads } }));
+  assert.equal(leadsTo(outside, 2, learning, ahead, facets), null, "a memory outside the thread, later than all of it, does not lead to the book");
+  assert.equal(leadsTo(outside, 0, learning, ahead, facets), "book");
+  const empty = [[0], [0]].map((threads, i) => ({ year: 1990 + i, members: { threads } }));
+  assert.equal(leadsTo(empty, 1, learning, ahead, facets), null, "an empty thread leads nowhere");
 });

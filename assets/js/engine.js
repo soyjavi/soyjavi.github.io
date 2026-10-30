@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { BUDGET, FACETS, FLOOR, RAIL, START, shapeBy, futures, layout, memories, playElapsed, monthsUntil, playYear, railPercent, skyOf, todayYear, untilText, yearRings } from "./life.js";
-import { LEVEL, inviteLine, askLevels, askPairs, declared, periodNames, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, figureCount, figureOf, figureSpan, filterHash, filterOfHash, leaderOf, levels as levelsOf, matching, perGalaxy, miniMap, miniVisible, QUALITY, averageMs, nextQuality, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, strongest, tagSpots, tourPlan, tourTick, worked, isFresh } from "./explore.js";
+import { LEVEL, aheadOf, leadsTo, inviteLine, askLevels, askPairs, declared, periodNames, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, figureCount, figureOf, figureSpan, filterHash, filterOfHash, leaderOf, levels as levelsOf, matching, perGalaxy, miniMap, miniVisible, QUALITY, averageMs, nextQuality, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, strongest, tagSpots, tourPlan, tourTick, worked, isFresh } from "./explore.js";
 import { clamp } from "./orbit.js";
 import { createSound } from "./sound.js";
 import { OVERVIEW_PITCH, createScene } from "./scene.js";
@@ -458,7 +458,7 @@ async function start() {
     if (station.kind === "hero") return { previous: null, next: lived[0].t };
     if (station.kind === "milestone") {
       const { previous, next } = sequence(marks, memoryOf(index), filter);
-      return { previous: previous !== null ? stationOf(previous) : !filter && memoryOf(index) === 0 ? 0 : null, next: next !== null ? stationOf(next) : !filter ? bookAt : null };
+      return { previous: previous !== null ? stationOf(previous) : !filter && memoryOf(index) === 0 ? 0 : null, next: next !== null ? stationOf(next) : !filter ? bookAt : { book: bookAt, clone: cloneAt }[leadsTo(marks, memoryOf(index), filter, ahead, facets)] ?? null };
     }
     if (station.kind === "book") return { previous: lived.at(-1).t, next: cloneAt };
     if (station.kind === "clone") return { previous: bookAt, next: contactAt };
@@ -723,7 +723,8 @@ async function start() {
       button.textContent = text;
     };
     place(previousButton, previous, `← ${copy.earlier}`);
-    place(nextButton, next, `${copy.later} →`);
+    const ring = filter && station.kind === "milestone" ? { [bookAt]: tools.dataset.book, [cloneAt]: tools.dataset.clone }[next] : undefined;
+    place(nextButton, next, `${ring ?? copy.later} →`);
     cardSteps.hidden = station.kind === "hero" || (previous === null && next === null);
     closeButton.hidden = station.kind === "hero";
     fitCard();
@@ -865,6 +866,8 @@ async function start() {
       const chain = matching(marks, filter);
       const span = figureSpan(marks, chain);
       Object.assign(figure, { key, chain, edges: figureOf(marks, chain, (i) => scene.centerOf(i).toArray()), option: null, width: 0, height: 0 });
+      const leads = aheadOf(ahead, facets, filter);
+      if (chain.length && leads) figure.edges.push([chain.at(-1), scene.slotOf(leads), false]);
       figureTitle.textContent = filter ? names[filter.facet][facets[filter.facet][filter.item]] ?? "" : "";
       figureLine.textContent = chain.length ? figureCount(span, { one: tools.dataset.countMemory, many: tools.dataset.countMemories }) : "";
     }
