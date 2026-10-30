@@ -185,33 +185,6 @@ ordered by what is worth approving first; line numbers are from that review.
 
 ### 1. Bugs
 
-- **AGE-VIEW-KEYS** — In an age view the arrow keys skip its first memory
-  `bug · agent · high`
-  `selectPeriod` sets `current` to the age's first memory (`engine.js:833`) and `onKey` steps from it with `stepOf`
-  (`engine.js:1264`), so Right, PageDown and Space open the age's second memory and Left the last memory of the age
-  before, while the card's Earlier and Later step between ages (`engine.js:676-683`). One pure function in `explore.js`
-  for both.
-  accept: a Node test: from an age the step is the age before or after, never a memory; from a memory it equals
-  `sequence`.
-- **RAIL-SCRUB** — Dragging along the rail opens every memory it passes
-  `bug · agent · normal`
-  `pointermove` selects each new station (`engine.js:1321-1326`): the camera flies, a bell rings and each memory counts
-  as opened, so one sweep sets off the three-memories nudge; at two or three hundred memories that is one every few
-  pixels. While dragging, only the tip and the preview ring follow; the memory opens on release.
-  accept: a browser test drags across the track: the hash changes once, on release, and no nudge shows.
-- **SURPRISE-IN-FILTER** — Surprise me ignores the filter in force
-  `bug · agent · normal`
-  It picks from every memory (`engine.js:1016-1020`), so with a thread on it can open a dimmed one.
-  accept: a Node test of a pure pick: with a filter it always lands in the filter's chain, and it avoids the memories
-  opened in this visit while any are left.
-- **RAIL-AHEAD** — The rail's book and clone are pinned to calendar years
-  `bug · agent · normal`
-  `RAIL = { end: 2031, book: 2027.8, clone: 2029.6 }` (`life.js:433`), while the today mark is the visitor's date
-  (`engine.js:1297`): from late 2027 today is drawn past the book, after 2031 past the end. The decades
-  (`src/rail.mjs:4`) and the end of the bars (`src/rail.mjs:10`) are fixed the same way. The sky's `futures` already sit
-  relative to today.
-  accept: a Node test with today at 2028.5 and at 2035 keeps today before the book, the book before the clone and the
-  clone inside the rail; the decades come from the span.
 - **ENTER-STALL** — A failed or slow script leaves the page blank
   `bug · agent · normal`
   During the entrance everything but the stage is hidden (`site.css:2295`) and the only way out without the script is
@@ -344,6 +317,11 @@ From the performance audit (24 frames a second already ships):
   The hero and the page title say "A life, in milestones" / "Una vida en hitos", while the rules keep one word, memory,
   for each memory, and the lede follows them.
   accept: the creator keeps it or changes it; the title, the hero and the share image follow.
+- **RAIL-DECADES** — The rail's decades follow the years it spans
+  `chore · agent · low`
+  The decade labels stop at 2020 (`src/rail.mjs`) and the density bars at 2026, although the rail now moves its end, the book and the clone with the year; from 2030 on the rail would have no label for its last decade.
+  accept: a Node test of the decades for a rail ending in 2036 lists 2030; the build output does not change while the year is 2026.
+
 - **MILESTONE-MEDIA** — A photo or a sound at a milestone
   `feature · agent · low` · depends: the creator's approval of each file
   board: MILESTONE-MEDIA

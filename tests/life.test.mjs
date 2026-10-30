@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { shapeBy, AHEAD, BUDGET, LANES, PLAY, RAIL, SKY, SPACE, SPREAD, START, activityAt, activityTable, aheadPoint, assign, crowdScale, densityAt, densityByYear, dotsPerWeight, fractionIn, futures, galaxies, galaxyOf, lanes, layout, memories, onPath, orderOf, yearOf, playElapsed, playYear, precisionOf, railPercent, shellPoint, skyOf, SPIN, spinAngle, spinRate, spinTime, spun, starfield, todayYear, unitsOf, yearRings, years } from "../assets/js/life.js";
+import { railBase, railOf, shapeBy, AHEAD, BUDGET, LANES, PLAY, RAIL, SKY, SPACE, SPREAD, START, activityAt, activityTable, aheadPoint, assign, crowdScale, densityAt, densityByYear, dotsPerWeight, fractionIn, futures, galaxies, galaxyOf, lanes, layout, memories, onPath, orderOf, yearOf, playElapsed, playYear, precisionOf, railPercent, shellPoint, skyOf, SPIN, spinAngle, spinRate, spinTime, spun, starfield, todayYear, unitsOf, yearRings, years } from "../assets/js/life.js";
 import { lerp, seeded, smoothstep } from "../assets/js/util.js";
 import { existsSync, readFileSync } from "node:fs";
 import { ageAt, ageIdOf } from "../assets/js/life.js";
@@ -228,6 +228,18 @@ test("the timeline rail maps years to a percentage and keeps the book and the cl
   assert.ok(railPercent(2000) > 39 && railPercent(2000) < 40);
   assert.ok(RAIL.book > TODAY && RAIL.clone > RAIL.book && RAIL.end > RAIL.clone);
   assert.ok(RAIL.book > 2026.9);
+});
+
+test("the rail's future follows today: the book and the clone stay ahead of it and inside the rail in any year", () => {
+  assert.deepEqual(railOf(railBase(2026.75)), RAIL);
+  for (const today of [2026.9, 2027.95, 2028.5, 2035.2, 2051]) {
+    const rail = railOf(railBase(today));
+    assert.ok(today < rail.book && rail.book < rail.clone && rail.clone < rail.end, String(today));
+    assert.ok(railPercent(today, rail) < railPercent(rail.book, rail) && railPercent(rail.clone, rail) < 100, String(today));
+  }
+  const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
+  assert.match(engine, /Object\.assign\(RAIL, railOf\(railBase\(today\)\)\);/, "the engine moves the rail to today's year");
+  assert.match(engine, /rail\.querySelectorAll\("\[data-year\]"\)/, "and lays its ticks again");
 });
 
 test("today is a fraction of its own year and grows with the day", () => {
@@ -759,4 +771,22 @@ test("a new memory breathes brighter in the sky", () => {
   assert.match(scene, /for \(const i of fresh\) levelNow\[i\] = levelGoal\[i\] \* \(1 \+ FRESH_GLOW \*/);
   const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
   assert.match(engine, /scene\.setFresh\(freshMarks\);/);
+});
+
+test("dragging along the rail only follows the finger: the memory opens once, on release, and a cancelled drag opens nothing", () => {
+  const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
+  const handler = (name) => engine.match(new RegExp(`track\\.addEventListener\\("${name}", [\\s\\S]*?\\n    \\}\\);`))[0];
+  assert.doesNotMatch(handler("pointerdown"), /\bselect\(/);
+  assert.doesNotMatch(handler("pointermove"), /\bselect\(/);
+  assert.match(handler("pointerup"), /select\(point\(event\)\.t\)/);
+  assert.match(engine, /track\.addEventListener\("pointercancel", letGo\);/);
+  assert.match(engine, /track\.addEventListener\("lostpointercapture", \(\) => scrubbing && letGo\(\)\);/);
+  assert.match(handler("pointerdown"), /event\.button !== 0\) return;/);
+});
+
+test("in an age view the arrow keys step between ages, and the card and the keys share one rule for it", () => {
+  const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
+  assert.match(engine, /if \(periodView >= 0\) \{\s*const age = ageAround\(marks, periods\.length, periodView \+ direction\);\s*if \(age !== null\) selectPeriod\(age\);/);
+  assert.match(engine, /place\(nextButton, ageAround\(marks, periods\.length, periodView \+ 1\)/);
+  assert.match(engine, /surprisePick\(marks, filter, memoryOf\(current\)/);
 });

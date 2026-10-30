@@ -430,7 +430,13 @@ export function memories({ marks, sky, today, random, base = BUDGET.base, cap = 
   return out;
 }
 
-export const RAIL = { start: START, end: 2031, book: 2027.8, clone: 2029.6 };
+export const RAIL_BASE = 2026;
+
+export const railOf = (base = RAIL_BASE) => ({ start: START, end: base + 5, book: base + 1.8, clone: base + 3.6 });
+
+export const railBase = (today) => Math.max(RAIL_BASE, Math.floor(today));
+
+export const RAIL = railOf();
 
 export const PLAY = { seconds: 16 };
 
@@ -438,7 +444,7 @@ export const playYear = (elapsed, to, from = START, seconds = PLAY.seconds) => f
 
 export const playElapsed = (year, to, from = START, seconds = PLAY.seconds) => clamp01((year - from) / (to - from)) * seconds;
 
-export const railPercent = (year) => ((year - RAIL.start) / (RAIL.end - RAIL.start)) * 100;
+export const railPercent = (year, rail = RAIL) => ((year - rail.start) / (rail.end - rail.start)) * 100;
 
 export const SPIN = { rate: 0.05, ramp: 6, slots: 16, near: 0.2 };
 

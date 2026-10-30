@@ -7,11 +7,11 @@ export function rail({ life, dict }) {
   const copy = dict.ui.rail;
   const placed = years(life.milestones);
   const pct = (year) => railPercent(year).toFixed(2);
-  const bars = densityByYear(life.milestones, Math.max(2026, Math.floor(Math.max(...placed))) + 0.99).map(({ year, value }) => `<i style="--x:${pct(year + 0.5)}%;--h:${value.toFixed(2)}"></i>`);
-  const ticks = placed.map((year, i) => `<i data-weight="${life.milestones[i].weight}" style="--x:${pct(year)}%"></i>`);
+  const bars = densityByYear(life.milestones, Math.max(2026, Math.floor(Math.max(...placed))) + 0.99).map(({ year, value }) => `<i data-year="${year + 0.5}" style="--x:${pct(year + 0.5)}%;--h:${value.toFixed(2)}"></i>`);
+  const ticks = placed.map((year, i) => `<i data-weight="${life.milestones[i].weight}" data-year="${year}" style="--x:${pct(year)}%"></i>`);
   const decades = DECADES.map((decade) => {
     const first = life.milestones.find((_, i) => placed[i] >= decade && placed[i] < decade + 10) ?? life.milestones.find((_, i) => placed[i] >= decade) ?? life.milestones.at(-1);
-    return `<li style="--x:${pct(decade)}%"><a href="#m-${first.id}" data-go="m-${first.id}" aria-label="${esc(fill(copy.decade, { year: decade, label: decade < 2000 ? decade % 100 : decade }))}">${decade}</a></li>`;
+    return `<li data-year="${decade}" style="--x:${pct(decade)}%"><a href="#m-${first.id}" data-go="m-${first.id}" aria-label="${esc(fill(copy.decade, { year: decade, label: decade < 2000 ? decade % 100 : decade }))}">${decade}</a></li>`;
   });
   return `<nav class="rail" aria-label="${esc(copy.label)}">
       <a class="rail-home" href="#top" data-go="top" aria-label="${esc(copy.overview)}" title="${esc(copy.overview)}"><i aria-hidden="true"></i><span class="rail-name">${esc(copy.overviewName)}</span></a>
@@ -20,8 +20,8 @@ export function rail({ life, dict }) {
         <div class="rail-track" aria-hidden="true">
           <div class="rail-bars">${bars.join("")}</div>
           <div class="rail-ticks">${ticks.join("")}</div>
-          <b class="rail-future" style="--x:${pct(RAIL.book)}%"></b>
-          <b class="rail-future" style="--x:${pct(RAIL.clone)}%"></b>
+          <b class="rail-future" data-ahead="book" style="--x:${pct(RAIL.book)}%"></b>
+          <b class="rail-future" data-ahead="clone" style="--x:${pct(RAIL.clone)}%"></b>
           <span class="rail-today"></span>
           <span class="rail-cursor"></span>
           <p class="rail-tip"></p>

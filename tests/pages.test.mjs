@@ -217,15 +217,15 @@ test("the timeline rail indexes the whole life the same way in both languages", 
     assert.ok(nav.includes(`<button class="rail-play" type="button" data-play aria-pressed="false" aria-label="${copy.play}" title="${copy.play}" data-play-label="${copy.play}" data-pause-label="${copy.pause}" data-play-name="${copy.playName}" data-pause-name="${copy.pauseName}">`), `${lang}: the rail can play the life`);
     assert.ok(nav.includes(`<span class="rail-name">${copy.overviewName}</span></a>`), `${lang}: the way back to the whole life carries its name`);
     assert.ok(nav.includes(`<span class="rail-name">${copy.playName}</span></button>`), `${lang}: the play button carries its name`);
-    const bars = [...nav.matchAll(/<i style="--x:([\d.]+)%;--h:([\d.]+)"><\/i>/g)];
+    const bars = [...nav.matchAll(/<i data-year="[\d.]+" style="--x:([\d.]+)%;--h:([\d.]+)"><\/i>/g)];
     assert.equal(bars.length, 47, `${lang}: one bar per year from 1980 to 2026`);
     assert.equal(Math.max(...bars.map((bar) => +bar[2])), 1);
     assert.ok(bars.every((bar, i) => i === 0 || +bar[1] > +bars[i - 1][1]), "bars run left to right");
-    const ticks = [...nav.matchAll(/<i data-weight="(\d)" style="--x:([\d.]+)%"><\/i>/g)];
+    const ticks = [...nav.matchAll(/<i data-weight="(\d)" data-year="[\d.]+" style="--x:([\d.]+)%"><\/i>/g)];
     assert.deepEqual(ticks.map((tick) => +tick[1]), content.life.milestones.map((entry) => entry.weight), `${lang}: one tick per milestone`);
     assert.ok(ticks.every((tick, i) => i === 0 || +tick[2] > +ticks[i - 1][2]), "ticks run left to right");
     assert.equal((nav.match(/class="rail-future"/g) ?? []).length, 2, "the book and the clone");
-    const decades = [...nav.matchAll(/<li style="--x:([\d.]+)%"><a href="#(m-[\w-]+)" data-go="m-[\w-]+" aria-label="([^"]+)">(\d{4})<\/a><\/li>/g)];
+    const decades = [...nav.matchAll(/<li data-year="\d+" style="--x:([\d.]+)%"><a href="#(m-[\w-]+)" data-go="m-[\w-]+" aria-label="([^"]+)">(\d{4})<\/a><\/li>/g)];
     assert.deepEqual(decades.map((decade) => decade[4]), ["1980", "1990", "2000", "2010", "2020"]);
     for (const [, , id] of decades) assert.ok(ids(read(homes[lang])).includes(id), `${id} is not a station`);
     assert.match(nav, /<div class="rail-track" aria-hidden="true">/);

@@ -270,7 +270,7 @@ Two and a half seconds after the last touch, wherever it is (the hero, a memory,
   are far and a little below (the contact from above) and drift slowly while nothing is touched. The scene is offset
   so the target sits in the free area beside the card (above it on a phone).
 - **Opening.** A click or a tap on a cloud, a galaxy's label (it frames the galaxy, the age view; pressed again it returns to the whole-life view), a related
-  memory, a result of the finder, a point on the rail, Surprise me,
+  memory, a result of the finder, a point on the rail, Surprise me (a memory in the filter when one is on, not the one in view, and one not yet opened in the visit while any is left),
   a link with `data-go`, an address hash (`#book`, `#m-tapquo`, `#period-midlife`, `#thread-family`; a malformed one or one that names nothing is
   ignored), a focus on the real document, or Earlier and Later. The address follows the memory in view with
   `history.replaceState`. A `data-go` link to the book or the clone also puts the cursor in its waitlist field.
@@ -371,7 +371,7 @@ Two and a half seconds after the last touch, wherever it is (the hero, a memory,
   (`playYear`): the dots, today and the rings ahead appear as their year comes, the year shows above
   the rail and the cursor follows it, and the memories of the last two and a half years are named. Pressing it again
   pauses and resumes from the same year (`playElapsed`); opening anything stops it and shows the whole life.
-- **Keyboard.** Arrows, Page keys and Space step Earlier and Later (inside the filter when there is one), Home and Escape
+- **Keyboard.** Arrows, Page keys and Space step Earlier and Later (inside the filter when there is one; from an age view, between ages, and not past the first or the last age), Home and Escape
   return to the whole life (Escape first closes the guide, the sheet or the finder and lets go of a filter), End opens the contact, `/` finds, `?` opens the guide, `H` hides the interface. Keys
   are left alone inside fields, and a space on a button or link presses it.
 
@@ -431,7 +431,7 @@ density (the sum of the weights of its milestones), a tick per memory (larger wh
 and the clone, today, and a cursor that follows the memory in view; and the five decades as links, which with the two
 buttons are the only focusable parts. It
 is generated at build time from `content/life.json` (`src/rail.mjs`), so both languages share it. Pressing or dragging
-on the track opens the nearest memory, book or clone; pointing at it shows that memory's date and title. Its bars and ticks rest at 40% and come to full while the pointer is over the rail or the focus is inside it. The rail is hidden
+on the track follows the finger with the date and title of the nearest memory, book or clone and its ring; the one it ends on opens when the finger or the pointer is released, and a cancelled drag, a secondary button or a lost pointer opens nothing. The rail's end, the book and the clone sit 5, 1.8 and 3.6 years after the current year (`railOf`, `railBase`), and the engine lays the ticks, bars and decades again when today is past the year it was built for, so today never passes them. Its bars and ticks rest at 40% and come to full while the pointer is over the rail or the focus is inside it. The rail is hidden
 in the flat page.
 
 ### Flat page

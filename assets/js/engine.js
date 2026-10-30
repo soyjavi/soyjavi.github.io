@@ -1,6 +1,6 @@
 import * as THREE from "three";
-import { BUDGET, FACETS, FLOOR, RAIL, START, shapeBy, futures, layout, memories, playElapsed, monthsUntil, playYear, railPercent, skyOf, todayYear, untilText, yearRings } from "./life.js";
-import { LEVEL, aheadOf, leadsTo, inviteLine, askLevels, askPairs, declared, periodNames, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, figureCount, figureOf, figureSpan, filterHash, filterOfHash, leaderOf, levels as levelsOf, matching, perGalaxy, miniMap, miniVisible, QUALITY, averageMs, nextQuality, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, strongest, tagSpots, tourPlan, tourTick, worked, isFresh } from "./explore.js";
+import { BUDGET, FACETS, FLOOR, RAIL, START, railBase, railOf, shapeBy, futures, layout, memories, playElapsed, monthsUntil, playYear, railPercent, skyOf, todayYear, untilText, yearRings } from "./life.js";
+import { LEVEL, ageAround, aheadOf, surprisePick, leadsTo, inviteLine, askLevels, askPairs, declared, periodNames, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, figureCount, figureOf, figureSpan, filterHash, filterOfHash, leaderOf, levels as levelsOf, matching, perGalaxy, miniMap, miniVisible, QUALITY, averageMs, nextQuality, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, strongest, tagSpots, tourPlan, tourTick, worked, isFresh } from "./explore.js";
 import { clamp } from "./orbit.js";
 import { createSound } from "./sound.js";
 import { OVERVIEW_PITCH, createScene } from "./scene.js";
@@ -91,6 +91,7 @@ async function start() {
   const masthead = document.querySelector(".masthead");
   const tools = document.querySelector(".explore");
   const today = todayYear();
+  Object.assign(RAIL, railOf(railBase(today)));
   const mobile = matchMedia("(max-width: 760px)").matches;
   const facets = JSON.parse(tools.dataset.facets);
   const ahead = JSON.parse(tools.dataset.ahead);
@@ -676,15 +677,14 @@ async function start() {
     card.dataset.collapsed = "";
     card.dataset.kind = "period";
     forms.forEach((holder) => (holder.hidden = true));
-    const around = (k) => (k >= 0 && k < periods.length && marks.some((mark) => mark.period === k) ? k : null);
     const place = (button, k, text) => {
       button.hidden = k === null;
       button.dataset.to = "";
       button.dataset.periodTo = k ?? "";
       button.textContent = text;
     };
-    place(previousButton, around(periodView - 1), `← ${copy.earlier}`);
-    place(nextButton, around(periodView + 1), `${copy.later} →`);
+    place(previousButton, ageAround(marks, periods.length, periodView - 1), `← ${copy.earlier}`);
+    place(nextButton, ageAround(marks, periods.length, periodView + 1), `${copy.later} →`);
     cardSteps.hidden = previousButton.hidden && nextButton.hidden;
     closeButton.hidden = false;
     play.running = false;
@@ -1021,10 +1021,8 @@ async function start() {
     }
   });
   tools.querySelector("[data-surprise]").addEventListener("click", () => {
-    const here = memoryOf(current);
-    let pick = here;
-    while (pick === here && marks.length > 1) pick = Math.floor(Math.random() * marks.length);
-    select(stationOf(pick));
+    const pick = surprisePick(marks, filter, memoryOf(current), new Set([...invite.opened].map(memoryOf)));
+    if (pick !== null) select(stationOf(pick));
   });
 
   const guide = tools.querySelector(".guide");
@@ -1274,9 +1272,14 @@ async function start() {
     } else if (event.key in stepKeys) {
       event.preventDefault();
       const direction = event.key === " " && event.shiftKey ? -1 : stepKeys[event.key];
-      const { previous, next } = stepOf(current);
-      const target = direction > 0 ? next : previous;
-      if (target !== null) select(target);
+      if (periodView >= 0) {
+        const age = ageAround(marks, periods.length, periodView + direction);
+        if (age !== null) selectPeriod(age);
+      } else {
+        const { previous, next } = stepOf(current);
+        const target = direction > 0 ? next : previous;
+        if (target !== null) select(target);
+      }
     }
   };
   addEventListener("keydown", onKey);
@@ -1310,6 +1313,8 @@ async function start() {
     const track = rail.querySelector(".rail-track");
     const tip = rail.querySelector(".rail-tip");
     rail.querySelector(".rail-today")?.style.setProperty("--x", `${railPercent(today).toFixed(2)}%`);
+    rail.querySelectorAll("[data-year]").forEach((node) => node.style.setProperty("--x", `${railPercent(+node.dataset.year).toFixed(2)}%`));
+    rail.querySelectorAll("[data-ahead]").forEach((node) => node.style.setProperty("--x", `${railPercent(RAIL[node.dataset.ahead]).toFixed(2)}%`));
     const yearAt = (event) => {
       const box = track.getBoundingClientRect();
       return RAIL.start + clamp((event.clientX - box.left) / box.width, 0, 1) * (RAIL.end - RAIL.start);
@@ -1325,21 +1330,31 @@ async function start() {
       tip.dataset.on = "1";
       return station;
     };
+    const follow = (station) => {
+      last = station.t;
+      setPreview(station.kind === "milestone" ? memoryOf(station.t) : -1);
+    };
     track.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0) return;
       scrubbing = true;
       track.setPointerCapture(event.pointerId);
-      const station = point(event);
-      last = station.t;
-      select(station.t);
+      follow(point(event));
     });
     track.addEventListener("pointermove", (event) => {
       const station = point(event);
-      if (scrubbing && station.t !== last) {
-        last = station.t;
-        select(station.t);
-      }
+      if (scrubbing && station.t !== last) follow(station);
     });
-    track.addEventListener("pointerup", () => (scrubbing = false));
+    track.addEventListener("pointerup", (event) => {
+      if (!scrubbing) return;
+      scrubbing = false;
+      select(point(event).t);
+    });
+    const letGo = () => {
+      scrubbing = false;
+      setPreview(-1);
+    };
+    track.addEventListener("pointercancel", letGo);
+    track.addEventListener("lostpointercapture", () => scrubbing && letGo());
     track.addEventListener("pointerleave", () => (tip.dataset.on = ""));
   }
 

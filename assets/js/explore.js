@@ -74,6 +74,16 @@ export function periodNames(marks, period, limit = 3, apart = 3) {
 
 export const aheadOf = (ahead, facets, filter) => (filter?.facet === "threads" ? ["book", "clone"].find((name) => ahead?.[name] === facets.threads[filter.item]) ?? null : null);
 
+export const ageAround = (marks, count, k) => (k >= 0 && k < count && marks.some((mark) => mark.period === k) ? k : null);
+
+export function surprisePick(marks, filter, here, seen, random = Math.random) {
+  const pool = (filter ? matching(marks, filter) : marks.map((mark, i) => i)).filter((i) => i !== here);
+  if (!pool.length) return null;
+  const fresh = pool.filter((i) => !seen.has(i));
+  const from = fresh.length ? fresh : pool;
+  return from[Math.floor(random() * from.length)];
+}
+
 export function sequence(marks, index, filter = null) {
   if (!filter) return { previous: index > 0 ? index - 1 : null, next: index < marks.length - 1 ? index + 1 : null };
   const chain = matching(marks, filter);

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { CADENCE, LEVEL, aheadOf, leadsTo, inviteLine, RING_CLEARANCE, STRONG, askLevels, askPairs, declared, periodNames, strongest, TAG_GAP, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, figureCount, figureOf, figureSpan, filterHash, filterOfHash, leaderOf, levels, matching, miniMap, MINI_ZOOM, miniVisible, QUALITY, averageMs, nextQuality, normalize, perGalaxy, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, tagSpots, tourPlan, tourTick, pace, worked } from "../assets/js/explore.js";
+import { CADENCE, LEVEL, ageAround, aheadOf, surprisePick, leadsTo, inviteLine, RING_CLEARANCE, STRONG, askLevels, askPairs, declared, periodNames, strongest, TAG_GAP, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, figureCount, figureOf, figureSpan, filterHash, filterOfHash, leaderOf, levels, matching, miniMap, MINI_ZOOM, miniVisible, QUALITY, averageMs, nextQuality, normalize, perGalaxy, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, tagSpots, tourPlan, tourTick, pace, worked } from "../assets/js/explore.js";
 import { layout } from "../assets/js/life.js";
 import { ORBIT, approach, ease, eye, nearest, slide, turn, zoom } from "../assets/js/orbit.js";
 import { loadContent } from "../src/content.mjs";
@@ -578,4 +578,25 @@ test("after the last memory of the book's thread the step is the book, after the
   assert.equal(leadsTo(outside, 0, learning, ahead, facets), "book");
   const empty = [[0], [0]].map((threads, i) => ({ year: 1990 + i, members: { threads } }));
   assert.equal(leadsTo(empty, 1, learning, ahead, facets), null, "an empty thread leads nowhere");
+});
+
+test("in an age view the next and the previous step are ages, and an age with no memory is never one", () => {
+  const marks = [0, 0, 1, 3].map((period) => ({ period }));
+  assert.equal(ageAround(marks, 4, 1), 1);
+  assert.equal(ageAround(marks, 4, 2), null, "an age nobody lived in the sky is skipped over");
+  assert.equal(ageAround(marks, 4, -1), null);
+  assert.equal(ageAround(marks, 4, 4), null);
+});
+
+test("surprise me stays inside the filter, avoids the memory in view and the ones already opened while any are left", () => {
+  const marks = [[0], [1], [1], [1], [0]].map((threads, i) => ({ year: 1990 + i, members: { threads } }));
+  const craft = { facet: "threads", item: 1 };
+  for (const roll of [0, 0.3, 0.6, 0.99]) {
+    assert.ok([1, 2, 3].includes(surprisePick(marks, craft, -1, new Set(), () => roll)), "inside the thread");
+    assert.notEqual(surprisePick(marks, craft, 2, new Set(), () => roll), 2, "never the one in view");
+    assert.equal(surprisePick(marks, craft, 1, new Set([2]), () => roll), 3, "the one not opened yet");
+  }
+  assert.equal(surprisePick(marks, craft, 1, new Set([1, 2, 3]), () => 0), 2, "when all were opened, any other in the thread");
+  assert.equal(surprisePick([marks[0]], null, 0, new Set()), null, "nothing else to open");
+  assert.equal(surprisePick(marks, { facet: "threads", item: 0 }, 0, new Set([4]), () => 0), 4, "opened already, but the only other one in the thread");
 });
