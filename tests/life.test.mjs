@@ -790,3 +790,15 @@ test("in an age view the arrow keys step between ages, and the card and the keys
   assert.match(engine, /place\(nextButton, ageAround\(marks, periods\.length, periodView \+ 1\)/);
   assert.match(engine, /surprisePick\(marks, filter, memoryOf\(current\)/);
 });
+
+test("a card's title is read as one phrase: the heading carries its own name and the animated words are hidden from assistive technology", () => {
+  const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
+  assert.match(engine, /root\.setAttribute\("aria-label", root\.textContent\.replace\(\/\\s\+\/g, " "\)\.trim\(\)\);/);
+  assert.match(engine, /piece\.className = "w";\s*piece\.setAttribute\("aria-hidden", "true"\);/);
+});
+
+test("reaching the book or the clone focuses its field with a keyboard or a mouse, and the card on a touch screen, so the keyboard does not open over the text", () => {
+  const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
+  assert.match(engine, /const coarsePointer = matchMedia\("\(pointer: coarse\)"\);/);
+  assert.match(engine, /if \(holder && coarsePointer\.matches\) card\.focus\(\{ preventScroll: true \}\);\s*else holder\?\.querySelector\("input, a, button"\)\?\.focus\(\);/);
+});

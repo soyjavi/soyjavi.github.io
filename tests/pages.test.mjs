@@ -262,22 +262,29 @@ test("a cold start hides the interface before the first paint, only when the ope
     const root = { setAttribute: (name, value) => (attrs[name] = value), removeAttribute: (name) => delete attrs[name], classList: { contains: () => immersive } };
     let onLoad = null;
     let later = null;
+    let onError = null;
+    const timers = [];
     const env = {
-      document: { documentElement: root },
+      document: { documentElement: root, addEventListener: (type, handler, capture) => type === "error" && capture === true && (onError = handler) },
       location: { hash },
       navigator: { webdriver },
       window: { matchMedia: true, addEventListener: (type, handler) => type === "load" && (onLoad = handler) },
       matchMedia: (query) => ({ matches: query.includes("reduce") ? reduced : fits }),
-      setTimeout: (handler) => (later = handler),
+      setTimeout: (handler, delay) => (timers.push({ handler, delay }), (later = handler)),
       WebGL2RenderingContext: webgl ? function () {} : undefined,
     };
     new Function(...Object.keys(env), code)(...Object.values(env));
-    return { attrs, load: () => (onLoad?.(), later?.(), attrs) };
+    return { attrs, load: () => (onLoad?.(), later?.(), attrs), fail: (tagName = "SCRIPT") => (onError?.({ target: { tagName } }), attrs), cap: () => (timers.find((timer) => timer.delay === 10000)?.handler(), attrs) };
   };
   assert.equal(run().attrs["data-entering"], "1", "a cold start hides the interface at once");
   for (const [why, options] of [["a link to something", { hash: "#m-born" }], ["an automated browser", { webdriver: true }], ["reduced motion", { reduced: true }], ["a window too small", { fits: false }], ["a browser without WebGL2, which gets the flat page at once", { webgl: false }]]) assert.equal(run(options).attrs["data-entering"], undefined, why);
   assert.equal(run().load()["data-entering"], undefined, "if the scene never runs, the page shows itself");
   assert.equal(run({ immersive: true }).load()["data-entering"], "1", "if it runs, the opening keeps it");
+  assert.equal(run().fail()["data-entering"], undefined, "a script that fails to load shows the page at once, not after the load event");
+  assert.equal(run().fail("IMG")["data-entering"], "1", "a missing picture does not");
+  assert.equal(run({ immersive: true }).fail()["data-entering"], "1", "nor does a failure once the scene runs");
+  assert.equal(run().cap()["data-entering"], undefined, "a load that never ends cannot keep the page blank");
+  assert.equal(run({ immersive: true }).cap()["data-entering"], "1");
   for (const page of ["index.html", "es/index.html"]) {
     const html = read(page);
     assert.ok(html.indexOf("/assets/lang.js") < html.indexOf("/assets/enter.js") && html.indexOf("/assets/enter.js") < html.indexOf("</head>"), `${page}: in the head, after the language`);

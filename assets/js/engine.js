@@ -29,6 +29,7 @@ const MAX_LINKS_CUT = 40;
 const MINI = { width: 104, height: 100, top: 118 };
 const SVG_NS = "http://www.w3.org/2000/svg";
 const stackedQuery = matchMedia(STACKED);
+const coarsePointer = matchMedia("(pointer: coarse)");
 const YEAR_RING_ANGLE = 0.9;
 const AHEAD_SIDES = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, 1], [1, -1], [-1, -1]];
 const FIT_KINDS = new Set(["hero", "contact"]);
@@ -53,6 +54,7 @@ export function mount() {
 
 function splitWords(root) {
   let index = 0;
+  root.setAttribute("aria-label", root.textContent.replace(/\s+/g, " ").trim());
   const walk = (node) => {
     [...node.childNodes].forEach((child) => {
       if (child.nodeType === Node.TEXT_NODE) {
@@ -62,6 +64,7 @@ function splitWords(root) {
           if (/^\s+$/.test(part)) return fragment.append(part);
           const piece = document.createElement("span");
           piece.className = "w";
+          piece.setAttribute("aria-hidden", "true");
           piece.style.setProperty("--i", index++);
           piece.textContent = part;
           fragment.append(piece);
@@ -1182,7 +1185,9 @@ async function start() {
     if (periodAt.has(id)) return selectPeriod(periodAt.get(id));
     const index = anchors.get(id);
     select(index);
-    if (stations[index].kind !== "hero") forms.get(stations[index].kind)?.querySelector("input, a, button")?.focus();
+    const holder = stations[index].kind !== "hero" ? forms.get(stations[index].kind) : null;
+    if (holder && coarsePointer.matches) card.focus({ preventScroll: true });
+    else holder?.querySelector("input, a, button")?.focus();
   };
   const fromHash = () => {
     const first = !hashSeen;

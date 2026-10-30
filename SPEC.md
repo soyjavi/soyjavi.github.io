@@ -37,7 +37,7 @@ The home pages declare `rel=canonical`, `hreflang` for `en`, `es` and `x-default
 - `assets/enter.js` loads synchronously in the `<head>` of the two home pages, after `lang.js`. On a cold start (no hash, no
   automated browser, no reduced motion, a window the scene fits) it marks `<html data-entering>` before the first paint, so
   the interface never shows before the opening; the scene keeps the mark, the flat page drops it, and if the scene has
-  not run 3 s after `load` the page shows itself. A browser without WebGL2 gets the flat page at once, unmarked.
+  not run 3 s after `load`, a script fails to load, or 10 s have passed since the page began, the page shows itself. A browser without WebGL2 gets the flat page at once, unmarked.
 - `assets/lang.js` loads synchronously in every `<head>`. On the path `/` only, it reads `localStorage.lang` and, when
   there is none, the first entry of `navigator.languages`; `es` goes to `/es/` keeping the query and the hash. Any
   other language, an empty list or a stored `en` stays. Any path other than `/` is never redirected, and a back or

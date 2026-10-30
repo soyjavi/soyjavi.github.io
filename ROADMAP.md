@@ -183,29 +183,7 @@ Visual ideas have a board in `design/proposals.html`; the others are described h
 it comes from a review of the whole project (the experience, the load, the code and the content) in October 2026,
 ordered by what is worth approving first; line numbers are from that review.
 
-### 1. Bugs
-
-- **ENTER-STALL** — A failed or slow script leaves the page blank
-  `bug · agent · normal`
-  During the entrance everything but the stage is hidden (`site.css:2295`) and the only way out without the script is
-  3 s after `load` (`enter.js:6`): a blocked `site.js` shows an empty night until then, and a stalled one never fires
-  `load`.
-  accept: a browser test with `site.js` aborted shows the interface within a second, and with it hanging, within a fixed
-  limit counted from `DOMContentLoaded`.
-- **A11Y-TITLE-WORDS** — A screen reader reads a card's title one word at a time
-  `bug · agent · normal`
-  `splitWords` (`engine.js:54-74`) wraps each word of the card's heading in an inline-block span for its animation;
-  VoiceOver and TalkBack can read such runs one swipe per word.
-  accept: a browser test: the card heading's accessible name equals the panel's heading, and the animated words sit in
-  an `aria-hidden` wrapper.
-- **TAP-NO-KEYBOARD** — On a phone, reaching the book does not raise the keyboard
-  `bug · agent · low`
-  `goTo` focuses the waitlist field (`engine.js:1180`), so a tap on "The book" or on the nudge covers the card with the
-  keyboard before its text is read.
-  accept: in a touch browser test, after a tap on the nav the focus is on the card, not on the field; with a keyboard it
-  stays as it is.
-
-### 2. Exploring and sharing
+### 1. Exploring and sharing
 
 - **BACK-TO-SKY** — Back returns to the sky instead of leaving the site
   `feature · agent · high`
@@ -226,7 +204,7 @@ ordered by what is worth approving first; line numbers are from that review.
   accept: a Node test: "art" does not return a memory whose only match is "start", "son" finds "my son" and not
   "person"; the list says how many it leaves out, in both languages.
 
-### 3. Load
+### 2. Load
 
 - **CACHE-BUST** — Version the asset URLs
   `chore · agent · high`
@@ -269,7 +247,7 @@ From the performance audit (24 frames a second already ships):
   `decision · creator · low`
   Capping at 1.5 saves about 22% of the GPU frame and slightly fades the dotted outlines and enlarges the selection ring; the clouds look the same. Only the creator's eye can say.
 
-### 4. Guards and documents
+### 3. Guards and documents
 
 - **BUILD-GUARDS** — The build refuses broken data, not only the tests
   `chore · agent · normal`
@@ -304,7 +282,7 @@ From the performance audit (24 frames a second already ships):
   version the tests run on.
   accept: README and REVIEW-LOOK point at the Node server only; both packages pinned exactly; a `.nvmrc`.
 
-### 5. Copy and depth — need the creator's words or approval
+### 4. Copy and depth — need the creator's words or approval
 
 - **BOOK-HOOK** — The book says why, in his own words
   `content · agent · normal`

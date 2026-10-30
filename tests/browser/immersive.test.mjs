@@ -3028,6 +3028,34 @@ test("with the book's thread on, Later at its last memory is the book, the figur
   await close();
 });
 
+test("on a touch screen reaching the book leaves the keyboard closed, and with a mouse it focuses the field", async () => {
+  const touch = await open("/", { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+  await immersive(touch.page);
+  await touch.page.evaluate(() => document.querySelector('.masthead nav a[data-go="book"]').click());
+  await hud(touch.page, BOOK);
+  assert.notEqual(await touch.page.evaluate(() => document.activeElement.tagName), "INPUT");
+  await touch.close();
+  const mouse = await open("/", { viewport: { width: 1280, height: 800 } });
+  await immersive(mouse.page);
+  await mouse.page.evaluate(() => document.querySelector('.masthead nav a[data-go="book"]').click());
+  await hud(mouse.page, BOOK);
+  assert.equal(await mouse.page.evaluate(() => document.activeElement.id), "waitlist-book-email");
+  await mouse.close();
+});
+
+test("a card's title is one phrase for a screen reader: the heading has its name and every animated word is hidden", async () => {
+  const { page, errors, close } = await open("/", { viewport: { width: 1280, height: 800 } });
+  await immersive(page);
+  await goTo(page, "m-born");
+  await hud(page, BORN);
+  await settled(page);
+  assert.equal(await page.locator(".card h3").getAttribute("aria-label"), titleOf("born"));
+  assert.equal(await page.locator(".card h3 .w:not([aria-hidden=true])").count(), 0);
+  assert.equal(await page.locator(".card h3").innerText(), titleOf("born"));
+  assert.deepEqual(errors, []);
+  await close();
+});
+
 test("a shared memory opens with a line that says whose life it is and goes to the whole life, the book's line replaces it from the second memory, and a visit from the top never shows it", async () => {
   const shared = await open(`/#m-${COMPANION}`, { viewport: { width: 1280, height: 800 } });
   await shared.page.waitForSelector(".nudge");
