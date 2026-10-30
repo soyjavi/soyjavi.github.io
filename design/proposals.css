@@ -145,3 +145,4 @@ table.matrix tr.pick td:first-child::before { content: "● "; }
 .meta, figcaption, .board header strong, .accept strong { font-size: var(--fs-label); }
 @media (max-width: 560px) { .cover { padding-top: 112px; } .board { padding: 48px 0; } .meta { flex-wrap: wrap; } }
 @media (max-width: 720px) { .art-views { grid-template-columns: 1fr; } }
+figure > .note { margin: 0; padding: 10px 14px 0; font-size: 13px; color: var(--muted); }

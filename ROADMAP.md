@@ -1,6 +1,6 @@
 # soyjavi.com roadmap
 
-Updated 2026-10-05.
+Updated 2026-10-29.
 
 This is the task pool. [SPEC.md](SPEC.md) owns current state and contracts; [AGENTS.md](AGENTS.md) defines the
 autonomous workflow that consumes this file. The site has no versions: git is the history.
@@ -40,6 +40,18 @@ unless the task names it.
   board: CLOSED-MEMORIES
   The sky draws only open memories and nothing private is in the repository, not even as a stub. What the site can add is a number: how many memories are closed in each age and in total, shown in the label of each galaxy and in the hero, so the visitor feels the depth of the book and the clone. The hero already reads `totals` from `life.json` and says "Over 500 memories" / "Más de 500 recuerdos" with the creator's provisional figure; what is left is the count per age, once he gives it. The creator gives those figures and decides whether each galaxy label also carries its count per age; agent work follows: the field and its test, the labels, the hero and the flat page.
 
+- **THREAD-LEADS-AHEAD** — A thread ends at the book or the clone, not in a dead end
+  `feature · agent · normal`
+  board: THREAD-LEADS-AHEAD
+  With a thread on, the last Later is the ring `ahead` names for that thread and the figure ends with one more line to it; any other thread ends as today.
+  accept: a Node test: after the last memory of the book's thread the step is the book, after the clone's it is the clone, otherwise none; the ring is read from `ahead`, never named in code.
+
+- **SHARE-MEMORY** — A memory has an address that unfurls as itself
+  `feature · agent · normal`
+  board: SHARE-MEMORY
+  A static page per memory and language (`/m/<id>/`, `/es/m/<id>/`), HTML first, with its title, its text (a month or a year, never a day), canonical, hreflang and its own preview title and description, and a link into `#m-<id>`; the share image declares its size and alt. Approved by the creator.
+  accept: the build writes both pages for every memory, the sitemap lists them, hreflang pairs match, no day appears, the share image declares size and alt in both languages.
+
 ## In progress
 
 _None._
@@ -76,6 +88,40 @@ _None._
   accept: each published milestone whose date the creator's notes give two ways has one date, a year or a month; the
   decades with no milestone (the 1990s after 1994 and the early 2000s) and the years 2023 and 2014 have a milestone or
   are left out on purpose; the dates of the products named in the Satoshi milestone are given if they are to appear.
+  Found in review: `first-breakup` is dated 1997 but its text puts it after the first payslip (2001); `last-school-year`
+  is dated 1998 and its text says 1999; `born-among-cows` and `born` place the birth in two places. 36 of the memories
+  show "~" (`approx`), some of them with a year the text states; an agent task keeps it only where he says the date is
+  uncertain.
+- **TAGS-AUDIT** — The people and places of each memory match its text
+  `content · creator · high`
+  Found in review. Memories in Thailand and the return to Asturias are tagged `bali`, and `running` is tagged
+  `pirineo-frances`; `yuri`, `missing-stretch` and `two-serious-years` tag people their text is not about, while
+  `boda-2019`, `eki-etxea`, `karate-con-eki` and `paternidad` miss the person they are about; the brother is two people
+  (`aitor` and `aitor-trayectoria-profesional`), so his filter misses half his memories; Chiang Mai, Hua Hin, Bangkok,
+  Asturias and Bilbao are not places although the texts live there; two English place labels are in Spanish,
+  `iparralde` overlaps `pirineo-frances`, and `villarcalo` reads like a place.
+  accept: the creator approves the people and places of each memory; an agent task applies them in one change, with a
+  test that refuses two people with one first name unless the creator lists them as distinct.
+- **PEOPLE-PRIVACY** — Nothing private about anyone else
+  `content · creator · high`
+  The voice rule says nothing about anyone else, yet `two-serious-years`, `first-breakup` and `missing-stretch` tell
+  private facts of a partner's life next to tags that name the person, and `people.json` gives full names where a first
+  name would do. The text is already in the public history, which is never rewritten; what changes is what the site
+  shows.
+  accept: the creator decides, sentence by sentence, what stays and whether people appear by first name or full name;
+  no memory both names a person and states a private fact about them; the rule for full names is written in AGENTS.
+- **REAL-NAMES** — Which names of places, companies and products may appear in a text
+  `decision · creator · normal`
+  Only Bilbao is named in a memory's text; the others say "a consultancy", "the island", "the city where I was living",
+  against the voice rule "real names of places, teams and tools", while the file names, `people.json` and the ages'
+  intros already name them. `money`, `splitpasa` and `arca` do not say what they are.
+  accept: the creator lists the names that may appear; an agent task writes them into both languages.
+- **MEMORY-OVERLAP** — Merge the memories that tell the same thing
+  `content · creator · normal`
+  `la-egb` and `school-years-grid` tell the same school year; `volver-a-espana-asturias-2026` and
+  `visa-schengen-bangkok-2026` share a paragraph; `missing-stretch` and `four-years-dated-by-doing` are about dating the
+  archive rather than an event.
+  accept: the creator says which to merge, cut or keep; an agent task does it in both languages.
 - **CLONE-NAME** — What the clone is called in public
   `decision · creator · normal`
   accept: its public name, and whether any earlier name of it is used in public at all.
@@ -139,23 +185,125 @@ _None._
   `deploy · creator · high`
   accept: the change is pushed to `main`, the Pages build is `built`, www.soyjavi.com and www.soyjavi.com/es/ serve the
   scene, the language redirect works from a Spanish and an English browser, night is the first look and the switch keeps paper,
-  the old `/blog/` and the files of the previous page are gone from the site, and the sitemap is submitted to the search
-  engines the creator uses. The live site still serves the March 2024 page: nothing of this work has been pushed.
+  the files of the previous page (`assets/style.css`, `assets/print.css`, `assets/logo.*`) are gone from the site, the
+  sitemap is submitted to the search engines the creator uses, and their page inspection shows the text of `/` and `/es/`
+  (the copy is hidden during the entrance; if the rendered page is empty, an agent task follows). The live site still serves the March 2024 page: nothing of this work has been pushed.
 
 ## Proposed
 
-Visual ideas have a board in `design/proposals.html`; the others are described here.
+Visual ideas have a board in `design/proposals.html`; the others are described here. Nothing here is approved. Most of
+it comes from a review of the whole project (the experience, the load, the code and the content) in October 2026,
+ordered by what is worth approving first; line numbers are from that review.
 
-From the brand and copy review (the creator asked for the name, the type and every sentence to be worked properly, and
-does not want the word AI on the site). Nothing here is approved.
+### 1. Bugs
 
-Ordered by what must be decided or applied first; each group names what it waits on.
+- **IMPORT-RETRACT** — The importer keeps a memory the archive has closed, and keeps one of two entries with one id
+  `bug · agent · high`
+  An entry marked `"public": false` is only counted (`tools/import.mjs:46`), so a memory already in `content/memories/`
+  stays published after the creator closes it in his archive, against "not in the repository in any form". Two incoming
+  entries with the same id report one added and one updated, and the second wins.
+  accept: on a temporary copy of `content/`, `importArchive` throws on a repeated id, and a non-public entry whose file
+  exists removes the file and the other memories' links to it, and the report gives only a count.
+- **ID-WORDS** — An address carries a word the site never says
+  `bug · agent · high`
+  The memory `aprendizaje-continuo-hasta-la-ia` puts the Spanish abbreviation the voice test bans into its anchor, its
+  links and the address bar (`#m-…-la-ia`); the test reads the text of the pages, not the ids.
+  accept: the file is renamed and its links follow; the voice test also checks every memory id, and fails on the old one.
+- **AGE-VIEW-KEYS** — In an age view the arrow keys skip its first memory
+  `bug · agent · high`
+  `selectPeriod` sets `current` to the age's first memory (`engine.js:833`) and `onKey` steps from it with `stepOf`
+  (`engine.js:1264`), so Right, PageDown and Space open the age's second memory and Left the last memory of the age
+  before, while the card's Earlier and Later step between ages (`engine.js:676-683`). One pure function in `explore.js`
+  for both.
+  accept: a Node test: from an age the step is the age before or after, never a memory; from a memory it equals
+  `sequence`.
+- **RAIL-SCRUB** — Dragging along the rail opens every memory it passes
+  `bug · agent · normal`
+  `pointermove` selects each new station (`engine.js:1321-1326`): the camera flies, a bell rings and each memory counts
+  as opened, so one sweep sets off the three-memories nudge; at two or three hundred memories that is one every few
+  pixels. While dragging, only the tip and the preview ring follow; the memory opens on release.
+  accept: a browser test drags across the track: the hash changes once, on release, and no nudge shows.
+- **SURPRISE-IN-FILTER** — Surprise me ignores the filter in force
+  `bug · agent · normal`
+  It picks from every memory (`engine.js:1016-1020`), so with a thread on it can open a dimmed one.
+  accept: a Node test of a pure pick: with a filter it always lands in the filter's chain, and it avoids the memories
+  opened in this visit while any are left.
+- **RAIL-AHEAD** — The rail's book and clone are pinned to calendar years
+  `bug · agent · normal`
+  `RAIL = { end: 2031, book: 2027.8, clone: 2029.6 }` (`life.js:433`), while the today mark is the visitor's date
+  (`engine.js:1297`): from late 2027 today is drawn past the book, after 2031 past the end. The decades
+  (`src/rail.mjs:4`) and the end of the bars (`src/rail.mjs:10`) are fixed the same way. The sky's `futures` already sit
+  relative to today.
+  accept: a Node test with today at 2028.5 and at 2035 keeps today before the book, the book before the clone and the
+  clone inside the rail; the decades come from the span.
+- **ENTER-STALL** — A failed or slow script leaves the page blank
+  `bug · agent · normal`
+  During the entrance everything but the stage is hidden (`site.css:2295`) and the only way out without the script is
+  3 s after `load` (`enter.js:6`): a blocked `site.js` shows an empty night until then, and a stalled one never fires
+  `load`.
+  accept: a browser test with `site.js` aborted shows the interface within a second, and with it hanging, within a fixed
+  limit counted from `DOMContentLoaded`.
+- **A11Y-TITLE-WORDS** — A screen reader reads a card's title one word at a time
+  `bug · agent · normal`
+  `splitWords` (`engine.js:54-74`) wraps each word of the card's heading in an inline-block span for its animation;
+  VoiceOver and TalkBack can read such runs one swipe per word.
+  accept: a browser test: the card heading's accessible name equals the panel's heading, and the animated words sit in
+  an `aria-hidden` wrapper.
+- **TAP-NO-KEYBOARD** — On a phone, reaching the book does not raise the keyboard
+  `bug · agent · low`
+  `goTo` focuses the waitlist field (`engine.js:1180`), so a tap on "The book" or on the nudge covers the card with the
+  keyboard before its text is read.
+  accept: in a touch browser test, after a tap on the nav the focus is on the card, not on the field; with a keyboard it
+  stays as it is.
 
-### 2. Review
+### 2. Exploring and sharing
+
+- **BACK-TO-SKY** — Back returns to the sky instead of leaving the site
+  `feature · agent · high`
+  Every step replaces the history entry (`engine.js:822, 850, 882`), so on a phone the back gesture after exploring
+  leaves the site. One entry is pushed when leaving the whole-life view, and every step after it replaces it: Back
+  returns to the sky, a second Back leaves.
+  accept: a browser test opens a memory, steps Later twice and goes back: the whole-life view, an empty hash and the
+  history one entry longer.
+- **MEMORY-TITLE** — The tab and the share sheet name the memory
+  `feature · agent · normal`
+  Nothing sets `document.title`: bookmarks, history and a phone's share sheet say the page's title for every memory.
+  accept: a browser test opens a memory and reads its title in `document.title`, an age reads its name, and Escape
+  gives the page's title back, in both languages.
+- **FIND-WORDS** — The finder matches words, not pieces of words, and says how many
+  `feature · agent · normal`
+  `search` matches anywhere inside a word (`explore.js:15`): today "art" finds more than half the memories through
+  "start" and "part", and the finder shows eight with no word about the rest (`engine.js:973`).
+  accept: a Node test: "art" does not return a memory whose only match is "start", "son" finds "my son" and not
+  "person"; the list says how many it leaves out, in both languages.
+
+### 3. Load
+
+- **CACHE-BUST** — Version the asset URLs
+  `chore · agent · high`
+  `site.js`, `site.css` and `brand.css` keep fixed names and the Pages CDN caches each for ten minutes on its own, so
+  after a push the new HTML can meet the old engine, which reads its hooks from the HTML and then throws or draws wrong.
+  accept: a Node test: every `?v=` in `index.html`, `es/` and `404.html` equals the hash of the file on disk.
+- **BUNDLE-SHAKE** — Let the bundler drop the parts of three.js the sky does not use
+  `chore · agent · normal`
+  `site.js` is 708 KB, 194 KB compressed, and three.js is 593 KB of it: the vendored file is minified without pure
+  annotations, so a bundle of `Vector3` alone weighs 364 KB. Vendor the source modules of the same release instead; it is
+  the same dependency.
+  accept: a bundle of `Vector3` alone is under 20 KB; the three.js inputs of the metafile stay under a budget measured
+  in the same change; no visible change.
+- **BUNDLE-SPLIT** — The flat page does not download the sky
+  `chore · agent · normal`
+  depends: ENTER-STALL
+  On the flat page `site.js` runs only the waitlist and the countdown, under 1 KB, but the visitor downloads and parses
+  all of it. Build modules with splitting and import the engine after the checks of `engine.js:46-51`; `script-src
+  'self'` already allows it.
+  accept: the entry chunk is under 10 KB and reaches three.js only through a dynamic import (the metafile says so).
+
+From the performance audit (24 frames a second already ships):
 
 - **PERF-CPU** — Stop the per-frame garbage and DOM churn
   `chore · agent · normal`
-  From the performance audit (24 frames a second already ships). The dotted guides are re-projected every frame with destructuring and closures (`scene.js` guides), about 115 KB of garbage a frame; the year-ring labels are measured every frame although they are empty (`engine.js` label loop, `||=` on a width of 0); `data-leader`, `hidden`, `data-edges`, `data-jumps` and `--cx`/`--cy`/`--r` are written with the same value every frame; five to eight `getBoundingClientRect` per frame; `centerOf` and `tagSpots` allocate; the minimap rewrites its attributes every frame; the probe WebGL context of `webglAvailable` is never released.
+  The dotted guides are re-projected every frame with destructuring and closures (`scene.js` guides), about 115 KB of garbage a frame; the year-ring labels are measured every frame although they are empty (`engine.js` label loop, `||=` on a width of 0); `data-leader`, `hidden`, `data-edges`, `data-jumps` and `--cx`/`--cy`/`--r` are written with the same value every frame; five to eight `getBoundingClientRect` per frame; `centerOf` and `tagSpots` allocate; the minimap rewrites its attributes every frame; the probe WebGL context of `webglAvailable` is never released.
   accept: a browser test over an idle second counts the mutation records and the DOM reads and they stay under a set budget; no visible change in a before and after capture.
 - **PERF-HAZE** — Do not compute the haze noise for every pixel every frame
   `chore · agent · normal`
@@ -172,8 +320,55 @@ Ordered by what must be decided or applied first; each group names what it waits
   `decision · creator · low`
   Capping at 1.5 saves about 22% of the GPU frame and slightly fades the dotted outlines and enlarges the selection ring; the clouds look the same. Only the creator's eye can say.
 
-### 3. Depth and the book — need content or approvals from the creator
+### 4. Guards and documents
 
+- **BUILD-GUARDS** — The build refuses broken data, not only the tests
+  `chore · agent · normal`
+  A link to a missing memory or to itself, an unknown thread, person or place and a future date are caught only by
+  `tests/content.test.mjs`, and `related()` drops a broken link without a word (`explore.js:27`). Memory ids come from
+  file names, are never checked and go unescaped into `id` and `data-links` (`src/home.mjs:69-71`).
+  accept: on a temporary copy, `loadContent` throws for a bad id, a missing or self link, an unknown person and a future
+  month, each naming its file.
+- **DOCS-DRIFT** — Remove the dead headline code and the sentences that contradict the code
+  `chore · agent · normal`
+  The whole-life names are gone but `heads` (`engine.js:149`), `headsQuiet` (`engine.js:443`) and the `priority === 40`
+  branches (`engine.js:1660, 1674`) remain, `design/index.html` still says one memory per galaxy is named, and SPEC
+  counts the `headlines` tests as covering it. SPEC also says of the age card that Earlier and Later are hidden and that
+  they step between ages; that an open memory names its links and that nothing related is named until pointed at; and
+  that `npm test` runs `tests/*.test.mjs`, when it runs `tests/**`, the browser suite included.
+  accept: grep finds none of the dead state; one sentence per behaviour; a design test rejects the headline sentence.
+- **ROADMAP-LINT** — A test that keeps this file in its own format
+  `chore · agent · low`
+  accept: a Node test parses this file: unique IDs, a type · owner · priority line on every entry, `depends` naming
+  IDs, an `accept` or a board on every agent task, and every lane heading present.
+- **ENGINE-PURE** — Move the logic still inside the engine into tested modules
+  `chore · agent · low`
+  `engine.js` is 1,755 lines and still holds pure logic the rules place in `explore.js` or `life.js`: the age facts
+  (`652-660`), the ring label spot (`1527-1535`), the galaxy label choice (`1546-1570`), the figure name placement
+  (`1606-1631`), the tag priority (`1651-1664`), the rail's nearest station (`1295-1304`) and an `overlaps` that
+  repeats the one in `explore.js` (`1353`); `skyOf` is computed twice (`120`).
+  accept: each one exported and tested in Node; the engine only calls them; no visible change.
+- **TOOLING** — One local server and exact pins
+  `chore · agent · low`
+  `npm run serve` needs a `python3` nothing declares, while `npm run dev` is Node; `@resvg/resvg-js` and `fontkit` are
+  caret ranges although the icon test compares the PNGs byte for byte; `engines` says Node 21 and nothing names the
+  version the tests run on.
+  accept: README and REVIEW-LOOK point at the Node server only; both packages pinned exactly; a `.nvmrc`.
+
+### 5. Copy and depth — need the creator's words or approval
+
+- **BOOK-HOOK** — The book says why, in his own words
+  `content · agent · normal`
+  `book.body` and `book.hint` are general ("my life, what I've learnt…"), while the creator's strongest reason for the
+  book is already public in one of his memories (`clonara`). Draft the book's text and the hero's lede from those words,
+  in both languages, adding nothing he has not said.
+  accept: the creator approves both texts; the voice tests stay green.
+- **HERO-WORD** — "Milestones" or "memories"
+  `decision · creator · low`
+  The hero and the page title say "A life, in milestones" / "Una vida en hitos", while the rules keep one word, memory,
+  for each memory, and the lede follows them.
+  accept: the creator keeps it or changes it; the title, the hero and the share image follow.
 - **MILESTONE-MEDIA** — A photo or a sound at a milestone
+  `feature · agent · low` · depends: the creator's approval of each file
   board: MILESTONE-MEDIA
   Optional media for a milestone, shown in its card, only where the creator has approved it.

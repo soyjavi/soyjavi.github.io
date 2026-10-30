@@ -242,6 +242,10 @@ Two and a half seconds after the last touch, wherever it is (the hero, a memory,
   close button) sits inside the card, above Earlier and Later, on a memory's card only; it takes room from the text, never from the card's size. It
   links to the book's waitlist, or to the clone's once the visitor has seen the clone's station; closing it hides it for the rest
   of the visit and nothing is stored. It is not drawn in the flat page, which already holds both lists.
+  A visit that began on a link to a memory (`/#m-<id>` naming a real memory, decided once at load by `inviteLine` in
+  `explore.js`) starts instead with the arrival line, "One of N memories in this sky · See it all →" (`nudgearrival`, N the
+  memories drawn), which goes to the whole life; from the second distinct memory the book's line takes its place, and
+  going back to the whole life ends the arrival for the visit.
 
 - With `book.date` set, the book's panel carries `<p class="countdown" data-until>`: "Aiming for" and the month as text,
   which a script (`countdown.js`, on every page) completes with the months left on the visitor's calendar

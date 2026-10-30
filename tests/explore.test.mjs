@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { CADENCE, LEVEL, RING_CLEARANCE, STRONG, askLevels, askPairs, declared, periodNames, strongest, TAG_GAP, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, figureCount, figureOf, figureSpan, filterHash, filterOfHash, leaderOf, levels, matching, miniMap, MINI_ZOOM, miniVisible, QUALITY, averageMs, nextQuality, normalize, perGalaxy, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, tagSpots, tourPlan, tourTick, pace, worked } from "../assets/js/explore.js";
+import { CADENCE, LEVEL, aheadOf, inviteLine, RING_CLEARANCE, STRONG, askLevels, askPairs, declared, periodNames, strongest, TAG_GAP, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, figureCount, figureOf, figureSpan, filterHash, filterOfHash, leaderOf, levels, matching, miniMap, MINI_ZOOM, miniVisible, QUALITY, averageMs, nextQuality, normalize, perGalaxy, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, tagSpots, tourPlan, tourTick, pace, worked } from "../assets/js/explore.js";
 import { layout } from "../assets/js/life.js";
 import { ORBIT, approach, ease, eye, nearest, slide, turn, zoom } from "../assets/js/orbit.js";
 import { loadContent } from "../src/content.mjs";
@@ -539,4 +539,26 @@ test("a memory is new for some weeks from the first of the month it was added, a
   assert.equal(isFresh("2026-11", new Date(2026, 9, 20)), false, "not before it was added");
   assert.equal(isFresh(undefined), false);
   assert.equal(isFresh("2026-10-03"), false, "a month, never a day");
+});
+
+test("the invitation line: a shared memory says whose life it is, then the book's line replaces it; a visit that began at the top waits for the third memory", () => {
+  const base = { arrived: false, opened: 0, closed: false, sawClone: false, memory: true, quiet: false, age: false };
+  assert.equal(inviteLine({ ...base, arrived: true, opened: 1 }), "arrival");
+  assert.equal(inviteLine({ ...base, arrived: true, opened: 2 }), "book");
+  assert.equal(inviteLine({ ...base, arrived: true, opened: 2, sawClone: true }), "clone");
+  assert.equal(inviteLine({ ...base, opened: 1 }), null);
+  assert.equal(inviteLine({ ...base, opened: 2 }), null);
+  assert.equal(inviteLine({ ...base, opened: 3 }), "book");
+  for (const stop of [{ closed: true }, { memory: false }, { quiet: true }, { age: true }]) assert.equal(inviteLine({ ...base, arrived: true, opened: 1, ...stop }), null);
+});
+
+test("a thread leads to the ring `ahead` names for it, and no other filter does", () => {
+  const facets = { threads: ["home", "craft", "learning"], people: ["ana"] };
+  const ahead = { book: "learning", clone: "craft" };
+  assert.equal(aheadOf(ahead, facets, { facet: "threads", item: 2 }), "book");
+  assert.equal(aheadOf(ahead, facets, { facet: "threads", item: 1 }), "clone");
+  assert.equal(aheadOf(ahead, facets, { facet: "threads", item: 0 }), null);
+  assert.equal(aheadOf(ahead, facets, { facet: "people", item: 0 }), null);
+  assert.equal(aheadOf(ahead, facets, null), null);
+  assert.equal(aheadOf(undefined, facets, { facet: "threads", item: 2 }), null);
 });

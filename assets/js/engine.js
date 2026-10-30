@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { BUDGET, FACETS, FLOOR, RAIL, START, shapeBy, futures, layout, memories, playElapsed, monthsUntil, playYear, railPercent, skyOf, todayYear, untilText, yearRings } from "./life.js";
-import { LEVEL, askLevels, askPairs, declared, periodNames, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, figureCount, figureOf, figureSpan, filterHash, filterOfHash, leaderOf, levels as levelsOf, matching, perGalaxy, miniMap, miniVisible, QUALITY, averageMs, nextQuality, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, strongest, tagSpots, tourPlan, tourTick, worked, isFresh } from "./explore.js";
+import { LEVEL, inviteLine, askLevels, askPairs, declared, periodNames, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, figureCount, figureOf, figureSpan, filterHash, filterOfHash, leaderOf, levels as levelsOf, matching, perGalaxy, miniMap, miniVisible, QUALITY, averageMs, nextQuality, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, strongest, tagSpots, tourPlan, tourTick, worked, isFresh } from "./explore.js";
 import { clamp } from "./orbit.js";
 import { createSound } from "./sound.js";
 import { OVERVIEW_PITCH, createScene } from "./scene.js";
@@ -429,6 +429,7 @@ async function start() {
     lit: tools.dataset.lit,
     all: tools.dataset.all,
     fewer: tools.dataset.fewer,
+    nudgearrival: tools.dataset.nudgearrival,
     nudgebook: tools.dataset.nudgebook,
     nudgeclone: tools.dataset.nudgeclone,
     nudgeclose: tools.dataset.nudgeclose,
@@ -447,6 +448,8 @@ async function start() {
   const pointerAt = { x: 0, y: 0 };
   const gentle = { on: false, seen: false, from: null };
   const invite = { opened: new Set(), sawClone: false, closed: false };
+  let arrived = false;
+  let hashSeen = false;
   const memoryOf = (index) => markOf.get(index) ?? -1;
   const stationOf = (memory) => lived[memory].t;
 
@@ -744,13 +747,13 @@ async function start() {
 
   const updateNudge = () => {
     const station = stations[current];
-    const want = !invite.closed && invite.opened.size >= 3 && station.kind === "milestone" && periodView < 0 && !station.element.dataset.quiet;
-    nudge.hidden = !want;
-    if (!want) return;
-    const target = invite.sawClone ? "clone" : "book";
+    const line = inviteLine({ arrived, opened: invite.opened.size, closed: invite.closed, sawClone: invite.sawClone, memory: station.kind === "milestone", quiet: Boolean(station.element.dataset.quiet), age: periodView >= 0 });
+    nudge.hidden = line === null;
+    if (line === null) return;
+    const target = line === "arrival" ? "top" : line;
     nudgeLink.dataset.go = target;
     nudgeLink.href = `#${target}`;
-    nudgeLink.textContent = copy[target === "clone" ? "nudgeclone" : "nudgebook"];
+    nudgeLink.textContent = line === "arrival" ? copy.nudgearrival.replace("{n}", String(marks.length)) : copy[line === "clone" ? "nudgeclone" : "nudgebook"];
     nudgeClose.setAttribute("aria-label", copy.nudgeclose);
     nudgeClose.setAttribute("title", copy.nudgeclose);
   };
@@ -812,6 +815,7 @@ async function start() {
     shotOf(current);
     if (stations[current].kind === "milestone" && !hush) invite.opened.add(current);
     if (stations[current].kind === "clone") invite.sawClone = true;
+    if (stations[current].kind === "hero") arrived = false;
     renderCard();
     updateNudge();
     if (rail) rail.querySelector(".rail-cursor")?.style.setProperty("--x", `${railPercent(cursorYear()).toFixed(2)}%`);
@@ -1180,6 +1184,8 @@ async function start() {
     if (stations[index].kind !== "hero") forms.get(stations[index].kind)?.querySelector("input, a, button")?.focus();
   };
   const fromHash = () => {
+    const first = !hashSeen;
+    hashSeen = true;
     let id;
     try {
       id = decodeURIComponent(location.hash.slice(1));
@@ -1194,7 +1200,11 @@ async function start() {
       if (stations[current].kind !== "hero" || periodView >= 0) select(0, { push: false });
       return setFilter(chosen);
     }
-    if (anchors.has(id)) select(anchors.get(id), { push: false });
+    if (anchors.has(id)) {
+      select(anchors.get(id), { push: false });
+      if (first && id.startsWith("m-")) arrived = true;
+      updateNudge();
+    }
   };
   document.querySelectorAll("[data-go]").forEach((link) =>
     link.addEventListener("click", (event) => {

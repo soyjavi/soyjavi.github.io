@@ -3,6 +3,13 @@ import { FACETS } from "./life.js";
 export const LEVEL = { normal: 1, related: 0.85, weak: 0.5, quiet: 0.3, away: 0.1 };
 export const STRONG = 3;
 
+export function inviteLine({ arrived, opened, closed, sawClone, memory, quiet, age }) {
+  if (closed || !memory || quiet || age) return null;
+  if (arrived && opened < 2) return "arrival";
+  if (opened < (arrived ? 2 : 3)) return null;
+  return sawClone ? "clone" : "book";
+}
+
 export const normalize = (text) => text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
 
 export function search(items, query, limit = 8) {
@@ -64,6 +71,8 @@ export function periodNames(marks, period, limit = 3, apart = 3) {
   }
   return chosen.map(([, i]) => i);
 }
+
+export const aheadOf = (ahead, facets, filter) => (filter?.facet === "threads" ? ["book", "clone"].find((name) => ahead?.[name] === facets.threads[filter.item]) ?? null : null);
 
 export function sequence(marks, index, filter = null) {
   if (!filter) return { previous: index > 0 ? index - 1 : null, next: index < marks.length - 1 ? index + 1 : null };

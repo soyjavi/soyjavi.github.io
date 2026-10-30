@@ -3014,6 +3014,31 @@ test("the first memory of a visit opens gently, with no year rings and no minima
   await keyed.close();
 });
 
+test("a shared memory opens with a line that says whose life it is and goes to the whole life, the book's line replaces it from the second memory, and a visit from the top never shows it", async () => {
+  const shared = await open(`/#m-${COMPANION}`, { viewport: { width: 1280, height: 800 } });
+  await shared.page.waitForSelector(".nudge");
+  const line = shared.page.locator(".nudge");
+  await line.waitFor({ state: "visible" });
+  assert.equal(await line.locator("a").getAttribute("data-go"), "top");
+  assert.match(await line.locator("a").textContent(), /^One of \d+ memories in this sky/);
+  await goTo(shared.page, "m-born");
+  await hud(shared.page, BORN);
+  assert.equal(await line.locator("a").getAttribute("data-go"), "book");
+  await shared.close();
+  const typo = await open("/#m-no-such-memory", { viewport: { width: 1280, height: 800 } });
+  await immersive(typo.page);
+  await goTo(typo.page, "m-born");
+  await hud(typo.page, BORN);
+  assert.equal(await typo.page.locator(".nudge").isVisible(), false, "a link to nothing is not an arrival");
+  await typo.close();
+  const top = await open("/", { viewport: { width: 1280, height: 800 } });
+  await immersive(top.page);
+  await goTo(top.page, "m-born");
+  await hud(top.page, BORN);
+  assert.equal(await top.page.locator(".nudge").isVisible(), false);
+  await top.close();
+});
+
 test("after three memories a quiet line inside the card, above Earlier and Later, invites to the book's list, then to the clone's, can be closed for the visit, and never moves the card", async () => {
   for (const [width, height] of [[1280, 640], [1366, 657], [390, 844], [360, 640]]) {
     const mobile = width < 600;

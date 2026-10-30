@@ -89,7 +89,7 @@ test("the copy tells the same story in both languages: the hero, the book, the c
 test("memories of loss are marked quiet: no invitation to a list appears on them", () => {
   for (const id of ["grandfather", "inundaciones-chiang-mai-2024", "separacion-1988"]) assert.match(read("index.html"), new RegExp(`<li id="m-${id}"[^>]*data-quiet="1"`), id);
   assert.doesNotMatch(read("index.html"), /<li id="m-born-among-cows"[^>]*data-quiet/);
-  assert.match(read("assets/js/engine.js"), /station\.kind === "milestone" && periodView < 0 && !station\.element\.dataset\.quiet/);
+  assert.match(read("assets/js/engine.js"), /quiet: Boolean\(station\.element\.dataset\.quiet\)/);
 });
 
 test("a memory tells what happened in the past: no historic present for the moment itself", () => {
