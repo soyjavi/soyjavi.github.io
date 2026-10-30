@@ -181,6 +181,12 @@ test("generated pages on disk are exactly what the sources render", () => {
   }
 });
 
+test("no page of a memory on disk is left without its memory", async () => {
+  const { readdirSync } = await import("node:fs");
+  const wanted = new Set([...renderSite(content).keys()]);
+  for (const folder of ["m", "es/m"]) for (const id of readdirSync(`${root}${folder}`)) assert.ok(wanted.has(`${folder}/${id}/index.html`), `${folder}/${id}/ is left over: run npm run build`);
+});
+
 test("assets/site.js is exactly what the sources bundle to", async () => {
   const { outputFiles } = await build({ ...bundleOptions, write: false, logLevel: "silent" });
   assert.equal(outputFiles[0].text, readFileSync(`${root}assets/site.js`, "utf8"), "assets/site.js is stale: run npm run build");

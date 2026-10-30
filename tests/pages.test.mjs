@@ -569,3 +569,42 @@ test("a total of memories above what the sky draws is said as a floor in both la
   const without = renderSite({ ...content, life: { ...content.life, totals: {} } });
   assert.match(without.get(homes.en), new RegExp(`<p class="stats kicker">${content.life.milestones.length} memories · `));
 });
+
+test("every memory has a page of its own in both languages, with its title, its text, its canonical and a way into the sky", async () => {
+  const { esc, memoryPath, snippet } = await import("../src/html.mjs");
+  const { dayProblem } = await import("../src/content.mjs");
+  for (const lang of ["en", "es"]) {
+    for (const entry of content.life.milestones) {
+      const file = `${memoryPath(lang, entry.id).slice(1)}index.html`;
+      assert.ok(files.has(file), file);
+      const html = files.get(file);
+      const copy = content.dict[lang].life[entry.id];
+      assert.ok(html.includes(`<title>${esc(copy.title)} · Javi</title>`), `${file}: title`);
+      assert.ok(html.includes(`<link rel="canonical" href="https://www.soyjavi.com${memoryPath(lang, entry.id)}" />`), `${file}: canonical`);
+      assert.ok(html.includes(`href="${lang === "en" ? "/" : "/es/"}#m-${entry.id}"`), `${file}: link into the sky`);
+      assert.equal(dayProblem(html.replace(/<[^>]+>/g, " ")), null, `${file}: names a day`);
+      assert.doesNotMatch(html, /<form|waitlist|data-station/i, `${file}: only the memory`);
+      assert.equal(html.includes("<script src=\"/assets/site.js\""), false, `${file}: no engine`);
+    }
+  }
+  assert.equal(snippet("short"), "short");
+  assert.equal(snippet("x".repeat(200), 20), `${"x".repeat(19)}…`, "a long word is cut, not trimmed by a character");
+  const long = snippet("word ".repeat(80), 160);
+  assert.ok(long.length <= 160 && long.endsWith("…") && !/\s…$/.test(long));
+});
+
+test("the sitemap lists the page of every memory with both language alternates, and the share image declares its size and alt in both languages", () => {
+  const sitemap = files.get("sitemap.xml");
+  for (const entry of content.life.milestones) {
+    assert.ok(sitemap.includes(`<loc>https://www.soyjavi.com/m/${entry.id}/</loc>`) && sitemap.includes(`<loc>https://www.soyjavi.com/es/m/${entry.id}/</loc>`), entry.id);
+    assert.ok(sitemap.includes(`hreflang="es" href="https://www.soyjavi.com/es/m/${entry.id}/"`), entry.id);
+  }
+  for (const [file, lang] of [["index.html", "en"], ["es/index.html", "es"], ["404.html", "en"]]) {
+    const html = files.get(file);
+    assert.match(html, /property="og:image:width" content="1200"/);
+    assert.match(html, /property="og:image:height" content="630"/);
+    assert.ok(html.includes(`property="og:image:alt" content="${content.dict[lang].meta.imageAlt}"`), file);
+    assert.ok(html.includes(`name="twitter:image:alt" content="${content.dict[lang].meta.imageAlt}"`), file);
+  }
+  assert.notEqual(content.dict.en.meta.imageAlt, content.dict.es.meta.imageAlt);
+});

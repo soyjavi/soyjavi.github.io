@@ -2,10 +2,12 @@
   "lang": "en",
   "locale": "en_US",
   "meta": {
+    "imageAlt": "The home page of javi: a life from 1980 to today as a sky of memories.",
     "title": "Javi · A life in milestones",
     "description": "Javi's life from 1980 to today as a sky of memories, with a book for his children and the Echo to keep talking with him. Join a waitlist."
   },
   "ui": {
+    "memoryPage": { "see": "See it in the sky →" },
     "skip": "Skip to content",
     "lockup": { "book": "by", "clone": "with" },
     "switchLabel": "Español",

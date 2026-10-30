@@ -38,7 +38,7 @@ fails when a generated file is stale.
 | Three to five questions for the clone, each on public memories | `content/questions.json`: `[{ "id", "memories": [ids], "en", "es" }]` |
 | Layout of a page | `src/home.mjs`, `src/layout.mjs`, `src/notfound.mjs` |
 | The scene | `assets/js/life.js` (geometry: the sky), `assets/js/explore.js` (search, related, filters), `assets/js/orbit.js` (camera maths), `assets/js/scene.js` and `shaders.js` (three.js), `assets/js/engine.js` (card, controls, labels), `src/explore.mjs` and `src/rail.mjs` (the controls and the timeline rail) |
-| Look | `assets/brand.css` (tokens and themes), `assets/site.css` (home), `assets/page.css` (the 404) |
+| Look | `assets/brand.css` (tokens and themes), `assets/site.css` (home), `assets/page.css` (the 404 and the memory pages) |
 | The wordmark and favicon | `assets/brand/*.svg`, `favicon.svg` (outlined from Instrument Serif; see `design/`) |
 
 A memory is a file named after its id (lowercase letters, digits, hyphens), which is also its address (`#m-<id>`):

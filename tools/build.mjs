@@ -7,7 +7,7 @@ import { bundleOptions } from "./bundle.mjs";
 
 const files = renderSite(loadContent());
 
-rmSync(join(root, "es"), { recursive: true, force: true });
+for (const folder of ["es", "m"]) rmSync(join(root, folder), { recursive: true, force: true });
 for (const [file, text] of files) {
   const target = join(root, file);
   mkdirSync(dirname(target), { recursive: true });

@@ -7,7 +7,7 @@ import { rail } from "./rail.mjs";
 import { paragraphsOf } from "./content.mjs";
 
 
-const when = (locale, date, approx) => {
+export const when = (locale, date, approx) => {
   const [year, month] = date.split("-");
   const text = month
     ? new Intl.DateTimeFormat(locale.replace("_", "-"), { month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(+year, +month - 1, 1)))

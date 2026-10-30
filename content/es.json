@@ -2,10 +2,12 @@
   "lang": "es",
   "locale": "es_ES",
   "meta": {
+    "imageAlt": "La página de inicio de javi: una vida de 1980 a hoy como un cielo de recuerdos.",
     "title": "Javi · Una vida en hitos",
     "description": "La vida de Javi de 1980 a hoy como un cielo de recuerdos, un libro para sus hijos y el Eco para seguir hablando con él. Apúntate a una lista de espera."
   },
   "ui": {
+    "memoryPage": { "see": "Verlo en el cielo →" },
     "skip": "Saltar al contenido",
     "lockup": { "book": "de", "clone": "con" },
     "switchLabel": "English",

@@ -40,12 +40,6 @@ unless the task names it.
   board: CLOSED-MEMORIES
   The sky draws only open memories and nothing private is in the repository, not even as a stub. What the site can add is a number: how many memories are closed in each age and in total, shown in the label of each galaxy and in the hero, so the visitor feels the depth of the book and the clone. The hero already reads `totals` from `life.json` and says "Over 500 memories" / "Más de 500 recuerdos" with the creator's provisional figure; what is left is the count per age, once he gives it. The creator gives those figures and decides whether each galaxy label also carries its count per age; agent work follows: the field and its test, the labels, the hero and the flat page.
 
-- **SHARE-MEMORY** — A memory has an address that unfurls as itself
-  `feature · agent · normal`
-  board: SHARE-MEMORY
-  A static page per memory and language (`/m/<id>/`, `/es/m/<id>/`), HTML first, with its title, its text (a month or a year, never a day), canonical, hreflang and its own preview title and description, and a link into `#m-<id>`; the share image declares its size and alt. Approved by the creator.
-  accept: the build writes both pages for every memory, the sitemap lists them, hreflang pairs match, no day appears, the share image declares size and alt in both languages.
-
 ## In progress
 
 _None._

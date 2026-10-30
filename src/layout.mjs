@@ -38,8 +38,12 @@ export function head({ site, dict, lang, title, description, path, alternates, t
     <meta property="og:description" content="${esc(description)}" />
     <meta name="twitter:description" content="${esc(description)}" />
     <meta property="og:image" content="${site.url}/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="${esc(dict.meta.imageAlt)}" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="${site.url}/og-image.png" />
+    <meta name="twitter:image:alt" content="${esc(dict.meta.imageAlt)}" />
     <meta name="theme-color" content="#0c0c0b" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />

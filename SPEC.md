@@ -22,8 +22,9 @@ field of stars.
 | URL | Page |
 | --- | --- |
 | `/`, `/es/` | Home in English and in Spanish |
+| `/m/<id>/`, `/es/m/<id>/` | One page per memory and language (`src/memory.mjs`): its title, its text with a month or a year, a link into the sky at `#m-<id>`, its own canonical, `hreflang` pair and preview title and description (the first words of the text); no engine, no waitlist. Its link into the sky goes to `/#m-<id>`, which follows the language rule of the home page. The share image stays `og-image.png`, with its size and an alt in both languages (`meta.imageAlt`) |
 | `/404.html` | Not found, `noindex`: one star on the sky, the first memory (April 1980), that leads back to the start; the line in English and, small, in Spanish; no script of its own |
-| `/sitemap.xml`, `/robots.txt` | Every page with its `hreflang` alternates |
+| `/sitemap.xml`, `/robots.txt` | Every page, memory pages included, with its `hreflang` alternates |
 | `/design/`, `/design/proposals.html` | The brand and the design proposals, `noindex`, not linked from the site |
 
 The home pages declare `rel=canonical`, `hreflang` for `en`, `es` and `x-default`, Open Graph and Twitter card tags with
