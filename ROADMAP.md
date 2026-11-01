@@ -194,11 +194,13 @@ ordered by what is worth approving first; line numbers are from that review.
   history one entry longer.
 - **MEMORY-TITLE** — The tab and the share sheet name the memory
   `feature · agent · normal`
+  board: MEMORY-TITLE
   Nothing sets `document.title`: bookmarks, history and a phone's share sheet say the page's title for every memory.
   accept: a browser test opens a memory and reads its title in `document.title`, an age reads its name, and Escape
   gives the page's title back, in both languages.
 - **FIND-WORDS** — The finder matches words, not pieces of words, and says how many
   `feature · agent · normal`
+  board: FIND-WORDS
   `search` matches anywhere inside a word (`explore.js:15`): today "art" finds more than half the memories through
   "start" and "part", and the finder shows eight with no word about the rest (`engine.js:973`).
   accept: a Node test: "art" does not return a memory whose only match is "start", "son" finds "my son" and not
@@ -286,17 +288,20 @@ From the performance audit (24 frames a second already ships):
 
 - **BOOK-HOOK** — The book says why, in his own words
   `content · agent · normal`
+  board: BOOK-HOOK
   `book.body` and `book.hint` are general ("my life, what I've learnt…"), while the creator's strongest reason for the
   book is already public in one of his memories (`clonara`). Draft the book's text and the hero's lede from those words,
   in both languages, adding nothing he has not said.
   accept: the creator approves both texts; the voice tests stay green.
 - **HERO-WORD** — "Milestones" or "memories"
   `decision · creator · low`
+  board: HERO-WORD
   The hero and the page title say "A life, in milestones" / "Una vida en hitos", while the rules keep one word, memory,
   for each memory, and the lede follows them.
   accept: the creator keeps it or changes it; the title, the hero and the share image follow.
 - **RAIL-DECADES** — The rail's decades follow the years it spans
   `chore · agent · low`
+  board: RAIL-DECADES
   The decade labels stop at 2020 (`src/rail.mjs`) and the density bars at 2026, although the rail now moves its end, the book and the clone with the year; from 2030 on the rail would have no label for its last decade.
   accept: a Node test of the decades for a rail ending in 2036 lists 2030; the build output does not change while the year is 2026.
 
