@@ -270,6 +270,70 @@ test("section links and hashes open their station, not the hero, and the address
   await close();
 });
 
+test("Back after exploring returns to the sky, and a second Back leaves it", async () => {
+  const { page, close } = await open();
+  await immersive(page);
+  await hud(page, "javi");
+  const before = await page.evaluate(() => history.length);
+  await page.keyboard.press("ArrowDown");
+  await hud(page, BORN);
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("ArrowRight");
+  await hud(page, hudOf(milestones[2].id));
+  assert.equal(await page.evaluate(() => history.length), before + 1, "one entry for the whole walk");
+  await page.goBack();
+  await hud(page, "javi");
+  assert.equal(await page.evaluate(() => location.hash), "", "the sky has a clean address");
+  await close();
+});
+
+test("Escape after a memory leaves no dead entry, and Back after a filter lets it go", async () => {
+  const { page, close } = await open();
+  await immersive(page);
+  await hud(page, "javi");
+  const before = await page.evaluate(() => history.length);
+  await page.keyboard.press("ArrowDown");
+  await hud(page, BORN);
+  await page.keyboard.press("Escape");
+  await hud(page, "javi");
+  await page.keyboard.press("ArrowDown");
+  await hud(page, BORN);
+  assert.equal(await page.evaluate(() => history.length), before + 1, "Escape and a second walk add one entry in all");
+  await page.keyboard.press("Escape");
+  await hud(page, "javi");
+  await goTo(page, "thread-ventures");
+  await page.waitForFunction(() => location.hash === "#thread-ventures");
+  await page.goBack();
+  await page.waitForFunction(() => location.hash === "");
+  assert.equal(await page.locator(".stage").getAttribute("data-filter"), "", "the filter is gone with the address");
+  await close();
+});
+
+test("the tab names the memory, the age, and gives the page's title back, in both languages", async () => {
+  for (const [path, lang] of [["/", "en"], ["/es/", "es"]]) {
+    const { page, close } = await open(path);
+    await immersive(page);
+    const home = await page.title();
+    await goTo(page, "m-tapquo");
+    await page.waitForFunction((wanted) => document.title === wanted, `${content.dict[lang].life.tapquo.title} · Javi`);
+    await goTo(page, "period-midlife");
+    await page.waitForFunction((wanted) => document.title === wanted, `${content.dict[lang].periods.midlife.kicker} · Javi`);
+    await page.keyboard.press("Escape");
+    await page.waitForFunction((wanted) => document.title === wanted, home);
+    await close();
+  }
+});
+
+test("the finder says how many memories match", async () => {
+  const { page, close } = await open();
+  await immersive(page);
+  await page.keyboard.press("/");
+  await page.locator(".finder input").fill("a");
+  const text = await page.locator(".finder .none").textContent();
+  assert.match(text, /^\d+ of \d+$/);
+  await close();
+});
+
 test("landing or reloading on a memory still renders the scene", async () => {
   const { page, errors, close } = await open("/#m-mirai");
   await hud(page, hudOf("mirai"));
@@ -2202,7 +2266,7 @@ test("on a cold start the interface never shows before the opening, and a page w
   await human(context);
   let release;
   const held = new Promise((resolve) => (release = resolve));
-  await context.route(`${base}/assets/site.js`, async (route) => {
+  await context.route(`${base}/assets/site.js*`, async (route) => {
     await held;
     await route.continue();
   });
@@ -2219,7 +2283,7 @@ test("on a cold start the interface never shows before the opening, and a page w
   const broken = await browser.newContext({ viewport: { width: 1280, height: 800 }, locale: "en-US" });
   contexts.add(broken);
   await human(broken);
-  await broken.route(`${base}/assets/site.js`, (route) => route.abort());
+  await broken.route(`${base}/assets/site.js*`, (route) => route.abort());
   const lost = await broken.newPage();
   await lost.goto(`${base}/`);
   await lost.waitForFunction(() => document.documentElement.dataset.entering === undefined, null, { timeout: 8000 });

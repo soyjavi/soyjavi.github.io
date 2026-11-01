@@ -438,6 +438,14 @@ export const railBase = (today) => Math.max(RAIL_BASE, Math.floor(today));
 
 export const RAIL = railOf();
 
+export const DECADE_ROOM = 5;
+
+export const decadesOf = (rail = RAIL) => {
+  const decades = [];
+  for (let decade = Math.ceil(rail.start / 10) * 10; decade + DECADE_ROOM <= rail.end; decade += 10) decades.push(decade);
+  return decades;
+};
+
 export const PLAY = { seconds: 16 };
 
 export const playYear = (elapsed, to, from = START, seconds = PLAY.seconds) => from + (to - from) * clamp01(elapsed / seconds);

@@ -350,3 +350,10 @@ test("the hint under an age says the threads that mark it against the rest of th
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("the finder counts its results in both languages", () => {
+  for (const lang of ["en", "es"]) {
+    const text = content.dict[lang].ui.explore.findCount;
+    assert.ok(text.includes("{shown}") && text.includes("{total}"), lang);
+  }
+});

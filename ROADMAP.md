@@ -40,6 +40,54 @@ unless the task names it.
   board: CLOSED-MEMORIES
   The sky draws only open memories and nothing private is in the repository, not even as a stub. What the site can add is a number: how many memories are closed in each age and in total, shown in the label of each galaxy and in the hero, so the visitor feels the depth of the book and the clone. The hero already reads `totals` from `life.json` and says "Over 500 memories" / "Más de 500 recuerdos" with the creator's provisional figure; what is left is the count per age, once he gives it. The creator gives those figures and decides whether each galaxy label also carries its count per age; agent work follows: the field and its test, the labels, the hero and the flat page.
 
+- **BUILD-GUARDS** — The build refuses broken data, not only the tests
+  `chore · agent · normal`
+  A link to a missing memory or to itself, an unknown thread, person or place and a future date are caught only by
+  `tests/content.test.mjs`, and `related()` drops a broken link without a word (`explore.js:27`). Memory ids come from
+  file names, are never checked and go unescaped into `id` and `data-links` (`src/home.mjs:69-71`).
+  accept: on a temporary copy, `loadContent` throws for a bad id, a missing or self link, an unknown person and a future
+  month, each naming its file.
+- **DOCS-DRIFT** — Remove the dead headline code and the sentences that contradict the code
+  `chore · agent · normal`
+  The whole-life names are gone but `heads` (`engine.js:149`), `headsQuiet` (`engine.js:443`) and the `priority === 40`
+  branches (`engine.js:1660, 1674`) remain, `design/index.html` still says one memory per galaxy is named, and SPEC
+  counts the `headlines` tests as covering it. SPEC also says of the age card that Earlier and Later are hidden and that
+  they step between ages; that an open memory names its links and that nothing related is named until pointed at; and
+  that `npm test` runs `tests/*.test.mjs`, when it runs `tests/**`, the browser suite included.
+  accept: grep finds none of the dead state; one sentence per behaviour; a design test rejects the headline sentence.
+- **ENGINE-PURE** — Move the logic still inside the engine into tested modules
+  `chore · agent · low`
+  `engine.js` is 1,755 lines and still holds pure logic the rules place in `explore.js` or `life.js`: the age facts
+  (`652-660`), the ring label spot (`1527-1535`), the galaxy label choice (`1546-1570`), the figure name placement
+  (`1606-1631`), the tag priority (`1651-1664`), the rail's nearest station (`1295-1304`) and an `overlaps` that
+  repeats the one in `explore.js` (`1353`); `skyOf` is computed twice (`120`).
+  accept: each one exported and tested in Node; the engine only calls them; no visible change.
+- **PERF-CPU** — Stop the per-frame garbage and DOM churn
+  `chore · agent · normal`
+  The dotted guides are re-projected every frame with destructuring and closures (`scene.js` guides), about 115 KB of garbage a frame; the year-ring labels are measured every frame although they are empty (`engine.js` label loop, `||=` on a width of 0); `data-leader`, `hidden`, `data-edges`, `data-jumps` and `--cx`/`--cy`/`--r` are written with the same value every frame; five to eight `getBoundingClientRect` per frame; `centerOf` and `tagSpots` allocate; the minimap rewrites its attributes every frame; the probe WebGL context of `webglAvailable` is never released.
+  accept: a browser test over an idle second counts the mutation records and the DOM reads and they stay under a set budget; no visible change in a before and after capture.
+- **PERF-HAZE** — Do not compute the haze noise for every pixel every frame
+  `chore · agent · normal`
+  The dome shader runs three octaves of noise on a full-screen sphere every frame, about 28% of the GPU frame at a pixel ratio of 2, for a haze that moves 0.01 units a second, and tier 2 still computes it with the haze at zero. Gate it on `uHaze`, then bake it or draw it at half size.
+  accept: before and after captures of the opening, the whole-life view and a galaxy are indistinguishable; the draw time of the dome falls in the same headless measurement.
+- **PERF-POWER** — Ask for the default GPU
+  `chore · agent · low`
+  `powerPreference: "high-performance"` forces the discrete GPU on dual-GPU Macs; `"default"` costs nothing on Apple Silicon. Also draw the dust by sorting on its seed and `setDrawRange` instead of discarding in the vertex shader, so the lower tiers submit fewer points.
+  accept: the tiers draw fewer points (a test reads the draw range); no visible change.
+- **BUNDLE-SHAKE** — Let the bundler drop the parts of three.js the sky does not use
+  `chore · agent · normal`
+  `site.js` is 708 KB, 194 KB compressed, and three.js is 593 KB of it: the vendored file is minified without pure
+  annotations, so a bundle of `Vector3` alone weighs 364 KB. Vendor the source modules of the same release instead; it is
+  the same dependency.
+  accept: a bundle of `Vector3` alone is under 20 KB; the three.js inputs of the metafile stay under a budget measured
+  in the same change; no visible change.
+- **BUNDLE-SPLIT** — The flat page does not download the sky
+  `chore · agent · normal`
+  On the flat page `site.js` runs only the waitlist and the countdown, under 1 KB, but the visitor downloads and parses
+  all of it. Build modules with splitting and import the engine after the checks of `engine.js:46-51`; `script-src
+  'self'` already allows it.
+  accept: the entry chunk is under 10 KB and reaches three.js only through a dynamic import (the metafile says so).
+
 ## In progress
 
 _None._
@@ -50,8 +98,8 @@ _None._
 
 - **REVIEW-LOOK** — Look at the site and say what to change
   `verify · creator · high`
-  accept: the creator has used the home page in both themes on his own screen (`npm run serve`, then `PORT=4391 npm
-  run serve` if the port is taken), on his phone, and in Spanish, and has said what to change: the feel of the camera,
+  accept: the creator has used the home page in both themes on his own screen (`npm run dev`, or `PORT=4391 npm
+  run dev` if the port is taken), on his phone, and in Spanish, and has said what to change: the feel of the camera,
   the card, the threads and their names, the related memories, the labels, the rail and the sky itself, and has gone
   through the boards of `design/proposals.html`, approving, changing or discarding each. Each approved change becomes a
   Queue task.
@@ -185,63 +233,10 @@ ordered by what is worth approving first; line numbers are from that review.
 
 ### 1. Exploring and sharing
 
-- **BACK-TO-SKY** — Back returns to the sky instead of leaving the site
-  `feature · agent · high`
-  Every step replaces the history entry (`engine.js:822, 850, 882`), so on a phone the back gesture after exploring
-  leaves the site. One entry is pushed when leaving the whole-life view, and every step after it replaces it: Back
-  returns to the sky, a second Back leaves.
-  accept: a browser test opens a memory, steps Later twice and goes back: the whole-life view, an empty hash and the
-  history one entry longer.
-- **MEMORY-TITLE** — The tab and the share sheet name the memory
-  `feature · agent · normal`
-  board: MEMORY-TITLE
-  Nothing sets `document.title`: bookmarks, history and a phone's share sheet say the page's title for every memory.
-  accept: a browser test opens a memory and reads its title in `document.title`, an age reads its name, and Escape
-  gives the page's title back, in both languages.
-- **FIND-WORDS** — The finder matches words, not pieces of words, and says how many
-  `feature · agent · normal`
-  board: FIND-WORDS
-  `search` matches anywhere inside a word (`explore.js:15`): today "art" finds more than half the memories through
-  "start" and "part", and the finder shows eight with no word about the rest (`engine.js:973`).
-  accept: a Node test: "art" does not return a memory whose only match is "start", "son" finds "my son" and not
-  "person"; the list says how many it leaves out, in both languages.
-
 ### 2. Load
-
-- **CACHE-BUST** — Version the asset URLs
-  `chore · agent · high`
-  `site.js`, `site.css` and `brand.css` keep fixed names and the Pages CDN caches each for ten minutes on its own, so
-  after a push the new HTML can meet the old engine, which reads its hooks from the HTML and then throws or draws wrong.
-  accept: a Node test: every `?v=` in `index.html`, `es/` and `404.html` equals the hash of the file on disk.
-- **BUNDLE-SHAKE** — Let the bundler drop the parts of three.js the sky does not use
-  `chore · agent · normal`
-  `site.js` is 708 KB, 194 KB compressed, and three.js is 593 KB of it: the vendored file is minified without pure
-  annotations, so a bundle of `Vector3` alone weighs 364 KB. Vendor the source modules of the same release instead; it is
-  the same dependency.
-  accept: a bundle of `Vector3` alone is under 20 KB; the three.js inputs of the metafile stay under a budget measured
-  in the same change; no visible change.
-- **BUNDLE-SPLIT** — The flat page does not download the sky
-  `chore · agent · normal`
-  depends: ENTER-STALL
-  On the flat page `site.js` runs only the waitlist and the countdown, under 1 KB, but the visitor downloads and parses
-  all of it. Build modules with splitting and import the engine after the checks of `engine.js:46-51`; `script-src
-  'self'` already allows it.
-  accept: the entry chunk is under 10 KB and reaches three.js only through a dynamic import (the metafile says so).
 
 From the performance audit (24 frames a second already ships):
 
-- **PERF-CPU** — Stop the per-frame garbage and DOM churn
-  `chore · agent · normal`
-  The dotted guides are re-projected every frame with destructuring and closures (`scene.js` guides), about 115 KB of garbage a frame; the year-ring labels are measured every frame although they are empty (`engine.js` label loop, `||=` on a width of 0); `data-leader`, `hidden`, `data-edges`, `data-jumps` and `--cx`/`--cy`/`--r` are written with the same value every frame; five to eight `getBoundingClientRect` per frame; `centerOf` and `tagSpots` allocate; the minimap rewrites its attributes every frame; the probe WebGL context of `webglAvailable` is never released.
-  accept: a browser test over an idle second counts the mutation records and the DOM reads and they stay under a set budget; no visible change in a before and after capture.
-- **PERF-HAZE** — Do not compute the haze noise for every pixel every frame
-  `chore · agent · normal`
-  The dome shader runs three octaves of noise on a full-screen sphere every frame, about 28% of the GPU frame at a pixel ratio of 2, for a haze that moves 0.01 units a second, and tier 2 still computes it with the haze at zero. Gate it on `uHaze`, then bake it or draw it at half size.
-  accept: before and after captures of the opening, the whole-life view and a galaxy are indistinguishable; the draw time of the dome falls in the same headless measurement.
-- **PERF-POWER** — Ask for the default GPU
-  `chore · agent · low`
-  `powerPreference: "high-performance"` forces the discrete GPU on dual-GPU Macs; `"default"` costs nothing on Apple Silicon. Also draw the dust by sorting on its seed and `setDrawRange` instead of discarding in the vertex shader, so the lower tiers submit fewer points.
-  accept: the tiers draw fewer points (a test reads the draw range); no visible change.
 - **PERF-AUDIO** — Shorten the reverb of the sound bed
   `decision · creator · low`
   The bed runs a 5 s convolution reverb continuously once sound is on: about 7 points of a core, 6.6 of them the reverb. A 2.5 to 3 s tail halves it and `latencyHint: "playback"` saves a little more, at 20 to 40 ms of latency on the bells. Listen to both and choose, or fade the bed out after some idle minutes.
@@ -250,39 +245,6 @@ From the performance audit (24 frames a second already ships):
   Capping at 1.5 saves about 22% of the GPU frame and slightly fades the dotted outlines and enlarges the selection ring; the clouds look the same. Only the creator's eye can say.
 
 ### 3. Guards and documents
-
-- **BUILD-GUARDS** — The build refuses broken data, not only the tests
-  `chore · agent · normal`
-  A link to a missing memory or to itself, an unknown thread, person or place and a future date are caught only by
-  `tests/content.test.mjs`, and `related()` drops a broken link without a word (`explore.js:27`). Memory ids come from
-  file names, are never checked and go unescaped into `id` and `data-links` (`src/home.mjs:69-71`).
-  accept: on a temporary copy, `loadContent` throws for a bad id, a missing or self link, an unknown person and a future
-  month, each naming its file.
-- **DOCS-DRIFT** — Remove the dead headline code and the sentences that contradict the code
-  `chore · agent · normal`
-  The whole-life names are gone but `heads` (`engine.js:149`), `headsQuiet` (`engine.js:443`) and the `priority === 40`
-  branches (`engine.js:1660, 1674`) remain, `design/index.html` still says one memory per galaxy is named, and SPEC
-  counts the `headlines` tests as covering it. SPEC also says of the age card that Earlier and Later are hidden and that
-  they step between ages; that an open memory names its links and that nothing related is named until pointed at; and
-  that `npm test` runs `tests/*.test.mjs`, when it runs `tests/**`, the browser suite included.
-  accept: grep finds none of the dead state; one sentence per behaviour; a design test rejects the headline sentence.
-- **ROADMAP-LINT** — A test that keeps this file in its own format
-  `chore · agent · low`
-  accept: a Node test parses this file: unique IDs, a type · owner · priority line on every entry, `depends` naming
-  IDs, an `accept` or a board on every agent task, and every lane heading present.
-- **ENGINE-PURE** — Move the logic still inside the engine into tested modules
-  `chore · agent · low`
-  `engine.js` is 1,755 lines and still holds pure logic the rules place in `explore.js` or `life.js`: the age facts
-  (`652-660`), the ring label spot (`1527-1535`), the galaxy label choice (`1546-1570`), the figure name placement
-  (`1606-1631`), the tag priority (`1651-1664`), the rail's nearest station (`1295-1304`) and an `overlaps` that
-  repeats the one in `explore.js` (`1353`); `skyOf` is computed twice (`120`).
-  accept: each one exported and tested in Node; the engine only calls them; no visible change.
-- **TOOLING** — One local server and exact pins
-  `chore · agent · low`
-  `npm run serve` needs a `python3` nothing declares, while `npm run dev` is Node; `@resvg/resvg-js` and `fontkit` are
-  caret ranges although the icon test compares the PNGs byte for byte; `engines` says Node 21 and nothing names the
-  version the tests run on.
-  accept: README and REVIEW-LOOK point at the Node server only; both packages pinned exactly; a `.nvmrc`.
 
 ### 4. Copy and depth — need the creator's words or approval
 
@@ -299,12 +261,6 @@ From the performance audit (24 frames a second already ships):
   The hero and the page title say "A life, in milestones" / "Una vida en hitos", while the rules keep one word, memory,
   for each memory, and the lede follows them.
   accept: the creator keeps it or changes it; the title, the hero and the share image follow.
-- **RAIL-DECADES** — The rail's decades follow the years it spans
-  `chore · agent · low`
-  board: RAIL-DECADES
-  The decade labels stop at 2020 (`src/rail.mjs`) and the density bars at 2026, although the rail now moves its end, the book and the clone with the year; from 2030 on the rail would have no label for its last decade.
-  accept: a Node test of the decades for a rail ending in 2036 lists 2030; the build output does not change while the year is 2026.
-
 - **MILESTONE-MEDIA** — A photo or a sound at a milestone
   `feature · agent · low` · depends: the creator's approval of each file
   board: MILESTONE-MEDIA

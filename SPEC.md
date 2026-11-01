@@ -85,10 +85,12 @@ creator's archive. Everything else is the creator's own archive, and nothing in 
 
 ## Build
 
-`npm run build` runs `tools/build.mjs`: it renders every page from `src/` first (pure functions returning strings,
-collected by `renderSite`), then deletes `es/`, writes the pages, and bundles `assets/js/main.js` and
-three.js into `assets/site.js` with esbuild (IIFE, minified, ES2020). Generated files are committed. A test renders the
-site in memory and compares it, and the bundle, with the disk.
+`npm run build` runs `tools/build.mjs`: it bundles `assets/js/main.js` and three.js into `assets/site.js` with esbuild
+(IIFE, minified, ES2020), then renders every page from `src/` (pure functions returning strings, collected by
+`renderSite`), deletes `es/` and `m/` and writes the pages. Every local stylesheet and script in a generated page (not the fonts, and not the hand-written `design/` pages) is linked as
+`/assets/x.js?v=<ten hex digits of the sha-256 of the file>` (`src/assets.mjs`), so a page and the engine it was built
+with are never mixed by a cache. Generated files are committed. A test renders the site in memory and compares it, and
+the bundle, with the disk.
 
 ## Themes
 
@@ -272,8 +274,10 @@ Two and a half seconds after the last touch, wherever it is (the hero, a memory,
 - **Opening.** A click or a tap on a cloud, a galaxy's label (it frames the galaxy, the age view; pressed again it returns to the whole-life view), a related
   memory, a result of the finder, a point on the rail, Surprise me (a memory in the filter when one is on, not the one in view, and one not yet opened in the visit while any is left),
   a link with `data-go`, an address hash (`#book`, `#m-tapquo`, `#period-midlife`, `#thread-family`; a malformed one or one that names nothing is
-  ignored), a focus on the real document, or Earlier and Later. The address follows the memory in view with
-  `history.replaceState`. A `data-go` link to the book or the clone also puts the cursor in its waitlist field.
+  ignored), a focus on the real document, or Earlier and Later. The address follows the memory in view: the first step out of an
+  address with no hash pushes one history entry (`historyMove`) and every step after it replaces it, so Back returns to the
+  sky and a second Back leaves the site. The tab's title names the memory or the age in view (`titleOf`: `<title> · Javi`) and is the page's own at the whole
+  life. A `data-go` link to the book or the clone also puts the cursor in its waitlist field.
 - **Pointing.** The nearest cloud within its reach is named and the cursor changes. A drag never opens anything. The
   book and the clone rings answer the pointer and open their cards like a cloud: pointed at, or with their section of the header pointed at or focused, a ring brightens and grows a little with the easing of a cloud (`RING_GLOW`), its name comes to full ink and one line of the creator's says what it is (`book.hint`, `clone.hint`), placed under the name without moving it.
 - **Controls.** Find, Surprise me and a More button (`aria-expanded`) share the top line with the brand and the sections (left); the
@@ -283,7 +287,7 @@ Two and a half seconds after the last touch, wherever it is (the hero, a memory,
   flat page, which hides everything else of the controls, still shows them. Escape, a press elsewhere, choosing something or
   tabbing out of the sheet closes it, and the focus goes back to the More button (to the first thread after Filter); a
   filter in force is shown by a dot on More and in its accessible name. The thread legend, the guide and the finder open as
-  panels under that row. In the sections, The book and The Echo carry `.cta`: full ink, underlined and a 44 px
+  panels under that row. The finder matches the beginning of a word (`rank`: "art" finds Art and artisan, never start or part), lists the best eight and says how many it found (`findCount`, "8 of 13"). In the sections, The book and The Echo carry `.cta`: full ink, underlined and a 44 px
   target, because they are what the site offers; no control is drawn inverted unless the visitor pressed it, and Sound
   shows its state by the waves or the slash of its icon, never by a fill.
 - **Relations.** The relations of a memory are its explicit links in both directions and its neighbours in time inside each of
@@ -428,7 +432,7 @@ A `nav.rail` is fixed at the bottom of the scene: a link back to the whole life 
 glyph with its name beneath it ("Whole life", "Play" or "Pause"), unboxed, with a 44 px target (the button's label says
 play or pause and `aria-pressed` follows it); a track with a bar per year for the
 density (the sum of the weights of its milestones), a tick per memory (larger when heavier), hollow ticks for the book
-and the clone, today, and a cursor that follows the memory in view; and the five decades as links, which with the two
+and the clone, today, and a cursor that follows the memory in view; and the decades it has room for (`decadesOf`: one whose label has five years before the rail's end; today 1980 to 2020) as links, which with the two
 buttons are the only focusable parts. It
 is generated at build time from `content/life.json` (`src/rail.mjs`), so both languages share it. Pressing or dragging
 on the track follows the finger with the date and title of the nearest memory, book or clone and its ring; the one it ends on opens when the finger or the pointer is released, and a cancelled drag, a secondary button or a lost pointer opens nothing. The rail's end, the book and the clone sit 5, 1.8 and 3.6 years after the current year (`railOf`, `railBase`), and the engine lays the ticks, bars and decades again when today is past the year it was built for, so today never passes them. Its bars and ticks rest at 40% and come to full while the pointer is over the rail or the focus is inside it. The rail is hidden
@@ -537,6 +541,11 @@ Hooks that do not change: `.hud` (the label of where you are), `#card`, `.card-c
   tracking is a token, none below 12 px, no serif under 16 px). `pages.test.mjs` also checks that the header is the outlined
   wordmark, that the brand files and icons match what the tools generate, that the favicon keeps its ink at 16, 32 and 180 px in
   both lights (rendered in Node with resvg) and that both cards carry the lockup under the title.
+- `roadmap.test.mjs`: this repository's ROADMAP keeps its own format: the four lanes in order, unique IDs, a
+  type · owner · priority line on every entry, `depends` naming entries that exist, an `accept` or a board on every agent
+  task and only agent work in Queue and In progress.
+- `tooling.test.mjs`: every dependency is pinned to an exact version in the manifest and the lock, `npm run dev` is the only
+  local server (no Python), and `.nvmrc` names a Node major inside `engines`.
 - `browser/immersive.test.mjs`: Chromium with SwiftShader WebGL: the accessibility tree and the keyboard, the card, Earlier
   and Later, hashes (including malformed ones) and the address, the canvas drawing in both themes, night as the first
   look and the switch to paper remembered across pages, language redirects, the flat fallbacks and the size switch,
@@ -559,5 +568,5 @@ Hooks that do not change: `.hud` (the label of where you are), `#card`, `.card-c
 - The share image is made from the dark hero with software rendering; a real GPU draws it more smoothly.
 - The sky's look, the star field and the year rings have been judged on a laptop screen with software rendering only.
 - Real-device performance of 60,000 to 140,000 dots has not been measured; a phone gets about 40% fewer.
-- The rail's five decades are the only parts of it that take the keyboard; its memories are reached with the arrow keys,
+- The rail's decades are the only parts of it that take the keyboard; its memories are reached with the arrow keys,
   the finder or Tab through the card.

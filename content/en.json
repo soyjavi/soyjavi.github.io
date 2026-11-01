@@ -48,6 +48,7 @@
       "findLabel": "Find a memory",
       "findPlaceholder": "Search the memories",
       "findNone": "No memory matches",
+      "findCount": "{shown} of {total}",
       "surprise": "Surprise me",
       "filters": "Filter",
       "related": "Related",

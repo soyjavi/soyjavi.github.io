@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { CADENCE, LEVEL, ageAround, aheadOf, surprisePick, leadsTo, inviteLine, RING_CLEARANCE, STRONG, askLevels, askPairs, declared, periodNames, strongest, TAG_GAP, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, figureCount, figureOf, figureSpan, filterHash, filterOfHash, leaderOf, levels, matching, miniMap, MINI_ZOOM, miniVisible, QUALITY, averageMs, nextQuality, normalize, perGalaxy, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, tagSpots, tourPlan, tourTick, pace, worked } from "../assets/js/explore.js";
+import { rank, countText, FIND_LIMIT, CADENCE, LEVEL, ageAround, aheadOf, surprisePick, leadsTo, inviteLine, RING_CLEARANCE, STRONG, askLevels, askPairs, declared, periodNames, strongest, TAG_GAP, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, figureCount, figureOf, figureSpan, filterHash, filterOfHash, leaderOf, levels, matching, miniMap, MINI_ZOOM, miniVisible, QUALITY, averageMs, nextQuality, normalize, perGalaxy, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, tagSpots, tourPlan, tourTick, pace, worked } from "../assets/js/explore.js";
 import { layout } from "../assets/js/life.js";
 import { ORBIT, approach, ease, eye, nearest, slide, turn, zoom } from "../assets/js/orbit.js";
 import { loadContent } from "../src/content.mjs";
@@ -599,4 +599,24 @@ test("surprise me stays inside the filter, avoids the memory in view and the one
   assert.equal(surprisePick(marks, craft, 1, new Set([1, 2, 3]), () => 0), 2, "when all were opened, any other in the thread");
   assert.equal(surprisePick([marks[0]], null, 0, new Set()), null, "nothing else to open");
   assert.equal(surprisePick(marks, { facet: "threads", item: 0 }, 0, new Set([4]), () => 0), 4, "opened already, but the only other one in the thread");
+});
+
+test("the finder matches the beginning of a word, never a piece inside it, and counts what it leaves out", () => {
+  const item = (id, title, body = "", order = 0) => ({ id, title, body, extra: "", weight: 1, order });
+  const items = [item("a", "Art class", "", 0), item("b", "Summer", "the start of a long year", 1), item("c", "House", "a part of it", 2), item("d", "Studio", "two years of artisan work", 3), item("e", "Family", "my son and a person", 4), item("f", "Sonata", "", 5)];
+  assert.deepEqual(search(items, "art").map((x) => x.id), ["a", "d"], "start and part are not art");
+  assert.deepEqual(search(items, "son").map((x) => x.id), ["f", "e"], "son opens son and sonata, not person");
+  assert.deepEqual(search(items, "years art").map((x) => x.id), ["d"], "every term must open a word");
+  assert.deepEqual(search(items, "ibe"), []);
+  const many = Array.from({ length: FIND_LIMIT + 5 }, (_, k) => item(`x${k}`, "Art", "", k));
+  assert.equal(rank(many, "art").length, FIND_LIMIT + 5);
+  assert.equal(search(many, "art").length, FIND_LIMIT);
+  assert.equal(countText("{shown} of {total}", 8, 13), "8 of 13");
+  assert.equal(countText("{shown} de {total}", 2, 2), "2 de 2");
+});
+
+test("a query with an apostrophe, a hyphen, a dot or a comma still finds the word", () => {
+  const items = [{ id: "a", title: "Don't stop", body: "co-founder of node.js", extra: "niño", weight: 1, order: 0 }];
+  for (const query of ["don't", "co-founder", "node.js", "don,", "'don", "nino", "NIÑO"]) assert.equal(search(items, query).length, 1, query);
+  assert.equal(search(items, "zzz,").length, 0);
 });

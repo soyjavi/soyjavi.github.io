@@ -15,8 +15,7 @@ and dark themes, night first and a remembered switch to paper. Static pages on G
 npm install
 npm run browsers      # once: Chromium for the browser tests and the share image
 npm run build         # content + src → pages, sitemap, assets/site.js
-npm run serve         # http://localhost:4173, or PORT=4391 npm run serve (it needs a server: the pages use absolute URLs)
-npm run dev           # http://localhost:4392, never cached, so a reload always shows the last npm run build
+npm run dev           # http://localhost:4392 (or PORT=4391 npm run dev), never cached: a reload shows the last npm run build; the pages use absolute URLs, so they need a server
 npm test              # content, geometry, pages and a real browser
 npm run og            # regenerate og-image.png from the hero
 ```

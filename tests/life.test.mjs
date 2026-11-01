@@ -1,11 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { railBase, railOf, shapeBy, AHEAD, BUDGET, LANES, PLAY, RAIL, SKY, SPACE, SPREAD, START, activityAt, activityTable, aheadPoint, assign, crowdScale, densityAt, densityByYear, dotsPerWeight, fractionIn, futures, galaxies, galaxyOf, lanes, layout, memories, onPath, orderOf, yearOf, playElapsed, playYear, precisionOf, railPercent, shellPoint, skyOf, SPIN, spinAngle, spinRate, spinTime, spun, starfield, todayYear, unitsOf, yearRings, years } from "../assets/js/life.js";
+import { decadesOf, railBase, railOf, shapeBy, AHEAD, BUDGET, LANES, PLAY, RAIL, SKY, SPACE, SPREAD, START, activityAt, activityTable, aheadPoint, assign, crowdScale, densityAt, densityByYear, dotsPerWeight, fractionIn, futures, galaxies, galaxyOf, lanes, layout, memories, onPath, orderOf, yearOf, playElapsed, playYear, precisionOf, railPercent, shellPoint, skyOf, SPIN, spinAngle, spinRate, spinTime, spun, starfield, todayYear, unitsOf, yearRings, years } from "../assets/js/life.js";
 import { lerp, seeded, smoothstep } from "../assets/js/util.js";
 import { existsSync, readFileSync } from "node:fs";
 import { ageAt, ageIdOf } from "../assets/js/life.js";
 import { monthsUntil, untilText } from "../assets/js/life.js";
 import { CALL, CLOUD, DISCOVER, KIND_TINT, DUST_VERTEX, ENTRANCE, POINTER, formedAt, igniteAt } from "../assets/js/shaders.js";
+import { historyMove, titleOf } from "../assets/js/explore.js";
 import { archive } from "./fixtures/archive.mjs";
 import { loadContent } from "../src/content.mjs";
 
@@ -670,7 +671,7 @@ test("pressing an age frames its galaxy without opening a memory: three names, t
   const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
   assert.match(engine, /const selectPeriod = \(k, \{ push = true \} = \{\}\) =>/);
   assert.match(engine, /if \(periodAt\.has\(id\)\) return selectPeriod\(periodAt\.get\(id\)\);/);
-  assert.match(engine, /history\.replaceState\(null, "", `#period-\$\{periods\[k\]\}`\)/);
+  assert.match(engine, /writeUrl\(`#period-\$\{periods\[k\]\}`\)/);
   assert.match(engine, /if \(periodView >= 0\) priority = i === hover \|\| i === preview \? 900 : 0;/);
   assert.match(engine, /\[\.\.\.clone\.children\]\.forEach\(\(child\) => child\.matches\("\.kicker, \.period-head"\) \|\| child\.remove\(\)\)/);
   assert.match(engine, /showAll \? everyone : declared\(marks, memory\)/);
@@ -801,4 +802,43 @@ test("reaching the book or the clone focuses its field with a keyboard or a mous
   const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
   assert.match(engine, /const coarsePointer = matchMedia\("\(pointer: coarse\)"\);/);
   assert.match(engine, /if \(holder && coarsePointer\.matches\) card\.focus\(\{ preventScroll: true \}\);\s*else holder\?\.querySelector\("input, a, button"\)\?\.focus\(\);/);
+});
+
+test("Back lets go of a filter chosen at the sky, leaving a pushed memory goes back instead of piling entries, and reading the address never writes it", () => {
+  const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
+  assert.match(engine, /if \(!id\) \{\n      pushed = false;\n      select\(0, \{ push: false \}\);\n      if \(filter\) setFilter\(null\);/);
+  assert.match(engine, /if \(pushed && !url\.startsWith\("#"\)\) \{\n        pushed = false;\n        return history\.back\(\);/);
+  assert.match(engine, /if \(reading\) return;/);
+  assert.match(engine, /reading = true;\n    try \{\n      applyHash\(\);\n    \} finally \{\n      reading = false;/);
+  assert.match(engine, /querySelector\("h3, h2"\)\?\.textContent/);
+});
+
+test("the first step out of the sky pushes one history entry and every step after it replaces it", () => {
+  assert.equal(historyMove("", "#m-born"), "push");
+  assert.equal(historyMove("", "#period-2"), "push");
+  assert.equal(historyMove("#m-born", "#m-school"), "replace");
+  assert.equal(historyMove("#m-born", "/es/"), "replace");
+  assert.equal(historyMove("", "/es/"), "replace");
+  const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
+  assert.equal([...engine.matchAll(/history\.(?:replace|push)State|history\[/g)].length, 1, "one place writes the history");
+  assert.match(engine, /history\[move === "push" \? "pushState" : "replaceState"\]\(null, "", url\)/);
+  assert.equal([...engine.matchAll(/writeUrl\(/g)].length, 3, "the memory, the age and the filter go through it");
+});
+
+test("the tab names the memory or the age in view and gives the page's title back at the whole life", () => {
+  assert.equal(titleOf("Javi · A life in milestones", "Javi", "I was born in Bilbao"), "I was born in Bilbao · Javi");
+  assert.equal(titleOf("Javi · A life in milestones", "Javi", ""), "Javi · A life in milestones");
+  assert.equal(titleOf("Javi · Una vida en hitos", "Javi", undefined), "Javi · Una vida en hitos");
+  const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
+  assert.match(engine, /document\.title = titleOf\(homeTitle, siteName, station\.kind === "hero" \? "" : station\.element\.querySelector\("h3, h2"\)\?\.textContent\)/);
+  assert.match(engine, /document\.title = titleOf\(homeTitle, siteName, hud\.textContent\)/);
+  assert.match(engine, /querySelector\('meta\[property="og:site_name"\]'\)/);
+});
+
+test("the rail labels the decades it has room for: a rail ending in 2036 lists 2030, the rail of 2026 stops at 2020", () => {
+  assert.deepEqual(decadesOf(), [1980, 1990, 2000, 2010, 2020]);
+  assert.deepEqual(decadesOf(railOf(2031)), [1980, 1990, 2000, 2010, 2020, 2030]);
+  assert.deepEqual(decadesOf(railOf(2031)).at(-1), 2030);
+  assert.equal(decadesOf(railOf(2029)).includes(2030), false, "a decade right at the end has no room for its label");
+  assert.ok(decadesOf(railOf(2045)).includes(2040));
 });

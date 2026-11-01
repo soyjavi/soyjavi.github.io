@@ -1,7 +1,5 @@
-import { RAIL, densityByYear, railPercent, years } from "../assets/js/life.js";
+import { RAIL, decadesOf, densityByYear, railPercent, years } from "../assets/js/life.js";
 import { esc, fill } from "./html.mjs";
-
-const DECADES = [1980, 1990, 2000, 2010, 2020];
 
 export function rail({ life, dict }) {
   const copy = dict.ui.rail;
@@ -9,7 +7,7 @@ export function rail({ life, dict }) {
   const pct = (year) => railPercent(year).toFixed(2);
   const bars = densityByYear(life.milestones, Math.max(2026, Math.floor(Math.max(...placed))) + 0.99).map(({ year, value }) => `<i data-year="${year + 0.5}" style="--x:${pct(year + 0.5)}%;--h:${value.toFixed(2)}"></i>`);
   const ticks = placed.map((year, i) => `<i data-weight="${life.milestones[i].weight}" data-year="${year}" style="--x:${pct(year)}%"></i>`);
-  const decades = DECADES.map((decade) => {
+  const decades = decadesOf().map((decade) => {
     const first = life.milestones.find((_, i) => placed[i] >= decade && placed[i] < decade + 10) ?? life.milestones.find((_, i) => placed[i] >= decade) ?? life.milestones.at(-1);
     return `<li data-year="${decade}" style="--x:${pct(decade)}%"><a href="#m-${first.id}" data-go="m-${first.id}" aria-label="${esc(fill(copy.decade, { year: decade, label: decade < 2000 ? decade % 100 : decade }))}">${decade}</a></li>`;
   });

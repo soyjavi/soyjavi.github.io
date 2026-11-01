@@ -48,6 +48,7 @@
       "findLabel": "Buscar un recuerdo",
       "findPlaceholder": "Buscar entre los recuerdos",
       "findNone": "Ningún recuerdo coincide",
+      "findCount": "{shown} de {total}",
       "surprise": "Sorpréndeme",
       "filters": "Filtrar",
       "related": "Relacionados",

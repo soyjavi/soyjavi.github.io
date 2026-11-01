@@ -490,7 +490,7 @@ test("the 404 is one star that leads back to the start, with no script and nothi
   assert.match(html, /<a class="first-star" href="\/" aria-label="[^"]+"><svg viewBox="0 0 120 120" aria-hidden="true" focusable="false">/);
   assert.ok(html.includes(content.dict.en.notFound.star) && html.includes(content.dict.es.notFound.star), "the line in both languages");
   assert.match(html, /<a class="link" href="\/es\/">/, "the Spanish reader has a way home in Spanish");
-  assert.deepEqual([...html.matchAll(/<script\b([^>]*)>/g)].map((m) => m[1]).filter((attributes) => !/src="\/assets\/(theme|lang)\.js"/.test(attributes) && !/application\/ld\+json/.test(attributes)), []);
+  assert.deepEqual([...html.matchAll(/<script\b([^>]*)>/g)].map((m) => m[1]).filter((attributes) => !/src="\/assets\/(theme|lang)\.js(\?v=[0-9a-f]+)?"/.test(attributes) && !/application\/ld\+json/.test(attributes)), []);
   const css = read("assets/page.css");
   assert.match(css, /@media \(prefers-reduced-motion: reduce\) \{\s*\.first-star \.halo \{\s*animation: none;/);
 });
@@ -591,7 +591,7 @@ test("every memory has a page of its own in both languages, with its title, its 
       assert.ok(html.includes(`href="${lang === "en" ? "/" : "/es/"}#m-${entry.id}"`), `${file}: link into the sky`);
       assert.equal(dayProblem(html.replace(/<[^>]+>/g, " ")), null, `${file}: names a day`);
       assert.doesNotMatch(html, /<form|waitlist|data-station/i, `${file}: only the memory`);
-      assert.equal(html.includes("<script src=\"/assets/site.js\""), false, `${file}: no engine`);
+      assert.equal(html.includes("/assets/site.js"), false, `${file}: no engine`);
     }
   }
   assert.equal(snippet("short"), "short");
@@ -614,4 +614,20 @@ test("the sitemap lists the page of every memory with both language alternates, 
     assert.ok(html.includes(`name="twitter:image:alt" content="${content.dict[lang].meta.imageAlt}"`), file);
   }
   assert.notEqual(content.dict.en.meta.imageAlt, content.dict.es.meta.imageAlt);
+});
+
+test("every local stylesheet and script carries the hash of the file it names", async () => {
+  const { createHash } = await import("node:crypto");
+  let seen = 0;
+  for (const [file, html] of files) {
+    if (!file.endsWith(".html")) continue;
+    for (const [, ref] of html.matchAll(/(?:href|src)="(\/assets\/[^"]+\.(?:css|js)[^"]*)"/g)) {
+      const [path, query] = ref.split("?");
+      const hash = createHash("sha256").update(readFileSync(`${root}${path.slice(1)}`)).digest("hex").slice(0, 10);
+      assert.equal(query, `v=${hash}`, `${file}: ${path}`);
+      seen += 1;
+    }
+  }
+  assert.ok(seen > 0);
+  for (const file of ["index.html", "es/index.html"]) assert.match(read(file), /\/assets\/site\.js\?v=[0-9a-f]{10}"/, `${file}: the engine is versioned`);
 });

@@ -52,7 +52,7 @@ export function explore({ life, dict, tools = "" }) {
         <input id="finder-input" type="search" autocomplete="off" spellcheck="false" placeholder="${esc(copy.findPlaceholder)}" />
         <ul class="results"></ul>
         <div class="preview" aria-hidden="true"><time></time><strong></strong><p></p></div>
-        <p class="none" role="status" data-none="${esc(copy.findNone)}"></p>
+        <p class="none" role="status" data-none="${esc(copy.findNone)}" data-count="${esc(copy.findCount)}"></p>
       </form>
       ${legends.join("")}
     </div>`;

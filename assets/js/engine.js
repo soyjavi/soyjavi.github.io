@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { BUDGET, FACETS, FLOOR, RAIL, START, railBase, railOf, shapeBy, futures, layout, memories, playElapsed, monthsUntil, playYear, railPercent, skyOf, todayYear, untilText, yearRings } from "./life.js";
-import { LEVEL, ageAround, aheadOf, surprisePick, leadsTo, inviteLine, askLevels, askPairs, declared, periodNames, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, figureCount, figureOf, figureSpan, filterHash, filterOfHash, leaderOf, levels as levelsOf, matching, perGalaxy, miniMap, miniVisible, QUALITY, averageMs, nextQuality, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, strongest, tagSpots, tourPlan, tourTick, worked, isFresh } from "./explore.js";
+import { LEVEL, ageAround, historyMove, titleOf, aheadOf, surprisePick, leadsTo, inviteLine, askLevels, askPairs, declared, periodNames, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, figureCount, figureOf, figureSpan, filterHash, filterOfHash, leaderOf, levels as levelsOf, matching, perGalaxy, miniMap, miniVisible, QUALITY, averageMs, nextQuality, pickSpot, related, ringClearance, rank, countText, FIND_LIMIT, sequence, stackEdgeLabels, strongest, tagSpots, tourPlan, tourTick, worked, isFresh } from "./explore.js";
 import { clamp } from "./orbit.js";
 import { createSound } from "./sound.js";
 import { OVERVIEW_PITCH, createScene } from "./scene.js";
@@ -795,6 +795,22 @@ async function start() {
   };
 
   let quiet = false;
+  const homeTitle = document.title;
+  const siteName = document.querySelector('meta[property="og:site_name"]')?.content ?? "";
+  let reading = false;
+  let pushed = false;
+  const writeUrl = (url) => {
+    if (reading) return;
+    try {
+      if (pushed && !url.startsWith("#")) {
+        pushed = false;
+        return history.back();
+      }
+      const move = historyMove(location.hash, url);
+      history[move === "push" ? "pushState" : "replaceState"](null, "", url);
+      if (move === "push") pushed = true;
+    } catch {}
+  };
   const select = (index, { push = true, hush = false } = {}) => {
     quiet = hush;
     stopPlay();
@@ -815,6 +831,7 @@ async function start() {
     const station = stations[current];
     document.documentElement.dataset.at = current;
     hud.textContent = station.label;
+    document.title = titleOf(homeTitle, siteName, station.kind === "hero" ? "" : station.element.querySelector("h3, h2")?.textContent);
     refreshScene();
     shotOf(current);
     if (stations[current].kind === "milestone" && !hush) invite.opened.add(current);
@@ -825,13 +842,7 @@ async function start() {
     if (rail) rail.querySelector(".rail-cursor")?.style.setProperty("--x", `${railPercent(cursorYear()).toFixed(2)}%`);
     if (station.kind === "milestone") sound.memory(marks[memoryOf(current)]);
     else if (station.kind === "book" || station.kind === "clone") sound.swell(station.kind);
-    if (push) {
-      try {
-        history.replaceState(null, "", station.kind !== "hero" ? `#${station.id}` : filter ? `#${filterHash(filter.facet, facets[filter.facet][filter.item])}` : `${location.pathname}${location.search}`);
-      } catch {
-        return;
-      }
-    }
+    if (push) writeUrl(station.kind !== "hero" ? `#${station.id}` : filter ? `#${filterHash(filter.facet, facets[filter.facet][filter.item])}` : `${location.pathname}${location.search}`);
   };
 
   const selectPeriod = (k, { push = true } = {}) => {
@@ -847,19 +858,14 @@ async function start() {
     stage.dataset.period = periods[k];
     document.documentElement.dataset.at = current;
     hud.textContent = stations[current].element.querySelector(".kicker")?.textContent ?? "";
+    document.title = titleOf(homeTitle, siteName, hud.textContent);
     refreshScene();
     shotOf(current);
     renderCard();
     updateNudge();
     rail?.querySelector(".rail-cursor")?.style.setProperty("--x", `${railPercent(cursorYear()).toFixed(2)}%`);
     sound.memory(marks[periodNames(marks, k, 1)[0]]);
-    if (push) {
-      try {
-        history.replaceState(null, "", `#period-${periods[k]}`);
-      } catch {
-        return;
-      }
-    }
+    if (push) writeUrl(`#period-${periods[k]}`);
   };
 
   const setFilter = (next) => {
@@ -888,9 +894,7 @@ async function start() {
       unfilter.setAttribute("aria-label", `${copy.unfilter}: ${names[filter.facet][facets[filter.facet][filter.item]] ?? ""}`);
     }
     if (stations[current].kind === "hero" && periodView < 0) {
-      try {
-        history.replaceState(null, "", filter ? `#${filterHash(filter.facet, facets[filter.facet][filter.item])}` : `${location.pathname}${location.search}`);
-      } catch {}
+      writeUrl(filter ? `#${filterHash(filter.facet, facets[filter.facet][filter.item])}` : `${location.pathname}${location.search}`);
     }
     refreshScene();
     if (stations[current].kind === "milestone" && periodView < 0) renderCard();
@@ -980,7 +984,8 @@ async function start() {
     }
   });
   finderInput.addEventListener("input", () => {
-    const found = search(finderItems, finderInput.value);
+    const ranked = rank(finderItems, finderInput.value);
+    const found = ranked.slice(0, FIND_LIMIT);
     const shows = filtersFor(marks, facets, names, finderInput.value);
     results.replaceChildren(
       ...shows.map((entry) => {
@@ -996,7 +1001,7 @@ async function start() {
       ...found.map((item) => memoryRow(item.index)),
     );
     if (!finderInput.value.trim()) showIndex();
-    none.textContent = finderInput.value.trim() && !found.length && !shows.length ? none.dataset.none : "";
+    none.textContent = !finderInput.value.trim() ? "" : found.length ? countText(none.dataset.count, found.length, ranked.length) : shows.length ? "" : none.dataset.none;
   });
   finder.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -1189,7 +1194,7 @@ async function start() {
     if (holder && coarsePointer.matches) card.focus({ preventScroll: true });
     else holder?.querySelector("input, a, button")?.focus();
   };
-  const fromHash = () => {
+  const applyHash = () => {
     const first = !hashSeen;
     hashSeen = true;
     let id;
@@ -1198,7 +1203,12 @@ async function start() {
     } catch {
       return;
     }
-    if (!id) return select(0, { push: false });
+    if (!id) {
+      pushed = false;
+      select(0, { push: false });
+      if (filter) setFilter(null);
+      return;
+    }
     if (!begun) begin();
     if (periodAt.has(id)) return selectPeriod(periodAt.get(id), { push: false });
     const chosen = filterOfHash(id, facets);
@@ -1210,6 +1220,14 @@ async function start() {
       select(anchors.get(id), { push: false });
       if (first && id.startsWith("m-")) arrived = true;
       updateNudge();
+    }
+  };
+  const fromHash = () => {
+    reading = true;
+    try {
+      applyHash();
+    } finally {
+      reading = false;
     }
   };
   document.querySelectorAll("[data-go]").forEach((link) =>

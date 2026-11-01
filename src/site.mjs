@@ -1,3 +1,4 @@
+import { stamp } from "./assets.mjs";
 import { LANGS } from "./content.mjs";
 import { homePath, memoryPath } from "./html.mjs";
 import { home } from "./home.mjs";
@@ -19,9 +20,9 @@ const sitemap = ({ site, life }) => {
 
 export function renderSite(content) {
   const files = new Map();
-  for (const lang of LANGS) files.set(fileOf(homePath(lang)), home(content, lang));
-  for (const lang of LANGS) for (const entry of content.life.milestones) files.set(fileOf(memoryPath(lang, entry.id)), memoryPage(content, lang, entry));
-  files.set("404.html", notFound(content));
+  for (const lang of LANGS) files.set(fileOf(homePath(lang)), stamp(home(content, lang)));
+  for (const lang of LANGS) for (const entry of content.life.milestones) files.set(fileOf(memoryPath(lang, entry.id)), stamp(memoryPage(content, lang, entry)));
+  files.set("404.html", stamp(notFound(content)));
   files.set("sitemap.xml", sitemap(content));
   files.set("robots.txt", `User-agent: *\nAllow: /\nSitemap: ${content.site.url}/sitemap.xml\n`);
   return files;

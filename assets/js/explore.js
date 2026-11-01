@@ -12,22 +12,30 @@ export function inviteLine({ arrived, opened, closed, sawClone, memory, quiet, a
 
 export const normalize = (text) => text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
 
-export function search(items, query, limit = 8) {
-  const terms = normalize(query).split(/\s+/).filter(Boolean);
+const WORD = /[^\p{L}\p{N}]+/u;
+
+export function rank(items, query) {
+  const terms = normalize(query).split(WORD).filter(Boolean);
   if (!terms.length) return [];
   return items
     .map((item) => {
       const title = normalize(item.title);
-      const text = normalize(`${item.title} ${item.body} ${item.extra}`);
-      if (!terms.every((term) => text.includes(term))) return null;
-      const score = terms.reduce((sum, term) => sum + (title.startsWith(term) ? 3 : title.includes(term) ? 2 : 1), 0) + item.weight * 0.1;
+      const words = new Set(normalize(`${item.title} ${item.body} ${item.extra}`).split(WORD));
+      const starts = (term) => [...words].some((word) => word.startsWith(term));
+      if (!terms.every(starts)) return null;
+      const score = terms.reduce((sum, term) => sum + (title.startsWith(term) ? 3 : title.split(WORD).some((word) => word.startsWith(term)) ? 2 : 1), 0) + item.weight * 0.1;
       return { item, score };
     })
     .filter(Boolean)
     .sort((a, b) => b.score - a.score || a.item.order - b.item.order)
-    .slice(0, limit)
     .map(({ item }) => item);
 }
+
+export const FIND_LIMIT = 8;
+
+export const search = (items, query, limit = FIND_LIMIT) => rank(items, query).slice(0, limit);
+
+export const countText = (template, shown, total) => template.replace("{shown}", String(shown)).replace("{total}", String(total));
 
 export function related(marks, index) {
   const own = marks[index];
@@ -73,6 +81,10 @@ export function periodNames(marks, period, limit = 3, apart = 3) {
 }
 
 export const aheadOf = (ahead, facets, filter) => (filter?.facet === "threads" ? ["book", "clone"].find((name) => ahead?.[name] === facets.threads[filter.item]) ?? null : null);
+
+export const titleOf = (home, name, part) => (part ? `${part} · ${name}` : home);
+
+export const historyMove = (hash, url) => (!hash && url.startsWith("#") ? "push" : "replace");
 
 export const ageAround = (marks, count, k) => (k >= 0 && k < count && marks.some((mark) => mark.period === k) ? k : null);
 
