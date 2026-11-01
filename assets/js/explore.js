@@ -217,16 +217,6 @@ export function leaderOf(box, { x, y, r }) {
 
 export const ringClearance = (radius) => Math.min(radius, 70) + RING_CLEARANCE;
 
-export function headlines(marks) {
-  const best = new Map();
-  marks.forEach((mark, i) => {
-    if (mark.period < 0) return;
-    const held = best.get(mark.period);
-    if (held === undefined || mark.weight > marks[held].weight || (mark.weight === marks[held].weight && mark.year < marks[held].year)) best.set(mark.period, i);
-  });
-  return [...best.entries()].sort((a, b) => a[0] - b[0]).map(([, i]) => i);
-}
-
 export function edgeExit(samples, rect) {
   const inside = (p) => p.visible !== false && p.x >= rect.left && p.x <= rect.right && p.y >= rect.top && p.y <= rect.bottom;
   for (let k = 1; k < samples.length; k++) {
@@ -258,21 +248,27 @@ export function edgeLabel(point, side, { width, height }, rect, offset = 8) {
   return { left, right: left + width, top, bottom: top + height };
 }
 
+export const overlaps = (a, b, gap = 0, slack = 0) => a.left < b.right + gap - slack && a.right + gap > b.left + slack && a.top < b.bottom + gap - slack && a.bottom + gap > b.top + slack;
+
+export const nearestBy = (items, target, valueOf) => items.reduce((best, item) => (Math.abs(valueOf(item) - target) < Math.abs(valueOf(best) - target) ? item : best), items[0]);
+
+export const ageFacts = (held) => [held.length, new Set(held.flatMap((mark) => mark.members.people ?? [])).size, new Set(held.flatMap((mark) => mark.members.places ?? [])).size];
+
 export function stackEdgeLabels(items, rect, gap = 4, avoid = []) {
   const placed = [...avoid];
   const slack = 0.5;
-  const overlaps = (a, b) => a.left < b.right + gap - slack && a.right + gap > b.left + slack && a.top < b.bottom + gap - slack && a.bottom + gap > b.top + slack;
+  const touches = (a, b) => overlaps(a, b, gap, slack);
   for (const item of items) {
     const along = item.side === "top" || item.side === "bottom" ? "top" : "left";
     const span = along === "top" ? item.box.bottom - item.box.top : item.box.right - item.box.left;
     const direction = item.side === "bottom" || item.side === "right" ? -1 : 1;
     let box = item.box;
-    for (let tries = 0; tries < 4 && placed.some((other) => overlaps(box, other)); tries++) {
+    for (let tries = 0; tries < 4 && placed.some((other) => touches(box, other)); tries++) {
       const shift = (span + gap) * direction * (tries + 1);
       box = along === "top" ? { ...item.box, top: item.box.top + shift, bottom: item.box.bottom + shift } : { ...item.box, left: item.box.left + shift, right: item.box.right + shift };
     }
     const fits = box.left >= rect.left - 1 && box.right <= rect.right + 1 && box.top >= rect.top - 1 && box.bottom <= rect.bottom + 1;
-    if (fits && !placed.some((other) => overlaps(box, other))) {
+    if (fits && !placed.some((other) => touches(box, other))) {
       placed.push(box);
       item.box = box;
       item.shown = true;

@@ -357,3 +357,33 @@ test("the finder counts its results in both languages", () => {
     assert.ok(text.includes("{shown}") && text.includes("{total}"), lang);
   }
 });
+
+test("the build refuses a bad id, a missing or self link, an unknown thread, person or place and a future date, naming the file", () => {
+  const dir = mkdtempSync(join(tmpdir(), "guards-"));
+  try {
+    cpSync(`${root}content`, dir, { recursive: true });
+    const folder = join(dir, "memories");
+    const name = readdirSync(folder)[0];
+    const id = name.slice(0, -5);
+    const original = JSON.parse(readFileSync(join(folder, name), "utf8"));
+    const url = pathToFileURL(`${dir}/`);
+    const change = (patch, expected) => {
+      writeFileSync(join(folder, name), JSON.stringify({ ...original, ...patch }));
+      assert.throws(() => loadContent(url), expected, JSON.stringify(patch));
+    };
+    change({ links: ["nowhere-at-all"] }, new RegExp(`${name}: links to "nowhere-at-all"`));
+    change({ links: [id] }, new RegExp(`${name}: links to itself`));
+    change({ threads: ["nonsense"] }, new RegExp(`${name}: threads names "nonsense"`));
+    change({ people: ["nobody"] }, new RegExp(`${name}: people names "nobody"`));
+    change({ places: ["noplace"] }, new RegExp(`${name}: places names "noplace"`));
+    change({ date: `${new Date().getFullYear() + 1}-01` }, new RegExp(`${name}: dated in the future`));
+    change({ threads: ["__proto__"] }, /threads names "__proto__"/);
+    writeFileSync(join(folder, name), JSON.stringify(original));
+    writeFileSync(join(folder, "Bad Id.json"), JSON.stringify(original));
+    assert.throws(() => loadContent(url), /Bad Id\.json: the id must be lowercase/);
+    rmSync(join(folder, "Bad Id.json"));
+    assert.doesNotThrow(() => loadContent(url));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});

@@ -21,7 +21,7 @@ const FIGURE_FLOW = 6;
 const DRIFT = { rate: 0.11, yaw: 0.14, pitch: 0.02, rest: 2.5 };
 
 export function createScene({ canvas, cloud, marks, future, today, mobile, sky, kinds = [] }) {
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: "high-performance" });
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: "default" });
   renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.5 : 2));
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(36, innerWidth / innerHeight, 0.1, 4000);

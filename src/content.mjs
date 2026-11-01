@@ -40,6 +40,11 @@ export const distinctive = (held, everything, threadOrder, count = 2) => {
 export const root = fileURLToPath(new URL("..", import.meta.url));
 export const CONTENT = new URL("../content/", import.meta.url);
 
+export const futureProblem = (date, now = new Date()) => {
+  const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  return date > (date.length === 4 ? month.slice(0, 4) : month) ? "dated in the future" : null;
+};
+
 const dateKey = (date) => +date.slice(0, 4) * 12 + (date.length === 7 ? +date.slice(5, 7) - 1 : 5.5);
 
 export function readMemories(dir = CONTENT) {
@@ -48,6 +53,7 @@ export function readMemories(dir = CONTENT) {
     .filter((file) => file.endsWith(".json"))
     .map((file) => {
       const id = file.slice(0, -".json".length);
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id)) throw new Error(`content/memories/${file}: the id must be lowercase letters and numbers joined by hyphens`);
       const memory = { id, ...JSON.parse(readFileSync(new URL(file, folder), "utf8")) };
       if (!precisionOf(String(memory.date))) throw new Error(`content/memories/${file}: date "${memory.date}" must be YYYY or YYYY-MM`);
       for (const lang of LANGS) if (!memory[lang]?.title || !memory[lang]?.body) throw new Error(`content/memories/${file}: needs "${lang}" with a title and a body`);
@@ -81,6 +87,19 @@ export function loadContent(dir = CONTENT) {
   if (base.totals !== undefined && (typeof base.totals !== "object" || base.totals === null || Array.isArray(base.totals))) throw new Error("content/life.json: totals must be an object");
   for (const [key, n] of Object.entries(base.totals ?? {})) if (!["memories", "people", "places"].includes(key) || !Number.isInteger(n) || n < 0) throw new Error(`content/life.json: totals.${key} must be one of memories, people, places and a whole number`);
   if (!Array.isArray(base.ages) || base.ages[0]?.from !== 0 || base.ages.some((stage, i) => !/^[a-z0-9-]+$/.test(stage.id ?? "") || !Number.isFinite(stage.from) || (i && stage.from <= base.ages[i - 1].from))) throw new Error("content/life.json: ages must start at 0, rise, and have slug ids");
+  const threadTable = Object.fromEntries((base.threads ?? []).map((id) => [id, 1]));
+  for (const memory of memories) {
+    const where = `content/memories/${memory.id}.json`;
+    const date = String(memory.date);
+    if (futureProblem(date)) throw new Error(`${where}: dated in the future`);
+    for (const link of memory.links ?? []) {
+      if (link === memory.id) throw new Error(`${where}: links to itself`);
+      if (!known.has(link)) throw new Error(`${where}: links to "${link}", which is not a memory`);
+    }
+    for (const [key, table] of [["threads", threadTable], ["people", facets.people], ["places", facets.places]]) {
+      for (const id of memory[key] ?? []) if (!Object.hasOwn(table, id)) throw new Error(`${where}: ${key} names "${id}", which is not in the ${key} of the site`);
+    }
+  }
   for (const memory of memories) {
     const age = ageAt(base.birth, String(memory.date));
     if (age < 0) throw new Error(`content/memories/${memory.id}.json: dated before his birth`);

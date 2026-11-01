@@ -40,9 +40,12 @@ const DOME_FRAGMENT = `
     vec3 dir = normalize(vDir);
     vec2 uv = vec2(atan(dir.y, dir.x) / 6.2831853 + 0.5, acos(clamp(dir.z, -1.0, 1.0)) / 3.1415927);
     vec4 t = texture2D(uMap, uv);
-    vec3 q = dir * 2.2 + uOffset + vec3(uTime, uTime * 0.6, 0.0);
-    float cloud = 0.55 * noise(q) + 0.3 * noise(q * 2.1) + 0.15 * noise(q * 4.3);
-    float haze = uHaze * uHazeMax * smoothstep(0.38, 0.8, cloud);
+    float haze = 0.0;
+    if (uHaze > 0.0) {
+      vec3 q = dir * 2.2 + uOffset + vec3(uTime, uTime * 0.6, 0.0);
+      float cloud = 0.55 * noise(q) + 0.3 * noise(q * 2.1) + 0.15 * noise(q * 4.3);
+      haze = uHaze * uHazeMax * smoothstep(0.38, 0.8, cloud);
+    }
     gl_FragColor = vec4(uInk, clamp(t.g * uFar + haze, 0.0, 1.0));
   }
 `;

@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { BUDGET, FACETS, FLOOR, RAIL, START, railBase, railOf, shapeBy, futures, layout, memories, playElapsed, monthsUntil, playYear, railPercent, skyOf, todayYear, untilText, yearRings } from "./life.js";
-import { LEVEL, ageAround, historyMove, titleOf, aheadOf, surprisePick, leadsTo, inviteLine, askLevels, askPairs, declared, periodNames, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, figureCount, figureOf, figureSpan, filterHash, filterOfHash, leaderOf, levels as levelsOf, matching, perGalaxy, miniMap, miniVisible, QUALITY, averageMs, nextQuality, pickSpot, related, ringClearance, rank, countText, FIND_LIMIT, sequence, stackEdgeLabels, strongest, tagSpots, tourPlan, tourTick, worked, isFresh } from "./explore.js";
+import { LEVEL, ageAround, ageFacts, nearestBy, overlaps, historyMove, titleOf, aheadOf, surprisePick, leadsTo, inviteLine, askLevels, askPairs, declared, periodNames, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, figureCount, figureOf, figureSpan, filterHash, filterOfHash, leaderOf, levels as levelsOf, matching, perGalaxy, miniMap, miniVisible, QUALITY, averageMs, nextQuality, pickSpot, related, ringClearance, rank, countText, FIND_LIMIT, sequence, stackEdgeLabels, strongest, tagSpots, tourPlan, tourTick, worked, isFresh } from "./explore.js";
 import { clamp } from "./orbit.js";
 import { createSound } from "./sound.js";
 import { OVERVIEW_PITCH, createScene } from "./scene.js";
@@ -150,7 +150,6 @@ async function start() {
 
   const cloud = memories({ marks, today, random: seeded(1980), facets, sky, cap: mobile ? 55000 : BUDGET.cap, trail: mobile ? 12000 : BUDGET.trail });
   const future = futures(sky);
-  const heads = new Set(headlines(marks));
   const scene = createScene({ canvas, cloud, marks, future, today, mobile, sky, kinds: lived.map((station) => station.element.dataset.kind) });
   scene.setFresh(freshMarks);
   const root = document.documentElement;
@@ -445,7 +444,6 @@ async function start() {
   const viewedMemory = () => (periodView >= 0 ? -1 : memoryOf(current));
   let filter = null;
   let hover = -1;
-  const headsQuiet = { on: false, over: 0, away: 0 };
   let neighbours = { links: [], near: [] };
   let chosen = [];
   let showAll = false;
@@ -656,11 +654,9 @@ async function start() {
     start.type = "button";
     start.dataset.go = station.id;
     const held = marks.filter((mark) => mark.period === periodView);
-    const facts = [
-      [held.length, tools.dataset.countMemories],
-      [new Set(held.flatMap((mark) => mark.members.people ?? [])).size, tools.dataset.countPeople],
-      [new Set(held.flatMap((mark) => mark.members.places ?? [])).size, tools.dataset.countPlaces],
-    ].filter(([n, text]) => n > 0 && text).map(([n, text]) => text.replace("{n}", String(n)));
+    const facts = ageFacts(held)
+      .map((n, k) => [n, [tools.dataset.countMemories, tools.dataset.countPeople, tools.dataset.countPlaces][k]])
+      .filter(([n, text]) => n > 0 && text).map(([n, text]) => text.replace("{n}", String(n)));
     const roster = element("div", "related");
     const rows = element("ul");
     marks.forEach((mark, i) => {
@@ -1342,7 +1338,7 @@ async function start() {
       const box = track.getBoundingClientRect();
       return RAIL.start + clamp((event.clientX - box.left) / box.width, 0, 1) * (RAIL.end - RAIL.start);
     };
-    const nearestStation = (year) => jumpable.reduce((best, station) => (Math.abs(railYears[station.t] - year) < Math.abs(railYears[best.t] - year) ? station : best), jumpable[0]);
+    const nearestStation = (year) => nearestBy(jumpable, year, (station) => railYears[station.t]);
     const label = (station) => `${station.element.querySelector("time")?.textContent ?? ""} · ${station.element.querySelector("h3, h2")?.textContent ?? ""}`.replace(/^ · /, "");
     let scrubbing = false;
     let last = -1;
@@ -1401,7 +1397,6 @@ async function start() {
     if (finderBox) rects.push(finderBox);
     return rects;
   };
-  const overlaps = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
 
   scene.on("frame", ({ formed, projected, camera, cssScale, time, dt, intro, entered, seen }) => {
     if (seed.isConnected) {
@@ -1452,10 +1447,6 @@ async function start() {
         hud.textContent = stations[current].label;
       }
     }
-    headsQuiet.over = hover >= 0 ? headsQuiet.over + dt : 0;
-    headsQuiet.away = hover >= 0 ? 0 : headsQuiet.away + dt;
-    if (headsQuiet.over > 0.35) headsQuiet.on = true;
-    else if (headsQuiet.away > 0.8) headsQuiet.on = false;
     const selected = viewedMemory();
     const ratio = scene.view.distance / scene.homeDistance();
     const keepOut = frameRects().map((box) => ({ left: box.left - 12, right: box.right + 12, top: box.top - 12, bottom: box.bottom + 12 }));
@@ -1708,7 +1699,6 @@ async function start() {
       else if (mark.weight === 2 && ratio < 0.5) priority = 20;
       else if (ratio < 0.22) priority = 10;
       if (selected >= 0 && priority < 500) priority = 0;
-      if (headsQuiet.on && i !== hover && priority === 40) priority = 0;
       if (mark.year + 3 > formed && i !== selected) priority = 0;
       if (!begun && seen && i === firstMemory) priority = 900;
       if (periodView >= 0) priority = i === hover || i === preview ? 900 : 0;
@@ -1722,7 +1712,7 @@ async function start() {
     candidates.sort((a, b) => b.priority - a.priority || a.i - b.i);
     const accepted = [];
     for (const { tag, spot, priority, i } of candidates) {
-      const asName = priority === 40 || (priority === 900 && i === hover && selected < 0 && periodView < 0 && ratio >= 0.6) ? "1" : "";
+      const asName = (priority === 900 && i === hover && selected < 0 && periodView < 0 && ratio >= 0.6) ? "1" : "";
       const hot = i === selected || i === hover ? "1" : "";
       if (tag.node.dataset.name !== asName || tag.node.dataset.hot !== hot) {
         tag.glide = tag.node.dataset.hot !== hot;

@@ -644,11 +644,9 @@ test("the book's line inside the card goes through the card's one link handler, 
   assert.match(engine, /cardSteps\.before\(nudge\)/);
 });
 
-test("pointing at a memory quiets the name of the main memory of each age, so the one pointed at is the only name", () => {
+test("a tag that changes side glides there", () => {
   const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
-  assert.match(engine, /if \(headsQuiet\.on && i !== hover && priority === 40\) priority = 0;/);
-  assert.match(engine, /if \(headsQuiet\.over > 0\.35\) headsQuiet\.on = true;\n\s+else if \(headsQuiet\.away > 0\.8\) headsQuiet\.on = false;/, "the names wait before stepping aside and before returning");
-  assert.match(engine, /\(tag\.glide \|\| moved\) && tag\.on && tag\.last/, "a tag that changes side glides there");
+  assert.match(engine, /\(tag\.glide \|\| moved\) && tag\.on && tag\.last/);
 });
 
 test("pointing at a memory moves it: the cloud draws in and glows, its name rises out of a blur and lingers, all slow and eased", async () => {
@@ -841,4 +839,35 @@ test("the rail labels the decades it has room for: a rail ending in 2036 lists 2
   assert.deepEqual(decadesOf(railOf(2031)).at(-1), 2030);
   assert.equal(decadesOf(railOf(2029)).includes(2030), false, "a decade right at the end has no room for its label");
   assert.ok(decadesOf(railOf(2045)).includes(2040));
+});
+
+test("the whole-life headline names are gone from the code and from the documents", () => {
+  const engine = readFileSync(new URL("../assets/js/engine.js", import.meta.url), "utf8");
+  const explore = readFileSync(new URL("../assets/js/explore.js", import.meta.url), "utf8");
+  for (const dead of [/\bheadsQuiet\b/, /\bheadlines\b/, /\bheads\b/, /priority === 40/]) {
+    assert.doesNotMatch(engine, dead, String(dead));
+    assert.doesNotMatch(explore, dead, String(dead));
+  }
+  const design = readFileSync(new URL("../design/index.html", import.meta.url), "utf8");
+  assert.doesNotMatch(design, /one memory per galaxy is named/);
+  const spec = readFileSync(new URL("../SPEC.md", import.meta.url), "utf8");
+  assert.doesNotMatch(spec, /Earlier and Later are hidden/);
+  assert.doesNotMatch(spec, /linked ones are named beside their clouds/);
+  assert.doesNotMatch(spec, /`npm test` runs `tests\/\*\.test\.mjs`/);
+  assert.match(spec, /`npm test` runs `tests\/\*\*\/\*\.test\.mjs`/);
+});
+
+test("the dome computes its haze noise only while the haze is on", () => {
+  const source = readFileSync(new URL("../assets/js/backdrop.js", import.meta.url), "utf8");
+  const guarded = source.match(/if \(uHaze > 0\.0\) \{([\s\S]*?)\n    \}/)?.[1] ?? "";
+  assert.match(guarded, /noise\(q\)/);
+  assert.match(guarded, /noise\(q \* 4\.3\)/);
+  assert.equal([...source.matchAll(/noise\(q/g)].length, [...guarded.matchAll(/noise\(q/g)].length, "no noise outside the guard");
+  assert.match(source, /uniforms\.uHaze\.value = state\.quiet \? 0 : layers\.haze \* state\.sky;/);
+});
+
+test("the renderer asks for the default GPU, not the discrete one", () => {
+  const scene = readFileSync(new URL("../assets/js/scene.js", import.meta.url), "utf8");
+  assert.match(scene, /powerPreference: "default"/);
+  assert.doesNotMatch(scene, /high-performance/);
 });

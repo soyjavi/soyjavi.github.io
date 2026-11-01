@@ -60,15 +60,16 @@ test("a memory without one of the languages or with a day in its date stops the 
 test("people.json brings people to filter by: names in both languages and a facet the memories can point at", () => {
   const { dir, url } = copyOfContent();
   try {
-    writeFileSync(join(dir, "people.json"), JSON.stringify({ aitor: { en: "Aitor", es: "Aitor" }, mother: { en: "My mother", es: "Mi madre" } }));
+    const kept = existsSync(join(dir, "people.json")) ? JSON.parse(readFileSync(join(dir, "people.json"), "utf8")) : {};
+    writeFileSync(join(dir, "people.json"), JSON.stringify({ ...kept, aitor: { en: "Aitor", es: "Aitor" }, mother: { en: "My mother", es: "Mi madre" } }));
     const born = JSON.parse(readFileSync(join(dir, "memories", "born.json"), "utf8"));
     writeFileSync(join(dir, "memories", "born.json"), JSON.stringify({ ...born, people: ["mother"] }));
     const content = loadContent(url);
-    assert.deepEqual(content.life.people, ["aitor", "mother"]);
+    assert.ok(["aitor", "mother"].every((id) => content.life.people.includes(id)));
     assert.equal(content.dict.es.people.mother, "Mi madre");
     assert.deepEqual(content.life.milestones.find((entry) => entry.id === "born").people, ["mother"]);
     const html = renderSite(content).get("index.html");
-    assert.match(html, /data-facets="[^"]*&quot;people&quot;:\[&quot;aitor&quot;,&quot;mother&quot;\]/);
+    assert.match(html, /data-facets="[^"]*&quot;people&quot;:\[[^\]]*&quot;mother&quot;/);
     assert.match(html, /<ul class="facets" data-facet="people"[^>]*><li data-item="mother">My mother<\/li><\/ul>/);
     assert.doesNotMatch(html, /data-lens="people"/, "people are a filter, not a view");
   } finally {
@@ -302,6 +303,16 @@ test("closing a memory also removes the people and places only it named, and kee
     const people = JSON.parse(readFileSync(join(dir, "people.json"), "utf8"));
     assert.ok(!("solo" in people) && "shared" in people);
     assert.doesNotThrow(() => loadContent(url));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("the importer refuses a date in the future", () => {
+  const next = `${new Date().getFullYear() + 1}-01`;
+  const { dir, url } = copyOfContent();
+  try {
+    assert.throws(() => importArchive({ memories: [memory({ id: "later-on", date: next })] }, url), /memory later-on: dated in the future/);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

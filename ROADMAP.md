@@ -40,40 +40,22 @@ unless the task names it.
   board: CLOSED-MEMORIES
   The sky draws only open memories and nothing private is in the repository, not even as a stub. What the site can add is a number: how many memories are closed in each age and in total, shown in the label of each galaxy and in the hero, so the visitor feels the depth of the book and the clone. The hero already reads `totals` from `life.json` and says "Over 500 memories" / "Más de 500 recuerdos" with the creator's provisional figure; what is left is the count per age, once he gives it. The creator gives those figures and decides whether each galaxy label also carries its count per age; agent work follows: the field and its test, the labels, the hero and the flat page.
 
-- **BUILD-GUARDS** — The build refuses broken data, not only the tests
-  `chore · agent · normal`
-  A link to a missing memory or to itself, an unknown thread, person or place and a future date are caught only by
-  `tests/content.test.mjs`, and `related()` drops a broken link without a word (`explore.js:27`). Memory ids come from
-  file names, are never checked and go unescaped into `id` and `data-links` (`src/home.mjs:69-71`).
-  accept: on a temporary copy, `loadContent` throws for a bad id, a missing or self link, an unknown person and a future
-  month, each naming its file.
-- **DOCS-DRIFT** — Remove the dead headline code and the sentences that contradict the code
-  `chore · agent · normal`
-  The whole-life names are gone but `heads` (`engine.js:149`), `headsQuiet` (`engine.js:443`) and the `priority === 40`
-  branches (`engine.js:1660, 1674`) remain, `design/index.html` still says one memory per galaxy is named, and SPEC
-  counts the `headlines` tests as covering it. SPEC also says of the age card that Earlier and Later are hidden and that
-  they step between ages; that an open memory names its links and that nothing related is named until pointed at; and
-  that `npm test` runs `tests/*.test.mjs`, when it runs `tests/**`, the browser suite included.
-  accept: grep finds none of the dead state; one sentence per behaviour; a design test rejects the headline sentence.
 - **ENGINE-PURE** — Move the logic still inside the engine into tested modules
   `chore · agent · low`
-  `engine.js` is 1,755 lines and still holds pure logic the rules place in `explore.js` or `life.js`: the age facts
-  (`652-660`), the ring label spot (`1527-1535`), the galaxy label choice (`1546-1570`), the figure name placement
-  (`1606-1631`), the tag priority (`1651-1664`), the rail's nearest station (`1295-1304`) and an `overlaps` that
-  repeats the one in `explore.js` (`1353`); `skyOf` is computed twice (`120`).
-  accept: each one exported and tested in Node; the engine only calls them; no visible change.
+  The age facts, the rail's nearest station and the box `overlaps` now live in `explore.js` and are tested. Still in `engine.js`, searchable by name: the ring label spot, the galaxy label choice, the figure name placement and the tag priority (the `priority` ladder of the labels loop), all of which need a browser capture before and after to prove no visible change, and `skyOf`, which `layout` computes a second time.
+  accept: each one exported and tested in Node; the engine only calls them; before and after captures of the opening, a galaxy and an open memory are indistinguishable.
 - **PERF-CPU** — Stop the per-frame garbage and DOM churn
   `chore · agent · normal`
   The dotted guides are re-projected every frame with destructuring and closures (`scene.js` guides), about 115 KB of garbage a frame; the year-ring labels are measured every frame although they are empty (`engine.js` label loop, `||=` on a width of 0); `data-leader`, `hidden`, `data-edges`, `data-jumps` and `--cx`/`--cy`/`--r` are written with the same value every frame; five to eight `getBoundingClientRect` per frame; `centerOf` and `tagSpots` allocate; the minimap rewrites its attributes every frame; the probe WebGL context of `webglAvailable` is never released.
   accept: a browser test over an idle second counts the mutation records and the DOM reads and they stay under a set budget; no visible change in a before and after capture.
-- **PERF-HAZE** — Do not compute the haze noise for every pixel every frame
+- **PERF-HAZE** — Bake the haze noise or draw it at half size
   `chore · agent · normal`
-  The dome shader runs three octaves of noise on a full-screen sphere every frame, about 28% of the GPU frame at a pixel ratio of 2, for a haze that moves 0.01 units a second, and tier 2 still computes it with the haze at zero. Gate it on `uHaze`, then bake it or draw it at half size.
+  The dome no longer computes the noise while the haze is off (tier 2, the quiet view). With the haze on, it still runs three octaves of noise on a full-screen sphere every frame, for a haze that moves 0.01 units a second.
   accept: before and after captures of the opening, the whole-life view and a galaxy are indistinguishable; the draw time of the dome falls in the same headless measurement.
-- **PERF-POWER** — Ask for the default GPU
+- **PERF-POWER** — Draw the dust of a lower tier with a draw range
   `chore · agent · low`
-  `powerPreference: "high-performance"` forces the discrete GPU on dual-GPU Macs; `"default"` costs nothing on Apple Silicon. Also draw the dust by sorting on its seed and `setDrawRange` instead of discarding in the vertex shader, so the lower tiers submit fewer points.
-  accept: the tiers draw fewer points (a test reads the draw range); no visible change.
+  The renderer already asks for the default GPU. What is left: the dust is thinned by discarding in the vertex shader on `aSeed` against `uKeep`, so every tier still submits every point. Sort the points by seed when the geometry is built and draw only the first part with `setDrawRange`.
+  accept: the tiers draw fewer points (a test reads the draw range); a before and after capture of each tier is indistinguishable.
 - **BUNDLE-SHAKE** — Let the bundler drop the parts of three.js the sky does not use
   `chore · agent · normal`
   `site.js` is 708 KB, 194 KB compressed, and three.js is 593 KB of it: the vendored file is minified without pure

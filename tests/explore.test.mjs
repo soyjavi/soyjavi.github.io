@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { rank, countText, FIND_LIMIT, CADENCE, LEVEL, ageAround, aheadOf, surprisePick, leadsTo, inviteLine, RING_CLEARANCE, STRONG, askLevels, askPairs, declared, periodNames, strongest, TAG_GAP, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, headlines, figureCount, figureOf, figureSpan, filterHash, filterOfHash, leaderOf, levels, matching, miniMap, MINI_ZOOM, miniVisible, QUALITY, averageMs, nextQuality, normalize, perGalaxy, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, tagSpots, tourPlan, tourTick, pace, worked } from "../assets/js/explore.js";
+import { overlaps, nearestBy, ageFacts, rank, countText, FIND_LIMIT, CADENCE, LEVEL, ageAround, aheadOf, surprisePick, leadsTo, inviteLine, RING_CLEARANCE, STRONG, askLevels, askPairs, declared, periodNames, strongest, TAG_GAP, edgeExit, edgeLabel, edgeSide, filtersFor, galaxyAt, figureCount, figureOf, figureSpan, filterHash, filterOfHash, leaderOf, levels, matching, miniMap, MINI_ZOOM, miniVisible, QUALITY, averageMs, nextQuality, normalize, perGalaxy, pickSpot, related, ringClearance, search, sequence, stackEdgeLabels, tagSpots, tourPlan, tourTick, pace, worked } from "../assets/js/explore.js";
 import { layout } from "../assets/js/life.js";
 import { ORBIT, approach, ease, eye, nearest, slide, turn, zoom } from "../assets/js/orbit.js";
 import { loadContent } from "../src/content.mjs";
@@ -258,21 +258,6 @@ test("a ring's name starts a fixed clearance outside the ring's drawn radius, ho
   assert.ok(RING_CLEARANCE >= 6 && TAG_GAP > 0);
 });
 
-test("the whole-life view names one memory per galaxy: the heaviest of its period and, among equals, the earliest", () => {
-  const lived = layout(life.milestones, { threads: life.threads }, { periods: life.periods });
-  const picks = headlines(lived);
-  assert.equal(picks.length, life.periods.length, "one per period");
-  picks.forEach((i, k) => {
-    assert.equal(lived[i].period, k, "in period order");
-    const peers = lived.filter((mark) => mark.period === k);
-    assert.equal(lived[i].weight, Math.max(...peers.map((mark) => mark.weight)));
-    assert.ok(peers.filter((mark) => mark.weight === lived[i].weight).every((mark) => mark.year >= lived[i].year), "the earliest of the heaviest");
-  });
-  const marks = [{ period: 1, weight: 2, year: 5 }, { period: 1, weight: 3, year: 9 }, { period: 1, weight: 3, year: 7 }, { period: 0, weight: 1, year: 1 }, { period: -1, weight: 3, year: 2 }];
-  assert.deepEqual(headlines(marks), [3, 2], "a memory with no period is never named and an earlier equal beats a later one");
-  assert.deepEqual(headlines([]), []);
-});
-
 const frame = { left: 100, right: 500, top: 50, bottom: 350 };
 const line = (from, to, n = 20) => Array.from({ length: n + 1 }, (_, k) => ({ x: from[0] + ((to[0] - from[0]) * k) / n, y: from[1] + ((to[1] - from[1]) * k) / n, visible: true }));
 
@@ -490,7 +475,6 @@ test("an age names its heaviest memory first and at most three, the earliest amo
     { period: 0, weight: 1, year: 6 },
   ];
   assert.deepEqual(periodNames(marks, 0), [2, 1, 4], "the three heaviest, the earliest first among equals");
-  assert.equal(periodNames(marks, 0)[0], headlines(marks)[0], "the first one is the headline of the age");
   const near = marks.map((mark, i) => ({ ...mark, position: i === 1 ? [20.5, 0, 0] : [i * 10, 0, 0] }));
   assert.deepEqual(periodNames(near, 0), [2, 4, 5], "one that sits on a heavier one's cloud gives way to the next");
   assert.deepEqual(periodNames(marks, 1), [3]);
@@ -619,4 +603,21 @@ test("a query with an apostrophe, a hyphen, a dot or a comma still finds the wor
   const items = [{ id: "a", title: "Don't stop", body: "co-founder of node.js", extra: "niño", weight: 1, order: 0 }];
   for (const query of ["don't", "co-founder", "node.js", "don,", "'don", "nino", "NIÑO"]) assert.equal(search(items, query).length, 1, query);
   assert.equal(search(items, "zzz,").length, 0);
+});
+
+test("the pure helpers the engine calls: boxes that overlap, the nearest station to a year and the facts of an age", () => {
+  const box = (left, top, right, bottom) => ({ left, top, right, bottom });
+  assert.equal(overlaps(box(0, 0, 10, 10), box(5, 5, 15, 15)), true);
+  assert.equal(overlaps(box(0, 0, 10, 10), box(10, 0, 20, 10)), false, "edges that only touch do not overlap");
+  assert.equal(overlaps(box(0, 0, 10, 10), box(12, 0, 20, 10), 4), true, "a gap counts");
+  assert.equal(overlaps(box(0, 0, 10, 10), box(10.2, 0, 20, 10), 1, 0.5), true);
+  assert.equal(overlaps(box(0, 0, 10, 10), box(10.6, 0, 20, 10), 0.5, 0.5), false, "the slack forgives a hair");
+  const stops = [{ t: 0, year: 1980 }, { t: 1, year: 1990 }, { t: 2, year: 2000 }];
+  assert.equal(nearestBy(stops, 1994, (stop) => stop.year).t, 1);
+  assert.equal(nearestBy(stops, 1995, (stop) => stop.year).t, 1, "an exact middle keeps the earlier one");
+  assert.equal(nearestBy(stops, 3000, (stop) => stop.year).t, 2);
+  assert.equal(nearestBy(stops, 1900, (stop) => stop.year).t, 0);
+  const held = [{ members: { people: ["a", "b"], places: ["x"] } }, { members: { people: ["b"] } }, { members: {} }];
+  assert.deepEqual(ageFacts(held), [3, 2, 1]);
+  assert.deepEqual(ageFacts([]), [0, 0, 0]);
 });

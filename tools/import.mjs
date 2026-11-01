@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { ageAt, precisionOf } from "../assets/js/life.js";
-import { bodyProblem, CONTENT, dayProblem, KINDS, LANGS } from "../src/content.mjs";
+import { bodyProblem, CONTENT, dayProblem, futureProblem, KINDS, LANGS } from "../src/content.mjs";
 
 const SLUG = /^[a-z0-9-]+$/;
 const LISTS = ["people", "places", "links"];
@@ -75,6 +75,7 @@ export function importArchive(data, dir = CONTENT, now = new Date()) {
     if (!SLUG.test(entry.id ?? "")) errors.push(`${where}: id must be lowercase letters, digits and hyphens`);
     if (!precisionOf(date)) errors.push(`${where}: date must start with YYYY or YYYY-MM`);
     else if (ageAt(life.birth, date) < 0) errors.push(`${where}: dated before his birth (${life.birth})`);
+    else if (futureProblem(date)) errors.push(`${where}: ${futureProblem(date)}`);
     if (!KINDS.includes(entry.kind)) errors.push(`${where}: kind must be one of ${KINDS.join(", ")}`);
     if (![1, 2, 3].includes(entry.weight)) errors.push(`${where}: weight must be 1, 2 or 3`);
     if (!Array.isArray(entry.threads) || !entry.threads.length || entry.threads.length > 3 || entry.threads.some((id) => !threadIds.includes(id))) errors.push(`${where}: threads must be one to three of ${threadIds.join(", ")}`);
