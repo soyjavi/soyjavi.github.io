@@ -1,0 +1,210 @@
+{
+  "lang": "en",
+  "locale": "en_US",
+  "meta": {
+    "imageAlt": "javi: a life from 1980 to today as a sky of memories.",
+    "title": "Javi · A life in memories",
+    "description": "Javi's life from 1980 to today as a sky of memories, with a book for his children and the Echo to keep talking with him. Join a waitlist."
+  },
+  "ui": {
+    "memoryPage": { "see": "See it in the sky →" },
+    "skip": "Skip to content",
+    "lockup": { "book": "by", "clone": "with" },
+    "switchLabel": "Español",
+    "navLabel": "Sections",
+    "nav": {
+      "life": "Life",
+      "book": "The book",
+      "clone": "The Echo",
+      "contact": "Contact"
+    },
+    "theme": {
+      "toLight": "Switch to the light theme",
+      "toDark": "Switch to the dark theme"
+    },
+    "hudHero": "javi",
+    "footer": {
+      "site": "Site",
+      "elsewhere": "Elsewhere",
+      "colophon": "Colophon",
+      "colophonText": "Thousands of dots. No tracking."
+    },
+    "rail": {
+      "label": "Timeline",
+      "overview": "Back to the whole life",
+      "decade": "The {year}s",
+      "play": "Play: watch the life grow",
+      "pause": "Pause",
+      "overviewName": "Whole life",
+      "playName": "Play",
+      "pauseName": "Pause"
+    },
+    "today": "Today",
+    "explore": {
+      "label": "Explore the memories",
+      "mostly": "Marked by {threads}",
+      "threads": "Threads",
+      "find": "Find",
+      "findLabel": "Find a memory",
+      "findPlaceholder": "Search the memories",
+      "findNone": "No memory matches",
+      "findCount": "{shown} of {total}",
+      "surprise": "Surprise me",
+      "filters": "Filter",
+      "related": "Related",
+      "earlier": "Earlier",
+      "later": "Later",
+      "filter": "Show only {thread}",
+      "unfilter": "Show everything",
+      "people": "People",
+      "places": "Places",
+      "more": "{n} more",
+      "sound": "Sound",
+      "lit": "{n} memories light up: {names}",
+      "all": "All related ({n})",
+      "fewer": "Fewer",
+      "continues": "↓ more",
+      "fresh": "New",
+      "nudgearrival": "One of {n} memories in this sky · See it all →",
+      "nudgebook": "Hear about the book →",
+      "nudgeclone": "Hear about the Echo →",
+      "nudgeclose": "Close",
+      "periodstart": "Start with {title}",
+      "begin": "It all begins with a touch · with sound",
+      "silent": "Enter in silence",
+      "copylink": "Copy link",
+      "copied": "Link copied",
+      "with": "With",
+      "at": "At",
+      "about": "About",
+      "menu": "More"
+    },
+    "count": {
+      "memory": "{n} memory",
+      "memories": "{n} memories",
+      "over": "Over {n} memories",
+      "people": "{n} people",
+      "places": "{n} places"
+    },
+    "guide": {
+      "title": "How to read this sky",
+      "button": "How to read this sky",
+      "cloud": "A cloud is a memory; the bigger it is, the more it changed",
+      "galaxy": "A dotted circle is one age of my life, cut at {ages}; time runs from its core to its rim",
+      "line": "A line joins related memories",
+      "ring": "A hollow ring is still ahead: the book and the Echo",
+      "today": "Today",
+      "dust": "The fine dust is the days, thicker where more happened",
+      "keys": "/ find · ? this guide · H only the sky · Esc back"
+    },
+    "focus": "Interface hidden. Move or press a key to bring it back."
+  },
+  "threads": {
+    "home": "Home",
+    "family": "Family",
+    "body": "Body",
+    "craft": "Craft",
+    "ventures": "Ventures",
+    "learning": "Learning",
+    "love": "Love"
+  },
+  "hero": {
+    "kicker": "javi · 1980 – today",
+    "title": "A life, <em>in memories.</em>",
+    "lede": "I'm Javi. This is my life from 1980 to today: a cloud of dots per memory, a galaxy per age.",
+    "secondary": "Travel through it"
+  },
+  "ages": {
+    "early": {
+      "name": "Early years",
+      "title": "Early <em>years.</em>",
+      "intro": "I was born in Bilbao in April 1980 and spent my first years between a farmhouse with cows and a fifth floor with no lift. A brother arrived, school began, and a courtyard a few metres from home was the whole world. Most of what came later started in these small rooms.",
+      "hint": "A farmhouse, a courtyard, a brother"
+    },
+    "school": {
+      "name": "School years",
+      "title": "School <em>years.</em>",
+      "intro": "At eight the house broke one night, and the family I knew changed shape. I spent a season with my grandparents in Galicia, learned a sport on a mat, tore a muscle and broke my front teeth. These were the years I learned that things end, and that a body heals.",
+      "hint": "A house that broke, a body that healed"
+    },
+    "youth": {
+      "name": "Youth",
+      "title": "<em>Youth.</em>",
+      "intro": "I failed a year out of rebellion and paid for my first laptop myself. Between an old programming language and JavaScript I found a trade that asked nobody's permission. Then came a first payslip.",
+      "hint": "A laptop, a trade, a first payslip"
+    },
+    "building": {
+      "name": "Building a life",
+      "title": "Building <em>a life.</em>",
+      "intro": "I worked for others and then built my own: a t-shirt brand that came out of the snow, a company I sold from the other side of the world. I left with one backpack and stayed far from where I started. There a friend and a film introduced me to Yuri, and we married with two witnesses.",
+      "hint": "Companies, a backpack, and Yuri"
+    },
+    "midlife": {
+      "name": "Midlife",
+      "title": "<em>Midlife.</em>",
+      "intro": "At forty I became a father, built a house and watched the water take it. My grandfather went, my son and I put on white belts, and I began writing my life down. Now I am gathering the papers to go back.",
+      "hint": "A son, a flood, the way back"
+    },
+    "elder": {
+      "name": "Elder years",
+      "title": "Elder <em>years.</em>",
+      "intro": "From fifty-five to seventy."
+    },
+    "later": {
+      "name": "Later life",
+      "title": "Later <em>life.</em>",
+      "intro": "From seventy on."
+    }
+  },
+  "book": {
+    "hint": "What a father never says out loud, written down for my children. Not out yet.",
+    "kicker": "07 / The book",
+    "expected": "Aiming for",
+    "title": "A book <em>for my children.</em>",
+    "body": "It has two readers: my children, so they know things about their father that a father never says out loud, and anyone looking in one life for a reason for their own. It tells what went well and what went wrong.",
+    "form": {
+      "label": "Your email",
+      "placeholder": "you@example.com",
+      "button": "Tell me when it's out",
+      "region": "Waitlist for the book",
+      "note": "I'll only write to you about the book. Unsubscribe anytime.",
+      "opened": "Buttondown opened in a new tab to finish your signup.",
+      "soon": "The waitlist isn't open yet."
+    }
+  },
+  "clone": {
+    "hint": "My answers, in my own words, for when I can't give them. Not ready yet.",
+    "disclosure": "It is a program built from what I wrote; it is not me.",
+    "kicker": "08 / The Echo",
+    "ask": {
+      "label": "Questions for the Echo",
+      "title": "Ask, and see what it would draw on",
+      "draws": "Draws on:"
+    },
+    "title": "A place to <em>keep talking.</em>",
+    "body": "I'm building the Echo, a version of me for whoever wants to keep talking with me when I'm no longer here, especially those who knew me. It isn't ready yet.",
+    "form": {
+      "label": "Your email",
+      "placeholder": "you@example.com",
+      "button": "Tell me when it's ready",
+      "region": "Waitlist for the Echo",
+      "note": "I'll only write to you about the Echo. Unsubscribe anytime.",
+      "opened": "Buttondown opened in a new tab to finish your signup.",
+      "soon": "The waitlist isn't open yet."
+    }
+  },
+  "contact": {
+    "kicker": "09 / Say hello",
+    "title": "Write <em>to me.</em>",
+    "lede": "Email is best.",
+    "elsewhere": "Elsewhere",
+    "follow": "Follow me on X"
+  },
+  "notFound": {
+    "title": "Not found · Javi",
+    "heading": "This page isn't in the sky.",
+    "home": "Back to the sky",
+    "star": "Press the first star, April 1980, and the life starts again.",
+    "starLabel": "The first star: back to the start of the sky"
+  }
+}

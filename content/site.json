@@ -1,0 +1,11 @@
+{
+  "url": "https://www.soyjavi.com",
+  "name": "Javi",
+  "handle": "soyjavi",
+  "email": "hello@soyjavi.com",
+  "links": {
+    "x": "https://twitter.com/soyjavi"
+  },
+  "buttondown": { "username": "soyjavi", "tags": { "book": "book", "clone": "clone" } },
+  "book": { "title": null, "date": null }
+}

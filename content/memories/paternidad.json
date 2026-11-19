@@ -1,0 +1,23 @@
+{
+  "date": "2020-05",
+  "kind": "personal",
+  "weight": 3,
+  "threads": [
+    "family",
+    "love"
+  ],
+  "people": [
+    "benji"
+  ],
+  "links": [
+    "running"
+  ],
+  "en": {
+    "title": "My happiest day was spent outside the hospital",
+    "body": "My older son was born in May, in the middle of the lockdown, and I was left outside the hospital. I could not go in to see him. I spent three hours walking the streets promising a child I had not met yet that everything I did from then on would be for him.\n\nTwo years later the little one was born, and that was a different thing: this time I was inside, and the older boy helped choose the name. Being a father is what fills my forties now. At home there is an hour of study every day, and I have learned that my job is not to protect them but to prepare them to stand on their own. Sometimes the language fails me, and that fault is mine."
+  },
+  "es": {
+    "title": "El día más feliz lo pasé fuera del hospital",
+    "body": "Mi hijo mayor nació en mayo, en plena cuarentena, y me quedé fuera del hospital. No pude entrar a verlo. Me pasé tres horas caminando por la calle prometiéndole a un niño que aún no conocía que todo lo que hiciera a partir de entonces sería para él.\n\nDos años después nació el pequeño, y aquello fue otra cosa: esta vez estuve dentro, y el mayor ayudó a elegir el nombre. Ser padre es lo que ocupa ahora mis cuarenta. En casa hay una hora de estudio cada día, y he aprendido que mi trabajo no es protegerlos, sino prepararlos para que se valgan solos. A veces me falla el idioma, y esa culpa es mía."
+  }
+}

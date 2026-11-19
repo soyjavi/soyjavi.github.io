@@ -1,0 +1,21 @@
+{
+  "date": "1994-05",
+  "approx": true,
+  "kind": "personal",
+  "weight": 1,
+  "threads": [
+    "family",
+    "learning"
+  ],
+  "places": [
+    "colegio-herrieztegui"
+  ],
+  "en": {
+    "title": "We paid for the trip with potato omelettes",
+    "body": "My brother and I paid for the end-of-year trip by selling potato omelettes at break time. My mother and grandmother made them, and with that we raised the money to go on a school trip to another region.\n\nI was fourteen and it was my last year. I remember the mix of effort and celebration: having put in the money yourself gives the trip a different taste. It was one of those things that were done at home without money, with hands and with time."
+  },
+  "es": {
+    "title": "El viaje lo pagamos con tortillas de patata",
+    "body": "El viaje de fin de curso lo pagamos mi hermano y yo vendiendo tortillas de patata en el recreo. Las hacían mi madre y mi abuela, y con eso reunimos el dinero para irnos de excursión con la clase a otra región.\n\nTenía catorce años y era el último curso. Recuerdo la mezcla de esfuerzo y fiesta: haber puesto el dinero tú mismo le da otro sabor al viaje. Fue una de esas cosas que en casa se hacían sin dinero, con manos y con tiempo."
+  }
+}

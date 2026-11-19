@@ -1,0 +1,17 @@
+{
+  "date": "2025-10",
+  "kind": "personal",
+  "weight": 1,
+  "threads": [
+    "learning",
+    "love"
+  ],
+  "en": {
+    "title": "Knowing what you are",
+    "body": "One night in October I talked with my wife about the meaning of life, and about knowing yourself. I told her what I believe: that knowing who you are, how you face problems and how far you can go is not a luxury, it is the condition for choosing a path, at least the most honest one. Without that, every choice is a bet.\n\nAccepting yourself with your flaws and your virtues is not something you are born with. It comes with maturity and with the honesty to look at yourself without turning away. It took me years."
+  },
+  "es": {
+    "title": "Saber lo que uno es",
+    "body": "Una noche de octubre hablé con mi mujer del sentido de la vida y de conocerse a uno mismo. Le dije lo que creo: que saber quién eres, cómo afrontas los problemas y hasta dónde puedes llegar no es un lujo, es la condición para elegir un camino, al menos el más honesto. Sin eso, cualquier elección es una apuesta.\n\nAceptarte con tus defectos y tus virtudes no viene de fábrica. Llega con la madurez y con la honestidad de mirarte sin apartar la vista. A mí me costó años."
+  }
+}

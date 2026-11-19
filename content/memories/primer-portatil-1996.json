@@ -1,0 +1,27 @@
+{
+  "date": "1996",
+  "approx": true,
+  "kind": "professional",
+  "weight": 2,
+  "threads": [
+    "craft",
+    "learning"
+  ],
+  "people": [
+    "begona-materna",
+    "merche",
+    "tio-emilio"
+  ],
+  "places": [
+    "dma-servicios-informaticos",
+    "galdacano"
+  ],
+  "en": {
+    "title": "The laptop I paid for myself",
+    "body": "At sixteen I bought my first laptop with the money I earned working at the computer shop run by my aunt's partner. It was a second-hand Pentium with an English keyboard and a twelve-inch screen, and I spent the nights installing things on it. I do not remember what it cost.\n\nIn that shop I fixed computers, and there I wrote my first real programs: a couple of applications in Delphi and Visual Basic. I also cleaned and painted my uncle's gym to earn a bit more. It was the same school year I failed third year out of rebellion, the year only physics interested me."
+  },
+  "es": {
+    "title": "El portátil que me pagué yo",
+    "body": "A los dieciséis me compré mi primer portátil con el dinero que gané trabajando en la tienda de informática de la pareja de mi tía. Era un Pentium de segunda mano, con el teclado en inglés y una pantalla de doce pulgadas, y me pasaba las noches instalando cosas. No recuerdo cuánto costó.\n\nEn aquella tienda arreglaba ordenadores, y ahí escribí mis primeros programas de verdad: un par de aplicaciones en Delphi y Visual Basic. También limpié y pinté el gimnasio de mi tío para sacarme algo más. Fue el mismo curso en que suspendí tercero por rebeldía, el año en que solo me interesaba la física."
+  }
+}

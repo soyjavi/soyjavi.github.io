@@ -1,0 +1,104 @@
+{
+  "threads": [
+    {
+      "id": "family",
+      "en": "Family",
+      "es": "Familia"
+    },
+    {
+      "id": "work",
+      "en": "Work",
+      "es": "Trabajo"
+    }
+  ],
+  "ahead": {
+    "book": "family",
+    "clone": "work"
+  },
+  "people": {
+    "a-person": {
+      "public": true,
+      "en": "Name",
+      "es": "Nombre"
+    }
+  },
+  "places": {
+    "a-place": {
+      "public": true,
+      "en": "Place",
+      "es": "Lugar"
+    }
+  },
+  "memories": [
+    {
+      "id": "first-memory",
+      "public": true,
+      "date": "1984-03",
+      "approx": false,
+      "kind": "personal",
+      "weight": 2,
+      "threads": [
+        "family"
+      ],
+      "people": [
+        "a-person"
+      ],
+      "places": [
+        "a-place"
+      ],
+      "links": [
+        "second-memory"
+      ],
+      "en": {
+        "title": "Title of the first memory",
+        "body": "First person. One paragraph, or two separated by a blank line.\n\nThe whole text stays under 900 characters."
+      },
+      "es": {
+        "title": "Título del primer recuerdo",
+        "body": "En primera persona. Un párrafo, o dos separados por una línea en blanco.\n\nEl texto entero queda por debajo de 900 caracteres."
+      }
+    },
+    {
+      "id": "second-memory",
+      "public": true,
+      "date": "2001",
+      "approx": true,
+      "kind": "professional",
+      "weight": 3,
+      "threads": [
+        "work",
+        "family"
+      ],
+      "links": [
+        "first-memory"
+      ],
+      "en": {
+        "title": "Title of the second memory",
+        "body": "A year is enough when the month is unknown."
+      },
+      "es": {
+        "title": "Título del segundo recuerdo",
+        "body": "Basta con el año cuando no se sabe el mes."
+      }
+    },
+    {
+      "id": "kept-private",
+      "public": false,
+      "date": "1999-05",
+      "kind": "personal",
+      "weight": 1,
+      "threads": [
+        "family"
+      ],
+      "note": "Anything without \"public\": true is left out of the site, and any extra key like this one is ignored.",
+      "en": {
+        "title": "Never written to the repository",
+        "body": "Only entries marked public are imported."
+      },
+      "es": {
+        "title": "Nunca se escribe en el repositorio",
+        "body": "Solo se importan las entradas marcadas como públicas."
+      }
+    }
+  ]
+}

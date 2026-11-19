@@ -1,0 +1,30 @@
+{
+  "date": "1993",
+  "approx": true,
+  "kind": "personal",
+  "weight": 2,
+  "threads": [
+    "body",
+    "family"
+  ],
+  "people": [
+    "merche"
+  ],
+  "places": [
+    "braga",
+    "galdacano",
+    "iparralde"
+  ],
+  "links": [
+    "lesion-sexto-egb",
+    "childhood-taekwondo"
+  ],
+  "en": {
+    "title": "My teeth flying in the kitchen",
+    "body": "I must have been thirteen or fourteen, and I was messing about in the kitchen at home when I fell and broke both front teeth. I was wearing my taekwondo uniform. What I remember is not the blow: it is seeing my own teeth flying in front of me. My mother was at home. Fixing it here cost a fortune and across the border it was far cheaper, so the family crossed to see a dentist. It was the second country I ever set foot in, and the first one I did not visit for pleasure: I saw it with my mouth open. Years later I am still thirteen in that kitchen."
+  },
+  "es": {
+    "title": "Las paletas saltando en la cocina",
+    "body": "Tendría trece o catorce años y estaba en la cocina de casa haciendo el tonto cuando me caí y me rompí los dos incisivos. Llevaba puesto el uniforme de taekwondo. Lo que recuerdo no es el golpe: es ver delante de mí las paletas saltando por el aire. Mi madre estaba en casa. Como aquí arreglarlo costaba una fortuna y al otro lado de la frontera era mucho más barato, la familia cruzó para ir al dentista. Fue el segundo país que pisé en mi vida, y el primero al que no fui por gusto: lo conocí con la boca abierta. Años después sigo teniendo trece años en aquella cocina."
+  }
+}

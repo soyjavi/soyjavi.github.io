@@ -1,0 +1,24 @@
+{
+  "date": "2011-10",
+  "kind": "personal",
+  "weight": 2,
+  "threads": [
+    "ventures",
+    "craft"
+  ],
+  "people": [
+    "aitor"
+  ],
+  "links": [
+    "tapquo",
+    "el-trabajo-no-me-define"
+  ],
+  "en": {
+    "title": "I wanted a tribe, not a company",
+    "body": "When we started that, I was not after a conventional company. What I wanted was the romantic idea of a team of cypherpunks: outsiders, people who were not comfortable in their own careers and had not even finished them. The pattern was myself, who never started one.\n\nIn the first year it worked that way. We went everywhere, we built technology nobody needed, and there was still interest, even from the big names. Then came the meetings, the minutes and the partners I had not chosen. I went from the one running it to the odd one out. What tired me was not building: it was everything around it."
+  },
+  "es": {
+    "title": "Quería una tribu, no una empresa",
+    "body": "Cuando montamos aquello yo no buscaba una empresa al uso. Lo que quería era la idea romántica de un equipo de cypherpunks: outsiders, gente que no se sentía cómoda en su propia carrera y que ni siquiera la había terminado. El patrón era yo mismo, que nunca llegué a empezarla.\n\nEl primer año funcionó así. Íbamos a todos los sitios, construíamos tecnología que nadie necesitaba y aun así había interés, incluso de los grandes. Después llegaron las reuniones, las actas y los socios que no había elegido. Pasé de ser el que dirigía aquello a ser el raro. Lo que me cansó no fue construir: fue todo lo que había alrededor."
+  }
+}

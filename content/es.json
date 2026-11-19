@@ -1,0 +1,210 @@
+{
+  "lang": "es",
+  "locale": "es_ES",
+  "meta": {
+    "imageAlt": "javi: una vida de 1980 a hoy como un cielo de recuerdos.",
+    "title": "Javi · Una vida en recuerdos",
+    "description": "La vida de Javi de 1980 a hoy como un cielo de recuerdos, un libro para sus hijos y el Eco para seguir hablando con él. Apúntate a una lista de espera."
+  },
+  "ui": {
+    "memoryPage": { "see": "Verlo en el cielo →" },
+    "skip": "Saltar al contenido",
+    "lockup": { "book": "de", "clone": "con" },
+    "switchLabel": "English",
+    "navLabel": "Secciones",
+    "nav": {
+      "life": "Vida",
+      "book": "El libro",
+      "clone": "El Eco",
+      "contact": "Contacto"
+    },
+    "theme": {
+      "toLight": "Cambiar al tema claro",
+      "toDark": "Cambiar al tema oscuro"
+    },
+    "hudHero": "javi",
+    "footer": {
+      "site": "Sitio",
+      "elsewhere": "En otros sitios",
+      "colophon": "Colofón",
+      "colophonText": "Miles de puntos. Sin rastreo."
+    },
+    "rail": {
+      "label": "Línea de tiempo",
+      "overview": "Volver a la vida entera",
+      "decade": "Los años {label}",
+      "play": "Ver crecer la vida",
+      "pause": "Pausa",
+      "overviewName": "Vida entera",
+      "playName": "Ver",
+      "pauseName": "Pausa"
+    },
+    "today": "Hoy",
+    "explore": {
+      "label": "Explorar los recuerdos",
+      "mostly": "Huella de {threads}",
+      "threads": "Hilos",
+      "find": "Buscar",
+      "findLabel": "Buscar un recuerdo",
+      "findPlaceholder": "Buscar entre los recuerdos",
+      "findNone": "Ningún recuerdo coincide",
+      "findCount": "{shown} de {total}",
+      "surprise": "Sorpréndeme",
+      "filters": "Filtrar",
+      "related": "Relacionados",
+      "earlier": "Antes",
+      "later": "Después",
+      "filter": "Ver solo {thread}",
+      "unfilter": "Ver todo",
+      "people": "Personas",
+      "places": "Lugares",
+      "more": "{n} más",
+      "sound": "Sonido",
+      "lit": "Se iluminan {n} recuerdos: {names}",
+      "all": "Todos los relacionados ({n})",
+      "fewer": "Menos",
+      "continues": "↓ más",
+      "fresh": "Nuevo",
+      "nudgearrival": "Uno de {n} recuerdos de este cielo · Verlo todo →",
+      "nudgebook": "Entérate del libro →",
+      "nudgeclone": "Entérate del Eco →",
+      "nudgeclose": "Cerrar",
+      "periodstart": "Empieza por {title}",
+      "begin": "Todo empieza con un toque · con sonido",
+      "silent": "Entrar en silencio",
+      "copylink": "Copiar enlace",
+      "copied": "Enlace copiado",
+      "with": "Con",
+      "at": "En",
+      "about": "Sobre",
+      "menu": "Más"
+    },
+    "count": {
+      "memory": "{n} recuerdo",
+      "memories": "{n} recuerdos",
+      "over": "Más de {n} recuerdos",
+      "people": "{n} personas",
+      "places": "{n} lugares"
+    },
+    "guide": {
+      "title": "Cómo leer este cielo",
+      "button": "Cómo leer este cielo",
+      "cloud": "Una nube es un recuerdo; cuanto más grande, más cambió",
+      "galaxy": "Un círculo de puntos es una edad de mi vida, cortada a los {ages} años; el tiempo va del núcleo al borde",
+      "line": "Una línea une recuerdos relacionados",
+      "ring": "Un anillo hueco está por llegar: el libro y el Eco",
+      "today": "Hoy",
+      "dust": "El polvo fino son los días, más denso donde pasó más",
+      "keys": "/ buscar · ? esta guía · H solo el cielo · Esc volver"
+    },
+    "focus": "Interfaz oculta. Mueve o pulsa una tecla para recuperarla."
+  },
+  "threads": {
+    "home": "Hogar",
+    "family": "Familia",
+    "body": "Cuerpo",
+    "craft": "Oficio",
+    "ventures": "Empresas",
+    "learning": "Aprendizaje",
+    "love": "Amor"
+  },
+  "hero": {
+    "kicker": "javi · 1980 – hoy",
+    "title": "Una vida, <em>en recuerdos.</em>",
+    "lede": "Soy Javi. Esta es mi vida de 1980 a hoy: una nube de puntos por cada recuerdo y una galaxia por cada edad.",
+    "secondary": "Recórrela"
+  },
+  "ages": {
+    "early": {
+      "name": "Primeros años",
+      "title": "Primeros <em>años.</em>",
+      "intro": "Nací en Bilbao en abril de 1980 y pasé mis primeros años entre un caserío con vacas y un quinto sin ascensor. Llegó un hermano, empezó la escuela, y un patio a pocos metros de casa era el mundo entero. Casi todo lo que vino después empezó en esas habitaciones pequeñas.",
+      "hint": "Un caserío, un patio, un hermano"
+    },
+    "school": {
+      "name": "Años de escuela",
+      "title": "Años <em>de escuela.</em>",
+      "intro": "A los ocho años la casa se rompió una noche, y la familia que conocía cambió de forma. Pasé una temporada con mis abuelos en Galicia, aprendí un deporte sobre un tatami, me desgarré un músculo y me rompí las paletas. Fueron los años en que aprendí que las cosas se acaban y que el cuerpo se cura.",
+      "hint": "Una casa que se rompió, un cuerpo que sanó"
+    },
+    "youth": {
+      "name": "Juventud",
+      "title": "<em>Juventud.</em>",
+      "intro": "Repetí un curso por rebeldía y me pagué mi primer portátil. Entre un lenguaje de programación antiguo y JavaScript encontré un oficio que no pedía permiso a nadie. Después llegó una primera nómina.",
+      "hint": "Un portátil, un oficio, una primera nómina"
+    },
+    "building": {
+      "name": "Construir una vida",
+      "title": "Construir <em>una vida.</em>",
+      "intro": "Trabajé para otros y después levanté lo mío: una marca de camisetas que salió de la nieve, una empresa que vendí desde el otro lado del mundo. Me fui con una mochila y me quedé lejos de donde empecé. Allí una amiga y una película me presentaron a Yuri, y nos casamos con dos testigos.",
+      "hint": "Empresas, una mochila y Yuri"
+    },
+    "midlife": {
+      "name": "Mitad de la vida",
+      "title": "Mitad <em>de la vida.</em>",
+      "intro": "A los cuarenta fui padre, construí una casa y vi cómo el agua se la llevaba. Se fue mi abuelo, mi hijo y yo nos pusimos el cinturón blanco y empecé a escribir mi vida. Ahora estoy reuniendo los papeles para volver.",
+      "hint": "Un hijo, una riada, el camino de vuelta"
+    },
+    "elder": {
+      "name": "Madurez",
+      "title": "<em>Madurez.</em>",
+      "intro": "De los cincuenta y cinco a los setenta."
+    },
+    "later": {
+      "name": "Última etapa",
+      "title": "Última <em>etapa.</em>",
+      "intro": "A partir de los setenta."
+    }
+  },
+  "book": {
+    "hint": "Lo que un padre no dice en voz alta, escrito para mis hijos. Aún no ha salido.",
+    "kicker": "07 / El libro",
+    "expected": "Apunto a",
+    "title": "Un libro <em>para mis hijos.</em>",
+    "body": "Tiene dos lectores: mis hijos, para que sepan de su padre cosas que un padre no dice en voz alta, y cualquiera que busque en una vida una razón para la suya. Cuenta lo que salió bien y lo que salió mal.",
+    "form": {
+      "label": "Tu email",
+      "placeholder": "tu@ejemplo.com",
+      "button": "Avísame cuando salga",
+      "region": "Lista de espera del libro",
+      "note": "Solo te escribiré sobre el libro. Puedes darte de baja cuando quieras.",
+      "opened": "Se ha abierto Buttondown en una pestaña nueva para terminar tu suscripción.",
+      "soon": "La lista de espera aún no está abierta."
+    }
+  },
+  "clone": {
+    "hint": "Mis respuestas, con mis palabras, para cuando yo no pueda darlas. Aún no está listo.",
+    "disclosure": "Es un programa hecho a partir de lo que escribí; no soy yo.",
+    "kicker": "08 / El Eco",
+    "ask": {
+      "label": "Preguntas para el Eco",
+      "title": "Pregunta y mira de qué bebería",
+      "draws": "Se apoya en:"
+    },
+    "title": "Un sitio donde <em>seguir hablando.</em>",
+    "body": "Estoy construyendo el Eco, una versión de mí para quien quiera seguir hablando conmigo cuando ya no esté, sobre todo quienes me conocieron. Todavía no está listo.",
+    "form": {
+      "label": "Tu email",
+      "placeholder": "tu@ejemplo.com",
+      "button": "Avísame cuando esté listo",
+      "region": "Lista de espera del Eco",
+      "note": "Solo te escribiré sobre el Eco. Puedes darte de baja cuando quieras.",
+      "opened": "Se ha abierto Buttondown en una pestaña nueva para terminar tu suscripción.",
+      "soon": "La lista de espera aún no está abierta."
+    }
+  },
+  "contact": {
+    "kicker": "09 / Di hola",
+    "title": "<em>Escríbeme.</em>",
+    "lede": "Lo mejor es el email.",
+    "elsewhere": "En otros sitios",
+    "follow": "Sígueme en X"
+  },
+  "notFound": {
+    "title": "No encontrada · Javi",
+    "heading": "Esta página no está en el cielo.",
+    "home": "Volver al cielo",
+    "star": "Pulsa la primera estrella, abril de 1980, y la vida empieza otra vez.",
+    "starLabel": "La primera estrella: volver al principio del cielo"
+  }
+}

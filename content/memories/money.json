@@ -1,0 +1,17 @@
+{
+  "date": "2020",
+  "approx": true,
+  "kind": "product",
+  "weight": 1,
+  "threads": [
+    "ventures"
+  ],
+  "en": {
+    "title": "A small thing of mine",
+    "body": "It is on the short list of products I have put out under my own company. I made it, I published it, and there is nobody else inside: no partners, no payroll, no one to answer to.\n\nOf the what and the when I have nothing stored. There is the name and the fact that it was launched, and for now that is where it stays: one of those things you build on your own and that I will tell in full some day."
+  },
+  "es": {
+    "title": "Una cosa pequeña de las mías",
+    "body": "Está en la lista corta de productos que he sacado bajo mi propia empresa. Lo hice yo, lo publiqué yo y no hay nadie más dentro: ni socios, ni plantilla, ni nadie a quien rendir cuentas.\n\nDel qué y del cuándo no tengo nada guardado. Queda el nombre y el hecho de haberlo lanzado, y con eso se queda por ahora: es una de esas cosas que uno construye por su cuenta y que algún día contaré entera."
+  }
+}

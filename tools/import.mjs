@@ -1,0 +1,153 @@
+import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { ageAt, precisionOf } from "../assets/js/life.js";
+import { bodyProblem, CONTENT, dayProblem, futureProblem, KINDS, LANGS } from "../src/content.mjs";
+
+const SLUG = /^[a-z0-9-]+$/;
+const LISTS = ["people", "places", "links"];
+
+const monthOf = (date) => String(date ?? "").slice(0, /^\d{4}-\d{2}/.test(String(date ?? "")) ? 7 : 4);
+const readJson = (url, fallback) => (existsSync(url) ? JSON.parse(readFileSync(url, "utf8")) : fallback);
+const writeJson = (url, value) => writeFileSync(url, `${JSON.stringify(value, null, 2)}\n`);
+
+export function importArchive(data, dir = CONTENT, now = new Date()) {
+  const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const life = readJson(new URL("life.json", dir));
+  const folder = new URL("memories/", dir);
+  mkdirSync(folder, { recursive: true });
+  const errors = [];
+  const report = { added: 0, updated: 0, private: 0, retracted: 0, people: 0, places: 0, threads: 0 };
+  const dictionaries = Object.fromEntries(LANGS.map((lang) => [lang, readJson(new URL(`${lang}.json`, dir))]));
+  const nextLife = { ...life };
+
+  const structure = (key, shape) => {
+    const list = data[key];
+    if (list === undefined) return;
+    if (!Array.isArray(list) || !list.length) return errors.push(`${key}: must be a non-empty list, in the order they appear`);
+    const seen = new Set();
+    for (const [n, item] of list.entries()) {
+      const where = `${key}[${n}] ${item?.id ?? ""}`.trim();
+      if (!SLUG.test(item?.id ?? "")) errors.push(`${where}: id must be lowercase letters, digits and hyphens`);
+      if (seen.has(item?.id)) errors.push(`${where}: id is repeated`);
+      seen.add(item?.id);
+      for (const lang of LANGS) shape(item?.[lang], `${where} (${lang})`);
+    }
+    nextLife[key] = list.map((item) => item.id);
+  };
+  structure("threads", (value, where) => {
+    if (typeof value !== "string" || !value.trim()) errors.push(`${where}: needs a name`);
+  });
+  if (data.ahead !== undefined) {
+    for (const name of ["book", "clone"]) if (!(nextLife.threads ?? life.threads).includes(data.ahead?.[name])) errors.push(`ahead.${name}: must be one of the threads`);
+    nextLife.ahead = { book: data.ahead?.book, clone: data.ahead?.clone };
+  }
+  for (const name of ["book", "clone"]) if (!(nextLife.threads ?? life.threads).includes((nextLife.ahead ?? life.ahead)[name])) errors.push(`ahead.${name}: "${(nextLife.ahead ?? life.ahead)[name]}" is not one of the threads`);
+  const threadIds = nextLife.threads ?? life.threads;
+
+  const listed = Array.isArray(data) ? data : data.memories ?? [];
+  const listedIds = new Set();
+  for (const entry of listed) {
+    if (entry?.id && listedIds.has(entry.id)) errors.push(`memory ${entry.id}: id is repeated`);
+    listedIds.add(entry?.id);
+  }
+  const incoming = listed.filter((entry) => entry?.public === true || (report.private++, false));
+  const retract = listed.filter((entry) => entry?.public === false && SLUG.test(entry?.id ?? "") && existsSync(new URL(`${entry.id}.json`, folder))).map((entry) => entry.id);
+  for (const question of readJson(new URL("questions.json", dir), [])) for (const id of retract) if (question.memories?.includes(id)) errors.push(`memory ${id}: closed, but the question "${question.id}" draws on it`);
+  const tables = {};
+  for (const facet of ["people", "places"]) {
+    const table = readJson(new URL(`${facet}.json`, dir), {});
+    const used = new Set(incoming.flatMap((entry) => entry[facet] ?? []));
+    for (const [id, item] of Object.entries(data[facet] ?? {})) {
+      if (item?.public !== true || !used.has(id)) continue;
+      if (!SLUG.test(id)) errors.push(`${facet}/${id}: id must be lowercase letters, digits and hyphens`);
+      const names = Object.fromEntries(LANGS.map((lang) => [lang, item[lang] ?? item.name]));
+      if (LANGS.some((lang) => !names[lang])) errors.push(`${facet}/${id}: needs a name`);
+      if (!table[id]) report[facet]++;
+      table[id] = names;
+    }
+    tables[facet] = table;
+  }
+
+  const ids = new Set([...incoming.map((entry) => entry.id), ...readdirSync(folder).filter((file) => file.endsWith(".json")).map((file) => file.slice(0, -5))].filter((id) => !retract.includes(id)));
+  const ready = incoming.map((entry, n) => {
+    const where = `memory ${entry.id ?? `#${n + 1}`}`;
+    const date = monthOf(entry.date);
+    if (!SLUG.test(entry.id ?? "")) errors.push(`${where}: id must be lowercase letters, digits and hyphens`);
+    if (!precisionOf(date)) errors.push(`${where}: date must start with YYYY or YYYY-MM`);
+    else if (ageAt(life.birth, date) < 0) errors.push(`${where}: dated before his birth (${life.birth})`);
+    else if (futureProblem(date)) errors.push(`${where}: ${futureProblem(date)}`);
+    if (!KINDS.includes(entry.kind)) errors.push(`${where}: kind must be one of ${KINDS.join(", ")}`);
+    if (![1, 2, 3].includes(entry.weight)) errors.push(`${where}: weight must be 1, 2 or 3`);
+    if (!Array.isArray(entry.threads) || !entry.threads.length || entry.threads.length > 3 || entry.threads.some((id) => !threadIds.includes(id))) errors.push(`${where}: threads must be one to three of ${threadIds.join(", ")}`);
+    for (const facet of ["people", "places"]) for (const id of entry[facet] ?? []) if (!tables[facet][id]) errors.push(`${where}: ${facet} "${id}" is not public in ${facet}.json or in this archive`);
+    for (const id of entry.links ?? []) if (!ids.has(id) || id === entry.id) errors.push(`${where}: link "${id}" points at no other memory`);
+    for (const lang of LANGS) if (!entry[lang]?.title || !entry[lang]?.body) errors.push(`${where}: needs "${lang}" with a title and a body`);
+    for (const lang of LANGS) if (entry[lang]?.body && bodyProblem(entry[lang].body)) errors.push(`${where} (${lang}): ${bodyProblem(entry[lang].body)}`);
+    for (const lang of LANGS) if (entry[lang]?.title && dayProblem(entry[lang].title)) errors.push(`${where} (${lang}): title ${dayProblem(entry[lang].title)}`);
+    const memory = { date, ...(entry.approx ? { approx: true } : {}), kind: entry.kind, weight: entry.weight, threads: entry.threads };
+    for (const key of LISTS) if (entry[key]?.length) memory[key] = entry[key];
+    if (entry.order !== undefined) memory.order = entry.order;
+    if (entry.quiet) memory.quiet = true;
+    for (const lang of LANGS) memory[lang] = { title: entry[lang]?.title, body: entry[lang]?.body };
+    return [entry.id, memory];
+  });
+
+  const kept = readdirSync(folder).filter((file) => file.endsWith(".json")).map((file) => ({ id: file.slice(0, -5), ...readJson(new URL(file, folder)) }));
+  for (const entry of kept) {
+    if (!ids.has(entry.id) || incoming.some((other) => other.id === entry.id)) continue;
+    for (const thread of entry.threads ?? []) if (!threadIds.includes(thread)) errors.push(`memory ${entry.id}: its thread "${thread}" is no longer one of ${threadIds.join(", ")}`);
+  }
+  if (errors.length) throw new Error(errors.join("\n"));
+  for (const key of ["threads"]) {
+    if (data[key] === undefined) continue;
+    report[key] = data[key].length;
+    for (const lang of LANGS) {
+      dictionaries[lang][key] = Object.fromEntries(data[key].map((item) => [item.id, item[lang]]));
+      writeJson(new URL(`${lang}.json`, dir), dictionaries[lang]);
+    }
+  }
+  if (nextLife.threads !== life.threads || data.ahead !== undefined) writeJson(new URL("life.json", dir), nextLife);
+  const lost = Object.fromEntries(["people", "places"].map((facet) => [facet, new Set()]));
+  for (const id of retract) {
+    for (const facet of Object.keys(lost)) for (const item of readJson(new URL(`${id}.json`, folder))[facet] ?? []) lost[facet].add(item);
+    unlinkSync(new URL(`${id}.json`, folder));
+    report.retracted++;
+  }
+  for (const file of readdirSync(folder).filter((name) => name.endsWith(".json"))) {
+    const url = new URL(file, folder);
+    const memory = readJson(url);
+    if (!memory.links?.some((id) => retract.includes(id))) continue;
+    const links = memory.links.filter((id) => !retract.includes(id));
+    writeJson(url, Object.fromEntries(Object.entries(memory).flatMap(([key, value]) => (key !== "links" ? [[key, value]] : links.length ? [[key, links]] : []))));
+  }
+  for (const [id, memory] of ready) {
+    const file = new URL(`${id}.json`, folder);
+    const before = existsSync(file) ? readJson(file) : null;
+    report[before ? "updated" : "added"]++;
+    writeJson(file, { ...memory, ...(before ? (before.added ? { added: before.added } : {}) : { added: month }) });
+  }
+  for (const [facet, table] of Object.entries(tables)) if (Object.keys(table).length) writeJson(new URL(`${facet}.json`, dir), table);
+  for (const [facet, gone] of Object.entries(lost)) {
+    if (!gone.size) continue;
+    const stay = new Set(readdirSync(folder).filter((name) => name.endsWith(".json")).flatMap((name) => readJson(new URL(name, folder))[facet] ?? []));
+    const table = readJson(new URL(`${facet}.json`, dir), {});
+    for (const item of gone) if (!stay.has(item)) delete table[item];
+    writeJson(new URL(`${facet}.json`, dir), table);
+  }
+  return report;
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const [file] = process.argv.slice(2);
+  if (!file) {
+    console.error("usage: npm run import -- archive.json");
+    process.exit(1);
+  }
+  try {
+    const report = importArchive(JSON.parse(readFileSync(file, "utf8")));
+    console.log(`${report.added} memories added, ${report.updated} updated, ${report.private} left out as private${report.retracted ? ` (${report.retracted} already published, now removed)` : ""}; ${report.people} people and ${report.places} places added${report.threads ? `; ${report.threads} threads` : ""}. Run npm run build next.`);
+  } catch (error) {
+    console.error(error.message);
+    process.exit(1);
+  }
+}

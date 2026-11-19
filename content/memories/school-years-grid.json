@@ -1,0 +1,20 @@
+{
+  "date": "1986",
+  "approx": true,
+  "kind": "education",
+  "weight": 1,
+  "threads": [
+    "learning"
+  ],
+  "places": [
+    "colegio-herrieztegui"
+  ],
+  "en": {
+    "title": "The grid I use to order my school years",
+    "body": "When I had to put dates to my childhood, I made a simple list: the eight years of the old school, one after another, with the year each one fell in. The first, the 1986-87 school year, and so on up to the eighth, at fourteen.\n\nWith that grid I date every school episode I remember, because I name them by the year I was in and not by the calendar year. It is a way of not getting lost: every memory has its box, and that way I know where I was when it happened."
+  },
+  "es": {
+    "title": "La rejilla con la que ordeno mis cursos",
+    "body": "Cuando tuve que poner fechas a mi infancia, hice una lista sencilla: los ocho cursos de la escuela antigua, uno detrás de otro, con el año que le tocaba a cada uno. El primero, el curso 1986-87, y así hasta octavo, a los catorce.\n\nCon esa rejilla fecho todos los episodios escolares que recuerdo, porque yo mismo los nombro por el curso y no por el año. Es una forma de no perderme: cada recuerdo tiene su casilla, y así sé en qué momento estaba cuando pasó."
+  }
+}

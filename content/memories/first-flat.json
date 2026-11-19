@@ -1,0 +1,21 @@
+{
+  "date": "1982",
+  "approx": true,
+  "kind": "personal",
+  "weight": 1,
+  "threads": [
+    "home",
+    "family"
+  ],
+  "places": [
+    "galdacano"
+  ],
+  "en": {
+    "title": "Our first home of our own, a fifth floor with no lift",
+    "body": "When I was two or three, my parents bought their first home and we moved from the farmhouse to a quiet, half-working-class neighbourhood. It was a fifth floor with no lift, bought outright, and for them that was a great deal.\n\nWe went from a shared country house to a flat of our own, in an area where working people lived. It was the first place that truly belonged to the family, and there a part of my childhood began that I remember fondly."
+  },
+  "es": {
+    "title": "Nuestra primera casa propia, un quinto sin ascensor",
+    "body": "Cuando yo tenía dos o tres años, mis padres compraron su primera casa y nos mudamos del caserío a un barrio tranquilo, medio obrero. Era un quinto sin ascensor, comprado al contado, y para ellos eso era muchísimo.\n\nPasamos de una casa de campo compartida a un piso nuestro, en una zona donde vivía gente trabajadora. Fue el primer sitio que fue de verdad de la familia, y allí empezó una parte de mi infancia que recuerdo con cariño."
+  }
+}

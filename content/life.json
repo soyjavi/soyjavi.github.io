@@ -1,0 +1,49 @@
+{
+  "totals": {
+    "memories": 500
+  },
+  "birth": "1980-04",
+  "ages": [
+    {
+      "id": "early",
+      "from": 0
+    },
+    {
+      "id": "school",
+      "from": 7
+    },
+    {
+      "id": "youth",
+      "from": 14
+    },
+    {
+      "id": "building",
+      "from": 25
+    },
+    {
+      "id": "midlife",
+      "from": 40
+    },
+    {
+      "id": "elder",
+      "from": 55
+    },
+    {
+      "id": "later",
+      "from": 70
+    }
+  ],
+  "threads": [
+    "home",
+    "family",
+    "body",
+    "craft",
+    "ventures",
+    "learning",
+    "love"
+  ],
+  "ahead": {
+    "book": "learning",
+    "clone": "craft"
+  }
+}

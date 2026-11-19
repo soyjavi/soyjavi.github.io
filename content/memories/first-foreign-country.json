@@ -1,0 +1,21 @@
+{
+  "date": "1986",
+  "approx": true,
+  "kind": "personal",
+  "weight": 1,
+  "threads": [
+    "home",
+    "family"
+  ],
+  "places": [
+    "braga"
+  ],
+  "en": {
+    "title": "The first foreign country and a word",
+    "body": "As a child we made a trip from a campsite and crossed into another country. I think we were visiting the area and my parents decided to make the excursion, which was not far away, and there they bought some towels.\n\nWhat stayed with me was not the landscape or the city, but a word: the one used for girls' underwear. I had never heard it at home, because I had a little brother and no sisters. I cannot give the exact year, but it was before my parents separated, because in my memory both of them are there."
+  },
+  "es": {
+    "title": "El primer país extranjero y una palabra",
+    "body": "De niño hicimos un viaje desde un camping y cruzamos a otro país. Creo que estábamos de visita por la zona y mis padres decidieron hacer la excursión, que no quedaba muy lejos, y allí compraron unas toallas.\n\nLo que se me quedó no fue el paisaje ni la ciudad, sino una palabra: la que se usa para la ropa interior de las niñas. Yo nunca la había oído en casa, porque tenía un hermano pequeño y no había hermanas. No sé decir el año exacto, pero fue antes de que mis padres se separaran, porque en mi recuerdo van los dos."
+  }
+}

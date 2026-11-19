@@ -1,0 +1,20 @@
+{
+  "date": "2026-08",
+  "kind": "personal",
+  "weight": 2,
+  "threads": [
+    "family",
+    "home"
+  ],
+  "people": [
+    "eki"
+  ],
+  "en": {
+    "title": "The adventure my son asked for",
+    "body": "When my older son finished school I asked him to write down five things he would like to do during the holidays. One of them was to live an adventure. With that excuse I took the whole family to repeat a route from my first trips: the bridge, the ruins of the old capital, and the town where we once lived for months because the boys love it. I came back with a strange mixture. The adventure was good, but the place was no longer the same: what in my memory was a backpacker town has become an amusement park. And I understood, a little late, that what made me fall in love with the country was its naivety, exactly what twenty years of tourism keep erasing."
+  },
+  "es": {
+    "title": "La aventura que me pidió mi hijo",
+    "body": "Cuando mi hijo mayor terminó el colegio le pedí que escribiera cinco cosas que le gustaría hacer en vacaciones. Una era vivir una aventura. Con esa excusa me llevé a toda la familia a repetir una ruta de mis primeros viajes: el puente, las ruinas de la antigua capital y la ciudad donde vivimos unos meses, porque a los niños les encanta. Volví con una mezcla rara. La aventura estaba bien, pero el sitio ya no era el mismo: lo que en mi memoria era un pueblo de mochileros se ha convertido en un parque de atracciones. Y entendí, algo tarde, que lo que me enamoró del país fue la ingenuidad, justo lo que veinte años de turismo van borrando."
+  }
+}

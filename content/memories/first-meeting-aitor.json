@@ -1,0 +1,25 @@
+{
+  "date": "1984-03",
+  "kind": "personal",
+  "weight": 2,
+  "threads": [
+    "family"
+  ],
+  "people": [
+    "abuela-agustina",
+    "abuelo-paco",
+    "aitor"
+  ],
+  "places": [
+    "deusto",
+    "galdacano"
+  ],
+  "en": {
+    "title": "The brother who was not what I was promised",
+    "body": "I was almost four and had been promised a little brother to play football with. Nobody explained that playing football with a brother means waiting a few years. While my mother was in hospital I spent a few days at my paternal grandparents' flat.\n\nWhen they took me home and I saw the baby, I got angry. He was not what I had been promised. It is my first clear memory, and it is funny that it should be a disappointment: before that I remember almost nothing. My parents always said the jealous one was him, not me."
+  },
+  "es": {
+    "title": "El hermanito que no era lo prometido",
+    "body": "Tenía casi cuatro años y me habían prometido un hermanito para jugar al fútbol. Lo que nadie me explicó es que para jugar al fútbol con un hermano hay que esperar unos cuantos años. Mientras mi madre estaba en el hospital, pasé unos días en casa de mis abuelos paternos.\n\nCuando me llevaron a casa y vi al bebé, me enfadé. No era lo que me habían prometido. Es mi primer recuerdo nítido, y tiene gracia que sea una decepción: antes de eso no recuerdo casi nada. Mis padres siempre dijeron que el celoso era él, no yo."
+  }
+}

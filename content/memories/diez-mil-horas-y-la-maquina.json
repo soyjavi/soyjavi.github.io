@@ -1,0 +1,21 @@
+{
+  "date": "2026-09",
+  "kind": "personal",
+  "weight": 2,
+  "threads": [
+    "learning",
+    "craft"
+  ],
+  "links": [
+    "el-trabajo-no-me-define",
+    "primer-portatil-1996"
+  ],
+  "en": {
+    "title": "Ten thousand hours, and then the machine",
+    "body": "I spent five years with the word junior in my title and it never weighed on me: that was the method, the ten thousand hours it takes to earn a mastery, and I have always been someone learning and improving. My trade has been nothing other than learning from what I lived through.\n\nAnd then it stops. The sentence ends there, with the arrival of artificial intelligence. I cannot explain it yet: whether the machine does the learning for me, whether it took the pleasure away, or whether the effort became unnecessary. What I do know is that the one thing I used to identify with has come to a halt, and I have written it down without dressing it up."
+  },
+  "es": {
+    "title": "Las diez mil horas, y luego la máquina",
+    "body": "Pasé cinco años con la palabra júnior en el cargo y nunca me pesó: era el método, las diez mil horas que hacen falta para alcanzar una maestría, y yo he sido siempre alguien en continuo aprendizaje y mejora. Mi oficio no ha sido otro que aprender de lo que vivía.\n\nY de pronto se para. La frase termina ahí, con la llegada de la inteligencia artificial. Todavía no sé explicarlo: si la máquina aprende por mí, si me ha quitado el gusto o si el esfuerzo se ha vuelto innecesario. Lo que sí sé es que lo único con lo que me identificaba se ha detenido, y lo he dejado escrito sin adornarlo."
+  }
+}
